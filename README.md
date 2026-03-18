@@ -1,0 +1,5 @@
+# INF2608 - FUNDAMENTOS DA COMPUTAÇÃO GRÁFICA - 2026.1 - 3WA
+
+## Setup Python
+
+### ASDF
