@@ -1,4 +1,3 @@
-
 import glm
 
 class Ray:

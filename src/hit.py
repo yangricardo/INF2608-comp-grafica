@@ -1,5 +1,4 @@
-
-from pyglm import glm
+import glm
 
 class Hit:
   def __init__(self, t=float('inf')):
