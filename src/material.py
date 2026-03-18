@@ -3,8 +3,12 @@ from ray import Ray
 from hit import Hit
 from src.scene import Scene
 
-class PhongMaterial:
-  def __init__(self, ambient, diffuse, specular, shininess):
+class Material:
+  def eval(self, scene: Scene, hit: Hit, ray_origin: glm.vec3):
+    raise NotImplementedError("Material subclasses must implement eval()")
+
+class PhongMaterial(Material):
+  def __init__(self, ambient: glm.vec3, diffuse: glm.vec3, specular: glm.vec3, shininess: float):
     self.m_amb = glm.vec3(ambient)
     self.m_dif = glm.vec3(diffuse)
     self.m_spe = glm.vec3(specular)
