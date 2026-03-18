@@ -2,8 +2,11 @@ import glm
 from ray import Ray
 
 class Camera:
-  def __init__(self, eye, center, up, fov, width, height):
+  def __init__(self, eye: glm.vec3, center: glm.vec3, up: glm.vec3, fov: float, width: int, height: int):
     self.eye = glm.vec3(eye)
+    self.center = glm.vec3(center)
+    self.up = glm.vec3(up)
+    self.angle = fov
     self.inv_view = glm.inverse(glm.lookAt(self.eye, glm.vec3(center), glm.vec3(up)))
     self.aspect = width / height
     self.fov_tan = glm.tan(glm.radians(fov) / 2.0)
