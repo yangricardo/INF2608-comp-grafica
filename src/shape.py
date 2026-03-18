@@ -48,3 +48,23 @@ class Plane(Shape):
             hit.material = self.material
             return True
     return False
+  
+class Instance(Shape):
+  def __init__(self, shape: Shape, matrix: glm.mat4):
+    self.shape = shape
+    self.m = glm.mat4(matrix)
+    self.m_inv = glm.inverse(self.m)
+    self.m_inv_t = glm.transpose(self.m_inv) # Para transformar a normal corretamente
+
+  def intersect(self, ray: Ray, hit: Hit):
+    # Transforma o raio para o espaço local do objeto
+    local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
+    local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
+    local_ray = Ray(local_o, local_d)
+
+    if self.shape.intersect(local_ray, hit):
+      # Transforma o ponto e a normal de volta para o espaço do mundo
+      hit.pos = glm.vec3(self.m * glm.vec4(hit.pos.x, hit.pos.y, hit.pos.z, 1.0))
+      hit.normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(hit.normal.x, hit.normal.y, hit.normal.z, 0.0)))
+      return True
+    return False
