@@ -1,7 +1,7 @@
 import glm
 
-from src.hit import Hit
-from src.ray import Ray
+from hit import Hit
+from ray import Ray
 
 
 class Sphere:
