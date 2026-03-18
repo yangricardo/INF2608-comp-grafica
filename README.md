@@ -33,4 +33,5 @@ source .venv/bin/activate
 # Instalar bibliotecas recomendadas
 pip install --upgrade pip
 pip install PyGLM pillow numpy
+pip install -r requirements.txt
 ```
