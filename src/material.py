@@ -1,7 +1,7 @@
 import glm
 from ray import Ray
 from hit import Hit
-from src.scene import Scene
+from scene import Scene
 
 class Material:
   def eval(self, scene: Scene, hit: Hit, ray_origin: glm.vec3):
