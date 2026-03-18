@@ -2,10 +2,11 @@ import glm
 
 from hit import Hit
 from ray import Ray
+from material import Material
 
 
 class Sphere:
-  def __init__(self, center, radius, material):
+  def __init__(self, center: glm.vec3, radius: float, material: Material):
     self.center = glm.vec3(center)
     self.radius = radius
     self.material = material
