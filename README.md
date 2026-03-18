@@ -12,7 +12,7 @@ Este repositório implementa um renderizador de traçado de raios baseado nas au
 
 ## 🚀 Passo a Passo para Setup
 
-### 1. Instalação do asdf e Plugin Python
+### 1. Instalação do asdf e Python
 
 Caso ainda não possua o `asdf` instalado, siga as instruções oficiais. Em seguida, adicione o plugin do python (que utiliza o `pyenv` internamente):
 
@@ -24,5 +24,13 @@ asdf plugin add python
 asdf install python 3.13.9
 
 # Definir como versão local para o projeto
-asdf local python 3.13.9
+asdf set python 3.13.9
+
+# Criar venv
+python -m venv .venv
+source .venv/bin/activate
+
+# Instalar bibliotecas recomendadas
+pip install --upgrade pip
+pip install PyGLM pillow numpy
 ```
