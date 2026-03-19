@@ -6,7 +6,7 @@ if TYPE_CHECKING:
   from light import Light
 
 class Hit:
-  def __init__(self, t=float('inf')):
+  def __init__(self, t: float = float('inf')):
     self.t = t
     self.pos = glm.vec3(0)
     self.normal = glm.vec3(0)
