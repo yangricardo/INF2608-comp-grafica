@@ -1,0 +1,12 @@
+{
+  "spheres": [
+    {"center": [-6.0, 0.0, 0.0], "radius": 1.0, "material": {"ambient": [0.02,0.02,0.02], "diffuse": [0.9,0.9,0.1], "specular": [0.1,0.1,0.1], "shininess": 16}},
+    {"center": [-2.5, 0.0, 0.5], "radius": 0.9, "material": {"ambient": [0.02,0.02,0.02], "diffuse": [0.1,0.7,0.1], "specular": [0.1,0.1,0.1], "shininess": 16}},
+    {"center": [0.0, 0.0, 0.0], "radius": 1.1, "material": {"ambient": [0.02,0.02,0.02], "diffuse": [0.1,0.1,0.8], "specular": [0.1,0.1,0.1], "shininess": 16}},
+    {"center": [3.0, 0.0, -0.5], "radius": 0.95, "material": {"ambient": [0.02,0.02,0.02], "diffuse": [0.6,0.2,0.7], "specular": [0.1,0.1,0.1], "shininess": 16}},
+    {"center": [7.0, 0.0, 0.0], "radius": 1.0, "material": {"ambient": [0.02,0.02,0.02], "diffuse": [0.8,0.1,0.1], "specular": [0.1,0.1,0.1], "shininess": 16}}
+  ],
+  "plane": {"y": -1.5, "material": {"ambient": [0.02,0.02,0.02], "diffuse": [0.45,0.45,0.45], "specular": [0.0,0.0,0.0], "shininess": 1}},
+  "lights": [ {"pos": [12.0, 6.0, 4.0], "power": [500,500,500]} ],
+  "camera": {"eye": [0, 2.5, 20], "center": [0,0,0], "up": [0,1,0], "fov": 40}
+}
