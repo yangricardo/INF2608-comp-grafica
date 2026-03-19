@@ -1,6 +1,6 @@
 import glm
 from hit import Hit
-from src.light import PointLight
+from light import PointLight
 from ray import Ray
 from shape import Shape
 
