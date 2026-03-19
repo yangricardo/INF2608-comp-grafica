@@ -11,7 +11,7 @@ class Camera:
     self.aspect = width / height
     self.fov_tan = glm.tan(glm.radians(fov) / 2.0)
 
-  def generate_ray(self, xn, yn):
+  def generate_ray(self, xn: float, yn: float) -> Ray:
     # [cite: 4, 29]
     dv = self.fov_tan
     du = dv * self.aspect
