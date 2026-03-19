@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import glm
 from ray import Ray
 from hit import Hit
-from scene import Scene
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from scene import Scene
 
 class Material:
   def eval(self, scene: Scene, hit: Hit, ray_origin: glm.vec3):
