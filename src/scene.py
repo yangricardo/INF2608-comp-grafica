@@ -1,13 +1,13 @@
 import glm
 from hit import Hit
-from light import PointLight
+from light import Light
 from ray import Ray
 from shape import Shape
 
 class Scene:
   def __init__(self):
     self.objects: list[Shape] = []
-    self.lights: list[PointLight] = []
+    self.lights: list[Light] = []
     self.ambient_light = glm.vec3(0.1)
 
   def compute_intersection(self, ray: Ray):
