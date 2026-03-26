@@ -21,7 +21,7 @@ class Film:
     """Retorna as coordenadas normalizadas (0 a 1) para o pixel (i, j)"""
     return (i + 0.5) / self.width, (j + 0.5) / self.height
   
-  def render(self, scene: Scene, camera: Camera, filename: str) -> None:
+  def render(self, scene: Scene, camera: Camera, filename: str, gamma_fix: bool = False) -> None:
     print("Renderizando a cena...")    
     for j in range(self.height):
       for i in range(self.width):
@@ -32,8 +32,13 @@ class Film:
         color = scene.trace_ray(ray)
         # Define a cor do pixel no buffer do Film        
         self.set_pixel(i, j, color)
-    # Converte o buffer para uint8 e salva a imagem usando PIL
-    img_data = np.clip(self.image * 255, 0, 255).astype(np.uint8)
+    # Aplicação de correção gama (gamma correction) para melhor visualização
+    if gamma_fix:
+      img_data = np.power(self.image, 1/2.2)
+    else:
+      img_data = self.image
+    # Converte para uint8 e salva a imagem usando PIL
+    img_data = np.clip(img_data * 255, 0, 255).astype(np.uint8)
     img = Image.fromarray(img_data)
     img.save(filename)
     print(f"Imagem salva em {filename}")
