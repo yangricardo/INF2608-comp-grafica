@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inf2608-comp-grafica"
+version = "0.0.0"
+description = "Ray tracing examples for INF2608 course"
+requires-python = ">=3.10"
+authors = [
+	{ name = "Yang Ricardo Barcellos Miranda", email = "ymiranda@inf.puc-rio.br" },
+	{ name = "Yang Ricardo Barcellos Miranda", email = "yang@puc-rio.br" },
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
