@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from PIL import Image
 import glm
 import numpy as np
 
@@ -16,3 +17,8 @@ class Film:
   def get_sample(self, i, j):
     """Retorna as coordenadas normalizadas (0 a 1) para o pixel (i, j)"""
     return (i + 0.5) / self.width, (j + 0.5) / self.height
+  
+  def save(self, filename: str) -> None:
+    img_data = np.clip(self.image * 255, 0, 255).astype(np.uint8)
+    img = Image.fromarray(img_data)
+    img.save(filename)
