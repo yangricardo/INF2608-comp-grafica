@@ -11,11 +11,15 @@ class Light:
     self.power = glm.vec3(power)
     self.pos = pos
 
+  def radiance(self, scene: Scene, hit: Hit):
+    """Calcula a radiância incidente e a direção da luz no ponto de impacto"""
+    raise NotImplementedError("Light subclasses must implement radiance()")
+
 class PointLight(Light):
   def __init__(self, pos: glm.vec3, power: glm.vec3):
     super().__init__(pos, power)
 
-  def sample_radiance(self, scene: Scene, hit: Hit):
+  def radiance(self, scene: Scene, hit: Hit) -> tuple[glm.vec3, glm.vec3]:
     """Calcula a radiância incidente e a direção da luz no ponto de impacto"""
     l_vec = self.pos - hit.pos
     dist = glm.distance(self.pos, hit.pos)
@@ -28,7 +32,7 @@ class PointLight(Light):
     
     # Se houver algo bloqueando o caminho até a luz
     if shadow_hit and shadow_hit.t < dist:
-        return glm.vec3(0), l
+      return glm.vec3(0), l
         
     # Radiância com decaimento Li = P / r^2
     li = self.power / (dist ** 2)

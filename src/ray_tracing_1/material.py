@@ -25,19 +25,10 @@ class PhongMaterial(Material):
     v = glm.normalize(ray_origin - hit.pos)
     
     for light in scene.lights:
-      # Radiance e Shadow [cite: 4, 36, 39, 52]
-      l_vec = light.pos - hit.pos
-      dist = glm.distance(light.pos, hit.pos)
-      l = glm.normalize(l_vec)
+      # luz agora resolve a visibilidade e o decaimento
+      li, l = light.radiance(scene, hit)
       
-      # Shadow Ray para visibilidade [cite: 4, 39, 51]
-      shadow_ray = Ray(hit.pos + hit.normal * 0.001, l)
-      shadow_hit = scene.compute_intersection(shadow_ray)
-      
-      if shadow_hit and shadow_hit.t < dist:
-        continue # O ponto está em sombra
-          
-      li = light.power / (dist ** 2)
+      if li == glm.vec3(0): continue # Ponto em sombra
       
       # Difusa (Lambert) [cite: 4, 32, 49]
       n_dot_l = max(0.0, glm.dot(hit.normal, l))
