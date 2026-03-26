@@ -35,7 +35,7 @@ def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
 
 def _material_from_spec(spec: dict) -> PhongMaterial:
   if spec is None:
-    # default neutral gray
+    # Slide 4, p. 41-42: defaults neutros garantem contribuição ambiente/difusa mínima.
     return PhongMaterial(glm.vec3(0.02), glm.vec3(0.6), glm.vec3(0.3), 10)
   amb = spec.get('ambient', [0.02, 0.02, 0.02])
   dif = spec.get('diffuse', [0.6, 0.6, 0.6])
@@ -48,7 +48,7 @@ def build_scene_from_json(spec: dict) -> tuple[Scene, dict]:
   scene = Scene()
   props = {'spheres': [], 'plane': None, 'lights': []}
 
-  # Plane
+  # Slide 4, p. 11-12: um plano definido por altura `y` e normal para o piso da cena.
   plane_spec = spec.get('plane')
   if plane_spec is not None:
     plane_y = plane_spec.get('y', -1.0)
@@ -56,7 +56,7 @@ def build_scene_from_json(spec: dict) -> tuple[Scene, dict]:
     scene.objects.append(Plane(pos=glm.vec3(0, plane_y, 0), normal=glm.vec3(0, 1, 0), material=mat))
     props['plane'] = {'y': float(plane_y), 'material': plane_spec.get('material', {})}
 
-  # Spheres
+  # Slide 4, p. 15-18: cada esfera vira um objeto geométrico com centro, raio e material.
   for s in spec.get('spheres', []):
     center = s.get('center', [0.0, 0.0, 0.0])
     radius = s.get('radius', 1.0)
@@ -64,7 +64,7 @@ def build_scene_from_json(spec: dict) -> tuple[Scene, dict]:
     scene.objects.append(Sphere(center=glm.vec3(*center), radius=radius, material=mat))
     props['spheres'].append({'center': center, 'radius': radius, 'material': s.get('material', {})})
 
-  # Lights
+  # Slide 4, p. 40: luz pontual armazena posição e potência para a atenuação por distância.
   for L in spec.get('lights', []):
     pos = L.get('pos', [5,5,5])
     power = L.get('power', [150,150,150])
@@ -78,6 +78,7 @@ def explain_properties_md(props: dict) -> str:
   lines = []
   lines.append('# Propriedades da Simulação')
   lines.append('')
+  # Mantém a imagem no mesmo diretório do Markdown para o link relativo funcionar.
   lines.append('![Imagem da Simulação](render.png)')
   lines.append('')
   lines.append('## Valores usados (numéricos)')
