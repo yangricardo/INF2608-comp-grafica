@@ -50,7 +50,7 @@ def build_scene_from_json(spec: dict) -> tuple[Scene, dict]:
 
   # Plane
   plane_spec = spec.get('plane')
-  if plane_spec:
+  if plane_spec is not None:
     plane_y = plane_spec.get('y', -1.0)
     mat = _material_from_spec(plane_spec.get('material'))
     scene.objects.append(Plane(pos=glm.vec3(0, plane_y, 0), normal=glm.vec3(0, 1, 0), material=mat))
