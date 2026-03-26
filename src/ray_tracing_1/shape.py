@@ -84,25 +84,29 @@ class Instance(Shape):
     self.m_inv_t = glm.transpose(self.m_inv) # Para transformar a normal corretamente
 
   def intersect(self, ray: Ray, hit: Hit):
-    # Slide 4, p. 44-46: transforma o raio para o espaço local antes de testar a geometria.
+    # Slide 4, p. 44-46:
+    # 1. Transforma o raio do mundo para o espaço local da instância usando a inversa da matriz.
+    # 2. Normaliza a direção do raio local para garantir que o parâmetro t represente distância real (essencial para instâncias com escala).
+    # 3. Realiza o teste de interseção no espaço local.
+    # 4. Se houver hit, transforma a posição e a normal de volta para o mundo.
+    # 5. O parâmetro t é mantido consistente com o espaço global apenas se a direção local for normalizada.
     local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
     local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
+    local_d = glm.normalize(local_d)  # Normalização obrigatória para t correto
     local_ray = Ray(local_o, local_d)
-    # Mantém o hit local separado para não misturar `t` do espaço local com o do mundo.
     local_hit = Hit()
     if not self.shape.intersect(local_ray, local_hit):
-      return False
+        return False
 
-    # Slide 4, p. 44-46: reconstrói posição e normal no espaço do mundo.
     world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
     world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
 
     if local_hit.t < hit.t:
-      hit.t = float(local_hit.t)
-      hit.pos = world_pos
-      hit.normal = world_normal
-      hit.material = local_hit.material
-      hit.backfacing = local_hit.backfacing
-      return True
+        hit.t = float(local_hit.t)
+        hit.pos = world_pos
+        hit.normal = world_normal
+        hit.material = local_hit.material
+        hit.backfacing = local_hit.backfacing
+        return True
 
     return False
