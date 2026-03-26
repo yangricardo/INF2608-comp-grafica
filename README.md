@@ -57,9 +57,30 @@ As dependências estão listadas em [requirements.txt](requirements.txt).
 
 ### Executar a renderização
 
+Recomendado: instale o projeto em modo editável e execute como módulo (evita depender de hacks em `sys.path`).
+
+1. Usando o script de setup (cria venv, instala dependências e instala o pacote):
+
 ```bash
-python src/main.py
+./scripts/setup_dev.sh
 ```
+
+Depois ative o ambiente e execute:
+
+```bash
+source .venv/bin/activate
+python -m src.ray_tracing_1       # usa __main__.py do pacote
+# ou
+python -m src.ray_tracing_1.main  # executa explicitamente a função de render
+```
+
+Alternativa (sem instalar): execute como módulo diretamente (precisa estar na raiz do repositório):
+
+```bash
+python -m src.ray_tracing_1.main
+```
+
+Observação: muitos arquivos no diretório `src/ray_tracing_1` ainda contêm um bloco que modifica `sys.path` para permitir execução direta do `.py`. Após instalar o pacote em modo editável ou executar com `-m`, esses blocos não são necessários e podem ser removidos para maior correção e portabilidade.
 
 O programa salva a imagem final em [render_final.png](render_final.png).
 
