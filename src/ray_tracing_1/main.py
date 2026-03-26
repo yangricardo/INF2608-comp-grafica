@@ -32,26 +32,26 @@ def render():
   3. Para cada pixel, gera um raio primário e avalia a cor com
      `Scene.trace_ray`.
   """
-  # Resolução de saída
+  # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 400, 300
   film = Film(width=W, height=H)
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
-  # Definição de Materiais
+  # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
   mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=50.0)
   mat_gray = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(0.0), shininess=1.0)
 
-  # Monta a cena
+  # Slide 4, p. 35-40: reúne objetos, luzes e o ambiente que o traçador precisa avaliar.
   scene = Scene()
 
-  # Objetos: A Esfera e o Plano (Chão) para receber a sombra
+  # Slide 4, p. 11-18: adiciona um plano e uma esfera para exercitar interseções.
   scene.objects.append(Sphere(center=glm.vec3(0, 0, 0), radius=1.0, material=mat_red))
   scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=mat_gray))
 
-  # Fonte de Luz
+  # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
   scene.lights.append(PointLight(pos=glm.vec3(5, 5, 5), power=glm.vec3(150.0)))
 
-  # Renderiza a cena usando o Film para iterar sobre os pixels e salvar a imagem
+  # Slide 4, p. 24-29: o Film percorre os pixels e pede ao Camera um raio por amostra.
   film.render(scene=scene, camera=cam, filename="render_final.png")
 
 if __name__ == "__main__":
