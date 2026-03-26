@@ -10,17 +10,13 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 
 from __future__ import annotations
 
-
-import numpy as np
-from PIL import Image
 import glm
-from ray_tracing_1.ray import Ray
-from ray_tracing_1.camera import Camera
-from ray_tracing_1.scene import Scene
-from ray_tracing_1.shape import Plane, Sphere
-from ray_tracing_1.material import PhongMaterial
-from ray_tracing_1.light import PointLight
-from ray_tracing_1.film import Film
+from ray_tracing_2.camera import Camera
+from ray_tracing_2.scene import Scene
+from ray_tracing_2.shape import Plane, Sphere
+from ray_tracing_2.material import PhongMaterial
+from ray_tracing_2.light import PointLight
+from ray_tracing_2.film import Film
 
 
 def render():
@@ -52,7 +48,7 @@ def render():
   scene.lights.append(PointLight(pos=glm.vec3(5, 5, 5), power=glm.vec3(150.0)))
 
   # Slide 4, p. 24-29: o Film percorre os pixels e pede ao Camera um raio por amostra.
-  film.render(scene=scene, camera=cam, filename="render_ray_tracing_1.png")
+  film.render(scene=scene, camera=cam, filename="render_ray_tracing_2.png")
 
 if __name__ == "__main__":
     render()
