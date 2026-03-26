@@ -14,12 +14,12 @@ com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 import numpy as np
 from PIL import Image
 import glm
-from ray import Ray
-from camera import Camera
-from scene import Scene
-from shape import Sphere, Plane
-from material import PhongMaterial
-from light import PointLight
+from .ray import Ray
+from .camera import Camera
+from .scene import Scene
+from .shape import Sphere, Plane
+from .material import PhongMaterial
+from .light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_name: str):

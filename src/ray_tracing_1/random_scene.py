@@ -14,12 +14,12 @@ from PIL import Image
 import glm
 import random
 from datetime import datetime
-from ray import Ray
-from camera import Camera
-from scene import Scene
-from shape import Sphere, Plane
-from material import PhongMaterial
-from light import PointLight
+from .ray import Ray
+from .camera import Camera
+from .scene import Scene
+from .shape import Sphere, Plane
+from .material import PhongMaterial
+from .light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):

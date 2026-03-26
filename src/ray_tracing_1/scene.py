@@ -1,8 +1,8 @@
 import glm
-from hit import Hit
-from light import Light
-from ray import Ray
-from shape import Shape
+from .hit import Hit
+from .light import Light
+from .ray import Ray
+from .shape import Shape
 
 class Scene:
   def __init__(self):

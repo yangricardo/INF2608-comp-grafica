@@ -20,12 +20,11 @@ from datetime import datetime
 import numpy as np
 from PIL import Image
 import glm
-from ray import Ray
-from camera import Camera
-from scene import Scene
-from shape import Sphere, Plane
-from material import PhongMaterial
-from light import PointLight
+from .camera import Camera
+from .scene import Scene
+from .shape import Sphere, Plane
+from .material import PhongMaterial
+from .light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
@@ -50,7 +49,7 @@ def _material_from_spec(spec: dict) -> PhongMaterial:
   return PhongMaterial(ambient=glm.vec3(*amb), diffuse=glm.vec3(*dif), specular=glm.vec3(*spe), shininess=shi)
 
 
-def build_scene_from_json(spec: dict) -> (Scene, dict):
+def build_scene_from_json(spec: dict) -> tuple[Scene, dict]:
   scene = Scene()
   props = {'spheres': [], 'plane': None, 'lights': []}
 

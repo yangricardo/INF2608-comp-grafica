@@ -2,8 +2,8 @@ import glm
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from material import Material
-  from light import Light
+  from .material import Material
+  from .light import Light
 
 class Hit:
   def __init__(self, t: float = float('inf')):

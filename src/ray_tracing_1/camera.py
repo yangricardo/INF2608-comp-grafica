@@ -1,5 +1,5 @@
 import glm
-from ray import Ray
+from .ray import Ray
 
 class Camera:
   def __init__(self, eye: glm.vec3, center: glm.vec3, up: glm.vec3, fov: float, width: int, height: int):

@@ -11,12 +11,12 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 import numpy as np
 from PIL import Image
 import glm
-from ray import Ray
-from camera import Camera
-from scene import Scene
-from shape import Sphere
-from material import PhongMaterial
-from light import PointLight
+from .ray import Ray
+from .camera import Camera
+from .scene import Scene
+from .shape import Sphere
+from .material import PhongMaterial
+from .light import PointLight
 
 
 def render():

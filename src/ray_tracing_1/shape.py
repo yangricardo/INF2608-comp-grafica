@@ -1,8 +1,8 @@
 import glm
 
-from hit import Hit
-from ray import Ray
-from material import Material
+from .hit import Hit
+from .ray import Ray
+from .material import Material
 
 class Shape:
   def intersect(self, ray: Ray, hit: Hit):
