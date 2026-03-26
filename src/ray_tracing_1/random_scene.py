@@ -25,6 +25,7 @@ from ray_tracing_1.light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
+  # Slide 4, p. 24-29: percorre a grade de pixels e gera um raio por amostra.
   img = np.zeros((H, W, 3), dtype=np.uint8)
   for j in range(H):
     for i in range(W):
@@ -36,6 +37,7 @@ def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
 
 
 def build_random_scene(rng: random.Random):
+  # Gera parâmetros geométricos aleatórios para produzir variações da mesma cena-base.
   sx = rng.uniform(-2.0, 2.0)
   sy = rng.uniform(-0.5, 1.5)
   sr = rng.uniform(0.3, 1.5)
@@ -44,6 +46,7 @@ def build_random_scene(rng: random.Random):
   def rand_color(scale=1.0):
     return glm.vec3(rng.random() * scale, rng.random() * scale, rng.random() * scale)
 
+  # Slide 4, p. 41-49: materiais com componentes ambiente, difuso e especular.
   mat_sphere = PhongMaterial(
     ambient=glm.vec3(rng.uniform(0.0, 0.15), rng.uniform(0.0, 0.15), rng.uniform(0.0, 0.15)),
     diffuse=rand_color(1.0),
@@ -59,6 +62,7 @@ def build_random_scene(rng: random.Random):
   )
 
   scene = Scene()
+  # Slide 4, p. 11-18 e p. 40: plano, esfera e luzes formam a cena usada no teste visual.
   scene.objects.append(Plane(pos=glm.vec3(0, plane_y, 0), normal=glm.vec3(0, 1, 0), material=mat_plane))
   scene.objects.append(Sphere(center=glm.vec3(sx, sy, 0), radius=sr, material=mat_sphere))
 
@@ -72,6 +76,7 @@ def build_random_scene(rng: random.Random):
     scene.lights.append(PointLight(pos=glm.vec3(lx, ly, lz), power=p))
     lights.append({"pos": [lx, ly, lz], "power": [float(p.x), float(p.y), float(p.z)]})
 
+  # Guarda os valores numéricos usados para explicar a cena no Markdown de saída.
   props = {
     "sphere": {"center": [float(sx), float(sy), 0.0], "radius": float(sr)},
     "plane": {"y": float(plane_y), "normal": [0.0, 1.0, 0.0]},
@@ -96,9 +101,7 @@ def build_random_scene(rng: random.Random):
 def explain_properties_md(props: dict) -> str:
   lines = []
   lines.append('# Propriedades da Simulação')
-  # Use relative path so GitHub correctly renders the image when viewing the
-  # `properties.md` inside the simulation folder. The image `render.png` is
-  # written to the same folder as this markdown file.
+  # O caminho relativo permite renderizar a imagem no próprio diretório da simulação.
   lines.append('![Imagem da Simulação](render.png)')
   lines.append('')
   lines.append('## Valores usados (numéricos)')
@@ -124,22 +127,25 @@ def explain_properties_md(props: dict) -> str:
 
 
 def main(n_sim: int = 5, W: int = 400, H: int = 300):
+  # Mantém todas as simulações em uma pasta de saída previsível.
   out_root = os.path.join(os.getcwd(), 'outputs')
   os.makedirs(out_root, exist_ok=True)
   rng = random.Random()
   rng.seed()
 
+  # Slide 4, p. 14 e p. 29: câmera fixa para comparar variações de geometria.
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45, width=W, height=H)
 
   for i in range(n_sim):
     scene, props = build_random_scene(rng)
-    # Use timestamp to avoid overwriting previous simulation folders
+    # Timestamp evita sobrescrever uma simulação anterior.
     ts = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
     sim_dir = os.path.join(out_root, f'sim_{ts}')
     os.makedirs(sim_dir, exist_ok=True)
     img_path = os.path.join(sim_dir, 'render.png')
     md_path = os.path.join(sim_dir, 'properties.md')
 
+    # Renderiza e registra a explicação textual da cena em paralelo à imagem.
     render_scene(scene, cam, W, H, img_path)
     md_text = explain_properties_md(props)
     with open(md_path, 'w', encoding='utf-8') as f:
