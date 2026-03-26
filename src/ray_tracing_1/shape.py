@@ -97,14 +97,12 @@ class Instance(Shape):
     world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
     world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
 
-    # Compute world-space t as distance along the original (normalized) ray
-    t_world = glm.distance(world_pos, ray.o)
-
-    if t_world < hit.t:
-      hit.t = float(t_world)
+    if local_hit.t < hit.t:
+      hit.t = float(local_hit.t)
       hit.pos = world_pos
       hit.normal = world_normal
       hit.material = local_hit.material
+      hit.backfacing = local_hit.backfacing
       return True
 
     return False
