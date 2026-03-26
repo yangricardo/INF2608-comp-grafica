@@ -20,28 +20,41 @@ class Sphere(Shape):
     self.material = material
 
   def intersect(self, ray: Ray, hit: Hit):
+    # Equação quadrática: at² + bt + c = 0
     oc = ray.o - self.center
     a = glm.dot(ray.d, ray.d)
     b = 2.0 * glm.dot(ray.d, oc)
     c = glm.dot(oc, oc) - self.radius**2
-    delta = b**2 - 4*a*c
-    if delta >= 0:
-      sqrt_d = glm.sqrt(delta)
-      t1 = (-b - sqrt_d) / (2.0 * a)
-      t2 = (-b + sqrt_d) / (2.0 * a)
+    delta = (b**2) - (4*a*c)
+    if delta < 0:
+      return False
+    
+    sqrt_d = glm.sqrt(delta)
+    t1 = (-b - sqrt_d) / (2.0 * a)
+    t2 = (-b + sqrt_d) / (2.0 * a)
 
-      t_candidate = None
-      if t1 > 0.001:
-        t_candidate = t1
-      elif t2 > 0.001:
-        t_candidate = t2
+    t_candidate = None
+    if t1 > 0.001:
+      t_candidate = t1
+    elif t2 > 0.001:
+      t_candidate = t2
 
-      if t_candidate is not None and t_candidate < hit.t:
-        hit.t = t_candidate
-        hit.pos = ray.o + t_candidate * ray.d
-        hit.normal = (hit.pos - self.center) / self.radius
-        hit.material = self.material
-        return True
+    if t_candidate is not None and t_candidate < hit.t:
+      hit.t = t_candidate
+      hit.pos = ray.o + t_candidate * ray.d
+      # 1. Calcula a normal geométrica pura (sempre aponta do centro para fora)
+      hit.normal = (hit.pos - self.center) / self.radius
+      # 2. Teste de Face Traseira (Backfacing)
+      # Se o ângulo entre o raio e a normal for < 90º (produto escalar positivo),
+      # significa que o raio está a bater na parede interna da esfera.
+      if glm.dot(ray.d, hit.normal) > 0.0:
+          hit.normal = -hit.normal # Inverte a normal para o shading funcionar
+          hit.backfacing = True
+      else:
+          hit.normal = hit.normal
+          hit.backfacing = False
+      hit.material = self.material
+      return True
     return False
 
 
