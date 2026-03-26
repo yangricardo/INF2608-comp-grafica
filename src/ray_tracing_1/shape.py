@@ -20,7 +20,7 @@ class Sphere(Shape):
     self.material = material
 
   def intersect(self, ray: Ray, hit: Hit):
-    # Equação quadrática: at² + bt + c = 0
+    # Slide 4, p. 15-18: interseção esfera-raio é resolvida pela equação quadrática.
     oc = ray.o - self.center
     a = glm.dot(ray.d, ray.d)
     b = 2.0 * glm.dot(ray.d, oc)
@@ -33,6 +33,7 @@ class Sphere(Shape):
     t1 = (-b - sqrt_d) / (2.0 * a)
     t2 = (-b + sqrt_d) / (2.0 * a)
 
+    # Slide 4, p. 15-18: escolhe a primeira raiz positiva; se necessário, usa a segunda.
     t_candidate = None
     if t1 > 0.001:
       t_candidate = t1
@@ -42,11 +43,9 @@ class Sphere(Shape):
     if t_candidate is not None and t_candidate < hit.t:
       hit.t = t_candidate
       hit.pos = ray.o + t_candidate * ray.d
-      # 1. Calcula a normal geométrica pura (sempre aponta do centro para fora)
+      # Slide 4, p. 15-18: normal geométrica aponta do centro para fora.
       hit.normal = (hit.pos - self.center) / self.radius
-      # 2. Teste de Face Traseira (Backfacing)
-      # Se o ângulo entre o raio e a normal for < 90º (produto escalar positivo),
-      # significa que o raio está a bater na parede interna da esfera.
+      # Slide 4, p. 15-18: se o raio atingiu a face interna, inverte a normal para o shading.
       if glm.dot(ray.d, hit.normal) > 0.0:
           hit.normal = -hit.normal # Inverte a normal para o shading funcionar
           hit.backfacing = True
@@ -65,6 +64,7 @@ class Plane(Shape):
     self.material = material
 
   def intersect(self, ray: Ray, hit: Hit):
+    # Slide 4, p. 11-12: plano é resolvido por produto escalar entre normal e direção.
     denom = glm.dot(self.normal, ray.d)
     if abs(denom) > 1e-6:
         t = glm.dot(self.pos - ray.o, self.normal) / denom
@@ -84,16 +84,16 @@ class Instance(Shape):
     self.m_inv_t = glm.transpose(self.m_inv) # Para transformar a normal corretamente
 
   def intersect(self, ray: Ray, hit: Hit):
-    # Transforma o raio para o espaço local do objeto
+    # Slide 4, p. 44-46: transforma o raio para o espaço local antes de testar a geometria.
     local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
     local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
     local_ray = Ray(local_o, local_d)
-    # Use a local Hit to avoid contaminating the caller's hit with local-space t
+    # Mantém o hit local separado para não misturar `t` do espaço local com o do mundo.
     local_hit = Hit()
     if not self.shape.intersect(local_ray, local_hit):
       return False
 
-    # Transform local hit position and normal to world space
+    # Slide 4, p. 44-46: reconstrói posição e normal no espaço do mundo.
     world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
     world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
 
