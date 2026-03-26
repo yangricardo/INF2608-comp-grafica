@@ -19,8 +19,7 @@ import os
 import json
 import argparse
 from datetime import datetime
-import numpy as np
-from PIL import Image
+from ray_tracing_1.film import Film
 import glm
 from ray_tracing_1.camera import Camera
 from ray_tracing_1.scene import Scene
@@ -30,14 +29,8 @@ from ray_tracing_1.light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
-  img = np.zeros((H, W, 3), dtype=np.uint8)
-  for j in range(H):
-    for i in range(W):
-      xn, yn = (i + 0.5) / W, (j + 0.5) / H
-      ray = cam.generate_ray(xn, yn)
-      color = glm.clamp(scene.trace_ray(ray), 0, 1)
-      img[j, i] = (color * 255)
-  Image.fromarray(img).save(out_path)
+  film = Film(width=W, height=H)
+  film.render(scene=scene, camera=cam, filename=out_path)
 
 
 def _material_from_spec(spec: dict) -> PhongMaterial:
