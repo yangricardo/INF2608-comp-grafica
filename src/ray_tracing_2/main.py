@@ -45,10 +45,11 @@ def render():
   scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=mat_gray))
 
   # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
-  scene.lights.append(PointLight(pos=glm.vec3(5, 5, 5), power=glm.vec3(150.0)))
+  # scene.lights.append(PointLight(pos=glm.vec3(0, 5, 0), power=glm.vec3(150.0)))
+  scene.lights.append(PointLight(pos=glm.vec3(-5, 0, 0), power=glm.vec3(150.0)))
 
   # Slide 4, p. 24-29: o Film percorre os pixels e pede ao Camera um raio por amostra.
-  film.render(scene=scene, camera=cam, filename="render_ray_tracing_2.png")
+  film.render(scene=scene, camera=cam, filename="render_ray_tracing_2.png", gamma_fix=True)
 
 if __name__ == "__main__":
     render()
