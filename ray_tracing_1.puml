@@ -1,0 +1,37 @@
+@startuml
+actor User
+participant Film
+participant Camera
+participant Scene
+participant "compute_intersection()" as Compute
+participant "Shape\n(Sphere/Plane/Instance)" as Shape
+participant Material
+participant Light
+
+User -> Film : render()
+Film -> Camera : get_sample(i,j)\ngenerate_ray(xn,yn)
+Camera --> Film : Ray(origin, direction)
+Film -> Scene : trace_ray(Ray)
+Scene -> Compute : compute_intersection(Ray)
+Compute -> Shape : intersect(Ray, Hit)
+alt hit found
+  Shape --> Compute : Hit(local t, pos, normal, material)
+  Compute --> Scene : nearest Hit
+  Scene -> Material : eval(scene, Hit, ray.o)
+  loop for each light
+    Material -> Light : radiance(scene, Hit)
+    Light -> Scene : compute_intersection(shadow_ray)  <<shadow test>>
+    alt visible
+      Light --> Material : li, l (radiance, direction)
+      Material --> Scene : shading contribution
+    else occluded
+      Light --> Material : li = (0,0,0)
+    end
+  end
+  Material --> Scene : color
+  Scene --> Film : color
+else no hit
+  Scene --> Film : background_color
+end
+Film -> User : save image (render.png)
+@enduml
