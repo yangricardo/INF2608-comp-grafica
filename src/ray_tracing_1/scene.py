@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import glm
-from .hit import Hit
-from .light import Light
-from .ray import Ray
-from .shape import Shape
+from ray_tracing_1.hit import Hit
+from ray_tracing_1.light import Light
+from ray_tracing_1.ray import Ray
+from ray_tracing_1.shape import Shape
 
 class Scene:
   def __init__(self):

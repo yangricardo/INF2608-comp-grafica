@@ -5,6 +5,7 @@ propriedades e explicações em linguagem leiga.
 Veja `src/random.py` (anterior) — este arquivo evita colisão com o módulo
 `random` da biblioteca padrão renomeando o script.
 """
+from __future__ import annotations
 
 
 import os
@@ -15,12 +16,12 @@ from PIL import Image
 import glm
 import random
 from datetime import datetime
-from .ray import Ray
-from .camera import Camera
-from .scene import Scene
-from .shape import Sphere, Plane
-from .material import PhongMaterial
-from .light import PointLight
+from ray_tracing_1.ray import Ray
+from ray_tracing_1.camera import Camera
+from ray_tracing_1.scene import Scene
+from ray_tracing_1.shape import Sphere, Plane
+from ray_tracing_1.material import PhongMaterial
+from ray_tracing_1.light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):

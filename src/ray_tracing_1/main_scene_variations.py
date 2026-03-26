@@ -10,17 +10,17 @@ traçador de raios.
 Contribui com o que está documentado no README: mostra como construir cenas
 com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 """
-
+from __future__ import annotations
 
 import numpy as np
 from PIL import Image
 import glm
-from .ray import Ray
-from .camera import Camera
-from .scene import Scene
-from .shape import Sphere, Plane
-from .material import PhongMaterial
-from .light import PointLight
+from ray_tracing_1.ray import Ray
+from ray_tracing_1.camera import Camera
+from ray_tracing_1.scene import Scene
+from ray_tracing_1.shape import Sphere, Plane
+from ray_tracing_1.material import PhongMaterial
+from ray_tracing_1.light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_name: str):

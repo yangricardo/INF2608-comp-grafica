@@ -8,16 +8,18 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 `Scene.trace_ray`.
 """
 
+from __future__ import annotations
+
 
 import numpy as np
 from PIL import Image
 import glm
-from .ray import Ray
-from .camera import Camera
-from .scene import Scene
-from .shape import Sphere
-from .material import PhongMaterial
-from .light import PointLight
+from ray_tracing_1.ray import Ray
+from ray_tracing_1.camera import Camera
+from ray_tracing_1.scene import Scene
+from ray_tracing_1.shape import Sphere
+from ray_tracing_1.material import PhongMaterial
+from ray_tracing_1.light import PointLight
 
 
 def render():

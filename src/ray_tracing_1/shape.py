@@ -1,8 +1,13 @@
-import glm
+from __future__ import annotations
 
-from .hit import Hit
-from .ray import Ray
-from .material import Material
+import glm
+from typing import TYPE_CHECKING
+
+from ray_tracing_1.hit import Hit
+from ray_tracing_1.ray import Ray
+
+if TYPE_CHECKING:
+  from ray_tracing_1.material import Material
 
 class Shape:
   def intersect(self, ray: Ray, hit: Hit):

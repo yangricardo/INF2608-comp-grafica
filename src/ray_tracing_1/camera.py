@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import glm
-from .ray import Ray
+from ray_tracing_1.ray import Ray
 
 class Camera:
   def __init__(self, eye: glm.vec3, center: glm.vec3, up: glm.vec3, fov: float, width: int, height: int):

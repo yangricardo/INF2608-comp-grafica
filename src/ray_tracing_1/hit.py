@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import glm
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from .material import Material
-  from .light import Light
+  from ray_tracing_1.material import Material
+  from ray_tracing_1.light import Light
 
 class Hit:
   def __init__(self, t: float = float('inf')):
