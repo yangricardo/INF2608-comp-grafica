@@ -25,20 +25,22 @@ class PointLight(Light):
 
   def radiance(self, scene: "Scene", hit: "Hit") -> tuple[glm.vec3, glm.vec3]:
     """Calcula a radiância incidente e a direção da luz no ponto de impacto"""
+    # Slide 4, p. 40: a direção da luz vai do ponto atingido até a posição da fonte.
     l_vec = self.pos - hit.pos
+    # Slide 4, p. 40: a intensidade cai com o quadrado da distância.
     dist = glm.distance(self.pos, hit.pos)
     l = glm.normalize(l_vec)
 
-    # Teste de visibilidade (Shadow Ray)
-    # Pequeno epsilon aplicado ao ponto para evitar shadow acne
+    # Slide 4, p. 38-39 e p. 51-52: lança um shadow ray para testar visibilidade.
+    # O epsilon evita que o próprio ponto de impacto seja reintersectado.
     shadow_origin = hit.pos + hit.normal * 0.001
     shadow_ray = Ray(shadow_origin, l)
     shadow_hit = scene.compute_intersection(shadow_ray)
 
-    # Se houver algo bloqueando o caminho até a luz
+    # Slide 4, p. 38-39: se algo estiver entre o ponto e a luz, o ponto fica em sombra.
     if shadow_hit and shadow_hit.t < dist:
       return glm.vec3(0), l
 
-    # Radiância com decaimento Li = P / r^2
+    # Slide 4, p. 40: potência dividida por r^2 fornece a radiância recebida.
     li = self.power / (dist ** 2)
     return li, l
