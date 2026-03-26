@@ -14,3 +14,4 @@ class Hit:
     self.normal = glm.vec3(0)
     self.material: Optional['Material'] = None
     self.light: Optional['Light'] = None
+    self.backfacing: bool = False
