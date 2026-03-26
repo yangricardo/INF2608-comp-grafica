@@ -12,8 +12,6 @@ com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 """
 from __future__ import annotations
 
-import numpy as np
-from PIL import Image
 import glm
 from ray_tracing_1.ray import Ray
 from ray_tracing_1.camera import Camera
@@ -21,31 +19,13 @@ from ray_tracing_1.scene import Scene
 from ray_tracing_1.shape import Sphere, Plane
 from ray_tracing_1.material import PhongMaterial
 from ray_tracing_1.light import PointLight
+from ray_tracing_1.film import Film
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_name: str):
-  """Renderiza a cena fornecida e salva como PNG.
-
-  Parameters:
-  - scene: cena já montada com objetos, materiais e luzes
-  - cam: câmera que fornece `generate_ray(xn, yn)`
-  - W, H: resolução de saída
-  - out_name: caminho/nome do arquivo PNG de saída
-  """
-  # Buffer de saída em uint8 (0-255)
-  img = np.zeros((H, W, 3), dtype=np.uint8)
-  for j in range(H):
-    for i in range(W):
-      # Coordenadas normalizadas do centro do pixel (amostragem central)
-      xn, yn = (i + 0.5) / W, (j + 0.5) / H
-      ray = cam.generate_ray(xn, yn)
-      # Reaproveita Scene.trace_ray e clampa a saída entre 0 e 1
-      color = glm.clamp(scene.trace_ray(ray), 0, 1)
-      img[j, i] = (color * 255)
-
-  # Escreve o resultado no disco
-  Image.fromarray(img).save(out_name)
-  print(f"Saved {out_name}")
+def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str):
+  """Renderiza a cena usando a classe `Film` e salva como PNG."""
+  film = Film(width=W, height=H)
+  film.render(scene=scene, camera=cam, filename=out_name)
 
 
 def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene:
@@ -96,7 +76,7 @@ def main():
         # Monta a cena com os parâmetros atuais e renderiza
         scene = build_scene(sx=x, sy=y, sr=r, plane_y=-1.0)
         out_name = f"render_var_{idx:02d}_x{x}_y{y}_r{r}.png"
-        render_scene(scene=scene, cam=cam, W=W, H=H, out_name=out_name)
+        render_scene_with_film(scene=scene, cam=cam, W=W, H=H, out_name=out_name)
         idx += 1
 
   print("All renders complete.")
