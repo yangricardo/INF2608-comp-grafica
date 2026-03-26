@@ -20,7 +20,7 @@ class PhongMaterial(Material):
     self.shi = shininess
 
   def eval(self, scene: Scene, hit: Hit, ray_origin: glm.vec3):
-    # Luz Ambiente [cite: 4, 41, 42]
+    # Luz Ambiente [cite: 4, 41, 42] $c = m_{amb} * l_{amb}$
     color = self.m_amb * scene.ambient_light
     v = glm.normalize(ray_origin - hit.pos)
     
