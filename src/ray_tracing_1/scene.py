@@ -14,6 +14,7 @@ class Scene:
     self.background_color = glm.vec3(0.02, 0.02, 0.05)
 
   def compute_intersection(self, ray: Ray):
+    # Slide 4, p. 35 e p. 47-48: percorre os objetos e guarda apenas o hit mais próximo.
     closest_hit = Hit()
     found = False
     for obj in self.objects:
@@ -22,8 +23,9 @@ class Scene:
     return closest_hit if found else None
 
   def trace_ray(self, ray: Ray):
-    # [cite: 4, 35, 48, 55]
+    # Slide 4, p. 35 e p. 55: se houver interseção visível, delega o cálculo de cor ao material.
     hit = self.compute_intersection(ray)    
     if hit and hit.material:
       return hit.material.eval(self, hit, ray.o)
+    # Slide 4, p. 35: sem hit, o raio retorna a cor de fundo da cena.
     return self.background_color
