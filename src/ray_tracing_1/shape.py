@@ -75,10 +75,23 @@ class Instance(Shape):
     local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
     local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
     local_ray = Ray(local_o, local_d)
+    # Use a local Hit to avoid contaminating the caller's hit with local-space t
+    local_hit = Hit()
+    if not self.shape.intersect(local_ray, local_hit):
+      return False
 
-    if self.shape.intersect(local_ray, hit):
-      # Transforma o ponto e a normal de volta para o espaço do mundo
-      hit.pos = glm.vec3(self.m * glm.vec4(hit.pos.x, hit.pos.y, hit.pos.z, 1.0))
-      hit.normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(hit.normal.x, hit.normal.y, hit.normal.z, 0.0)))
+    # Transform local hit position and normal to world space
+    world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
+    world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
+
+    # Compute world-space t as distance along the original (normalized) ray
+    t_world = glm.distance(world_pos, ray.o)
+
+    if t_world < hit.t:
+      hit.t = float(t_world)
+      hit.pos = world_pos
+      hit.normal = world_normal
+      hit.material = local_hit.material
       return True
+
     return False
