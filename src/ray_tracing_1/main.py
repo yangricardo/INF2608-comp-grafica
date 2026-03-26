@@ -8,6 +8,7 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 `Scene.trace_ray`.
 """
 
+
 import numpy as np
 from PIL import Image
 import glm

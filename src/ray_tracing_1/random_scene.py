@@ -6,6 +6,7 @@ Veja `src/random.py` (anterior) — este arquivo evita colisão com o módulo
 `random` da biblioteca padrão renomeando o script.
 """
 
+
 import os
 import json
 import math

@@ -11,6 +11,7 @@ Contribui com o que está documentado no README: mostra como construir cenas
 com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 """
 
+
 import numpy as np
 from PIL import Image
 import glm
