@@ -11,6 +11,7 @@ class Scene:
     self.objects: list[Shape] = []
     self.lights: list[Light] = []
     self.ambient_light = ambient_light
+    self.background_color = glm.vec3(0.02, 0.02, 0.05)
 
   def compute_intersection(self, ray: Ray):
     closest_hit = Hit()
@@ -22,7 +23,7 @@ class Scene:
 
   def trace_ray(self, ray: Ray):
     # [cite: 4, 35, 48, 55]
-    hit = self.compute_intersection(ray)
+    hit = self.compute_intersection(ray)    
     if hit and hit.material:
       return hit.material.eval(self, hit, ray.o)
-    return glm.vec3(0.02, 0.02, 0.05) # Background
+    return self.background_color
