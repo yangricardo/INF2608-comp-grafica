@@ -20,21 +20,23 @@ class PhongMaterial(Material):
     self.shi = shininess
 
   def eval(self, scene: Scene, hit: Hit, ray_origin: glm.vec3):
-    # Luz Ambiente [cite: 4, 41, 42] $c = m_{amb} * l_{amb}$
+    # Slide 4, p. 41-42: começa pela contribuição ambiente, independente da direção da luz.
     color = self.m_amb * scene.ambient_light
+    # Slide 4, p. 32 e p. 49: o vetor de visão vai do ponto atingido até a câmera.
     v = glm.normalize(ray_origin - hit.pos)
     
     for light in scene.lights:
-      # luz agora resolve a visibilidade e o decaimento
+      # Slide 4, p. 38-40: a luz informa visibilidade e radiância já com atenuação.
       li, l = light.radiance(scene, hit)
       
-      if li == glm.vec3(0): continue # Ponto em sombra
+      # Slide 4, p. 38-39: se a radiância chegou zerada, o ponto está em sombra.
+      if li == glm.vec3(0): continue
       
-      # Difusa (Lambert) [cite: 4, 32, 49]
+      # Slide 4, p. 32 e p. 49: termo difuso de Lambert, proporcional a n·l.
       n_dot_l = max(0.0, glm.dot(hit.normal, l))
       color += self.m_dif * li * n_dot_l
       
-      # Especular (Phong) [cite: 4, 32, 49]
+      # Slide 4, p. 32 e p. 49: termo especular de Phong, baseado em r·v.
       r = glm.reflect(-l, hit.normal)
       r_dot_v = max(0.0, glm.dot(r, v))
       color += self.m_spe * li * (r_dot_v ** self.shi)
