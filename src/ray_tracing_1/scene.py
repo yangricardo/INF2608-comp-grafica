@@ -7,10 +7,10 @@ from ray_tracing_1.ray import Ray
 from ray_tracing_1.shape import Shape
 
 class Scene:
-  def __init__(self):
+  def __init__(self, ambient_light: glm.vec3 = glm.vec3(0.1)):
     self.objects: list[Shape] = []
     self.lights: list[Light] = []
-    self.ambient_light = glm.vec3(0.1)
+    self.ambient_light = ambient_light
 
   def compute_intersection(self, ray: Ray):
     closest_hit = Hit()
