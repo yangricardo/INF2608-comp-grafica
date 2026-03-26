@@ -17,9 +17,10 @@ import glm
 from ray_tracing_1.ray import Ray
 from ray_tracing_1.camera import Camera
 from ray_tracing_1.scene import Scene
-from ray_tracing_1.shape import Sphere
+from ray_tracing_1.shape import Plane, Sphere
 from ray_tracing_1.material import PhongMaterial
 from ray_tracing_1.light import PointLight
+from ray_tracing_1.film import Film
 
 
 def render():
@@ -33,33 +34,25 @@ def render():
   """
   # Resolução de saída
   W, H = 400, 300
+  film = Film(width=W, height=H)
+  cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
-  # Câmera: olho posicionado em (0,0,5), olhando para origem
-  cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45, width=W, height=H)
+  # Definição de Materiais
+  mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=50.0)
+  mat_gray = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(0.0), shininess=1.0)
 
-  # Monta a cena: um objeto (esfera) com material Phong e uma luz pontual
+  # Monta a cena
   scene = Scene()
-  mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0),
-                         diffuse=glm.vec3(0.7, 0, 0),
-                         specular=glm.vec3(1, 1, 1),
-                         shininess=50)
+
+  # Objetos: A Esfera e o Plano (Chão) para receber a sombra
   scene.objects.append(Sphere(center=glm.vec3(0, 0, 0), radius=1.0, material=mat_red))
-  scene.lights.append(PointLight(pos=glm.vec3(5, 5, 5), power=glm.vec3(150, 150, 150)))
+  scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=mat_gray))
 
-  # Loop de render: amostragem central do pixel e conversão para uint8
-  img = np.zeros((H, W, 3), dtype=np.uint8)
-  for j in range(H):
-    for i in range(W):
-      # Coordenadas normalizadas do centro do pixel
-      xn, yn = (i + 0.5) / W, (j + 0.5) / H
-      ray = cam.generate_ray(xn=xn, yn=yn)
-      # Avalia a cor via Scene.trace_ray e limita valores entre 0 e 1
-      color = glm.clamp(scene.trace_ray(ray=ray), 0, 1)
-      img[j, i] = (color * 255)
+  # Fonte de Luz
+  scene.lights.append(PointLight(pos=glm.vec3(5, 5, 5), power=glm.vec3(150.0)))
 
-  # Salva o resultado em disco
-  Image.fromarray(img).save("render_final.png")
-  print("Renderização concluída. Imagem salva como 'render_final.png'.")
+  # Renderiza a cena usando o Film para iterar sobre os pixels e salvar a imagem
+  film.render(scene=scene, camera=cam, filename="render_final.png")
 
 if __name__ == "__main__":
     render()
