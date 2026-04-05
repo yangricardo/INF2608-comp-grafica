@@ -19,7 +19,7 @@ import os
 import json
 import argparse
 from datetime import datetime
-from ray_tracing_2.film import Film
+from ray_tracing_2.render import Render
 import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
@@ -29,9 +29,14 @@ from ray_tracing_2.light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None):
-  # Cria Film com parâmetros de amostragem (AA) e passa para render
-  film = Film(width=W, height=H, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
-  film.render(scene=scene, camera=cam, filename=out_path)
+  # Usa a classe Render para organizar saída e gerar markdown
+  r = Render()
+  # out_path aqui é esperado ser o caminho completo do arquivo de imagem; a
+  # classe Render cria sua própria pasta timestamp. Interpretamos `out_path`
+  # como base nome da cena quando chamamos Render.render.
+  # Para compatibilidade com chamada anterior, extraímos um nome simples.
+  base = os.path.splitext(os.path.basename(out_path))[0]
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
 
 
 def _material_from_spec(spec: dict) -> PhongMaterial:
