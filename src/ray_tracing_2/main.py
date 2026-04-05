@@ -22,7 +22,7 @@ import argparse
 
 
 
-def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
+def render(spp: int = 25, sampling_mode: str = 'stratified', seed: int | None = None, gamma_fix: bool = True):
   """Renderiza a cena de exemplo e salva `render_final.png`.
 
   O procedimento segue o pipeline principal:
@@ -37,27 +37,39 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
   # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
-  mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=50.0)
-  mat_gray = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(0.0), shininess=1.0)
+  mat_red = PhongMaterial(ambient=glm.vec3(0.02, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=200.0)
+  mat_gray = PhongMaterial(ambient=glm.vec3(0.01), diffuse=glm.vec3(0.6), specular=glm.vec3(0.15), shininess=20.0)
 
   # Slide 4, p. 35-40: reúne objetos, luzes e o ambiente que o traçador precisa avaliar.
   scene = Scene()
+  # Fundo bem escuro para destacar a esfera e o piso
+  scene.background_color = glm.vec3(0.0)
+  # reduzir iluminação ambiente para obter sombreamento mais pronunciado
+  scene.ambient_light = glm.vec3(0.02)
 
   # Slide 4, p. 11-18: adiciona um plano e uma esfera para exercitar interseções.
   scene.objects.append(Sphere(center=glm.vec3(0, 0, 0), radius=1.0, material=mat_red))
   scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=mat_gray))
 
   # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
-  scene.lights.append(PointLight(pos=glm.vec3(0, 5, 0), power=glm.vec3(150.0)))
-  # scene.lights.append(PointLight(pos=glm.vec3(-5, 0, 0), power=glm.vec3(150.0)))
+  # Aproximação de area-light: 3x3 grid de point lights para sombras suaves
+  total_power = 450.0
+  n = 3
+  radius = 0.8
+  per_light = total_power / (n * n)
+  for ix in range(n):
+    for iz in range(n):
+      fx = (ix / (n - 1) - 0.5) * radius
+      fz = (iz / (n - 1) - 0.5) * radius
+      scene.lights.append(PointLight(pos=glm.vec3(fx, 5.0, fz), power=glm.vec3(per_light)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
-  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
+  parser.add_argument('--spp', type=int, default=25, help='Samples per pixel (anti-aliasing)')
+  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='stratified', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
