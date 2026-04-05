@@ -35,8 +35,8 @@ def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: 
   from ray_tracing_2.render import Render
   r = Render()
   base = os.path.splitext(os.path.basename(out_name))[0]
-  props = {'objects': len(scene.objects), 'lights': len(scene.lights)}
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=props, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  # Render infere automaticamente os props a partir da `Scene`.
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 
 def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene:
