@@ -25,19 +25,22 @@ class PhongMaterial(Material):
     v = glm.normalize(ray_origin - hit.pos)
     
     for light in scene.lights:
-      # Slide 4, p. 38-40: a luz informa visibilidade e radiância já com atenuação.
-      li, l = light.radiance(scene, hit)
-      
-      # Slide 4, p. 38-39: se a radiância chegou zerada, o ponto está em sombra.
-      if li == glm.vec3(0): continue
-      
-      # Slide 4, p. 32 e p. 49: termo difuso de Lambert, proporcional a n·l.
-      n_dot_l = max(0.0, glm.dot(hit.normal, l))
-      color += self.m_dif * li * n_dot_l
-      
-      # Slide 4, p. 32 e p. 49: termo especular de Phong, baseado em r·v.
-      r = glm.reflect(-l, hit.normal)
-      r_dot_v = max(0.0, glm.dot(r, v))
-      color += self.m_spe * li * (r_dot_v ** self.shi)
+      # Slide 4, p. 38-40: PointLight continua com uma única amostra.
+      # Para AreaLight, somamos várias amostras da superfície emissora.
+      samples = light.radiance(scene, hit) if hasattr(light, 'sample_radiance') else [light.radiance(scene, hit)]
+
+      for li, l in samples:
+        # Slide 4, p. 38-39: se a radiância chegou zerada, aquela amostra está em sombra.
+        if li == glm.vec3(0):
+          continue
+
+        # Slide 4, p. 32 e p. 49: termo difuso de Lambert, proporcional a n·l.
+        n_dot_l = max(0.0, glm.dot(hit.normal, l))
+        color += self.m_dif * li * n_dot_l
+
+        # Slide 4, p. 32 e p. 49: termo especular de Phong, baseado em r·v.
+        r = glm.reflect(-l, hit.normal)
+        r_dot_v = max(0.0, glm.dot(r, v))
+        color += self.m_spe * li * (r_dot_v ** self.shi)
         
     return color
