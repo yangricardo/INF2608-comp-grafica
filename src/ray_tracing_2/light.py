@@ -19,6 +19,10 @@ class Light:
   def radiance(self, scene: "Scene", hit: "Hit"):
     """Calcula a radiância incidente e a direção da luz no ponto de impacto"""
     raise NotImplementedError("Light subclasses must implement radiance()")
+  
+  def sample_radiance(self, scene: "Scene", hit: "Hit") -> list[tuple[glm.vec3, glm.vec3]]:
+    """Amostra múltiplos pontos na superfície da luz para produzir penumbra."""
+    return [self.radiance(scene, hit)]
 
 
 class PointLight(Light):
