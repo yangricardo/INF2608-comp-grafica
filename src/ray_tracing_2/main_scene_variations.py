@@ -19,12 +19,19 @@ from ray_tracing_2.shape import Sphere, Plane
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
 from ray_tracing_2.film import Film
+import argparse
+from typing import Optional
 
 
-def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str):
-  """Renderiza a cena usando a classe `Film` e salva como PNG."""
-  # Slide 4, p. 24-29: reutiliza o mesmo fluxo de pixels, câmera e cena.
-  film = Film(width=W, height=H)
+def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: Optional[int] = None):
+  """Renderiza a cena usando a classe `Film` e salva como PNG.
+
+  Comentário (PT): expõe parâmetros de amostragem por pixel (AA) conforme
+  Slide 4, p. 25-29. `samples_per_pixel`, `sampling_mode` e `seed` controlam
+  o comportamento de anti-aliasing e a reprodutibilidade.
+  """
+  # Slide 4, p. 24-29: cria Film com parâmetros de AA
+  film = Film(width=W, height=H, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
   film.render(scene=scene, camera=cam, filename=out_name)
 
 
@@ -59,7 +66,15 @@ def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene
 
 
 def main():
-  W, H = 400, 300
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--width', type=int, default=400)
+  parser.add_argument('--height', type=int, default=300)
+  parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
+  parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered')
+  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
+  args = parser.parse_args()
+
+  W, H = args.width, args.height
   # Slide 4, p. 14 e p. 29: câmera fixa para comparar as variações de geometria.
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45, width=W, height=H)
 
@@ -75,7 +90,7 @@ def main():
         # Monta a cena com os parâmetros atuais e renderiza uma nova imagem.
         scene = build_scene(sx=x, sy=y, sr=r, plane_y=-1.0)
         out_name = f"render_var_{idx:02d}_x{x}_y{y}_r{r}.png"
-        render_scene_with_film(scene=scene, cam=cam, W=W, H=H, out_name=out_name)
+        render_scene_with_film(scene=scene, cam=cam, W=W, H=H, out_name=out_name, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
         idx += 1
 
   print("All renders complete.")
