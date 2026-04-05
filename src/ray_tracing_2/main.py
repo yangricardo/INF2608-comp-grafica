@@ -22,7 +22,7 @@ import argparse
 
 
 
-def render(spp: int = 25, sampling_mode: str = 'stratified', seed: int | None = None, gamma_fix: bool = False):
+def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
   """Renderiza a cena de exemplo e salva `render_final.png`.
 
   O procedimento segue o pipeline principal:
@@ -54,8 +54,8 @@ def render(spp: int = 25, sampling_mode: str = 'stratified', seed: int | None = 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument('--spp', type=int, default=25, help='Samples per pixel (anti-aliasing)')
-  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='stratified', help='Sampling mode for AA')
+  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
+  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
