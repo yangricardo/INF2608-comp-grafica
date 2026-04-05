@@ -11,6 +11,7 @@ Contribui com o que está documentado no README: mostra como construir cenas
 com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 """
 from __future__ import annotations
+import os
 
 import glm
 from ray_tracing_2.camera import Camera
@@ -30,9 +31,12 @@ def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: 
   Slide 4, p. 25-29. `samples_per_pixel`, `sampling_mode` e `seed` controlam
   o comportamento de anti-aliasing e a reprodutibilidade.
   """
-  # Slide 4, p. 24-29: cria Film com parâmetros de AA
-  film = Film(width=W, height=H, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
-  film.render(scene=scene, camera=cam, filename=out_name)
+  # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
+  from ray_tracing_2.render import Render
+  r = Render()
+  base = os.path.splitext(os.path.basename(out_name))[0]
+  props = {'objects': len(scene.objects), 'lights': len(scene.lights)}
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=props, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
 
 
 def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene:
