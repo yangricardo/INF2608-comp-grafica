@@ -136,6 +136,10 @@ class Render:
         entry['normal'] = glm_to_list(getattr(o, 'normal'))
       if hasattr(o, 'radius'):
         entry['radius'] = float(getattr(o, 'radius'))
+      if hasattr(o, 'p_min'):
+        entry['p_min'] = glm_to_list(getattr(o, 'p_min'))
+      if hasattr(o, 'p_max'):
+        entry['p_max'] = glm_to_list(getattr(o, 'p_max'))
       mat = getattr(o, 'material', None)
       if mat is not None:
         m: dict[str, Any] = {}

@@ -75,6 +75,76 @@ class Plane(Shape):
             hit.material = self.material
             return True
     return False
+
+
+class Box(Shape):
+  def __init__(self, p_min: glm.vec3, p_max: glm.vec3, material: Material):
+    self.p_min = glm.vec3(
+      min(p_min.x, p_max.x),
+      min(p_min.y, p_max.y),
+      min(p_min.z, p_max.z),
+    )
+    self.p_max = glm.vec3(
+      max(p_min.x, p_max.x),
+      max(p_min.y, p_max.y),
+      max(p_min.z, p_max.z),
+    )
+    self.material = material
+
+  def intersect(self, ray: Ray, hit: Hit):
+    # Slabs: calcula os intervalos de entrada/saída do raio em cada eixo.
+    t_near = -float('inf')
+    t_far = float('inf')
+    near_normal = glm.vec3(0)
+    far_normal = glm.vec3(0)
+    eps = 1e-6
+
+    for axis in range(3):
+      origin = ray.o[axis]
+      direction = ray.d[axis]
+      slab_min = self.p_min[axis]
+      slab_max = self.p_max[axis]
+
+      if abs(direction) < eps:
+        if origin < slab_min or origin > slab_max:
+          return False
+        continue
+
+      inv_d = 1.0 / direction
+      t1 = (slab_min - origin) * inv_d
+      t2 = (slab_max - origin) * inv_d
+
+      if t1 > t2:
+        t1, t2 = t2, t1
+
+      if t1 > t_near:
+        t_near = t1
+        near_normal = glm.vec3(0)
+        near_normal[axis] = -1.0 if direction > 0.0 else 1.0
+
+      if t2 < t_far:
+        t_far = t2
+        far_normal = glm.vec3(0)
+        far_normal[axis] = 1.0 if direction > 0.0 else -1.0
+
+      if t_near > t_far:
+        return False
+
+    if t_far < 0.001:
+      return False
+
+    t_candidate = t_near if t_near > 0.001 else t_far
+    if t_candidate >= hit.t:
+      return False
+
+    hit.t = t_candidate
+    hit.pos = ray.o + t_candidate * ray.d
+    hit.normal = near_normal if t_candidate == t_near else far_normal
+    hit.material = self.material
+    hit.backfacing = glm.dot(ray.d, hit.normal) > 0.0
+    if hit.backfacing:
+      hit.normal = -hit.normal
+    return True
   
 class Instance(Shape):
   def __init__(self, shape: Shape, matrix: glm.mat4):
