@@ -52,11 +52,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   # scene.lights.append(PointLight(pos=glm.vec3(-5, 0, 0), power=glm.vec3(150.0)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
-  props = {
-    'objects': len(scene.objects),
-    'lights': len(scene.lights)
-  }
-  r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', props=props, samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
