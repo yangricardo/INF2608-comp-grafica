@@ -24,7 +24,7 @@ import argparse
 from typing import Optional
 
 
-def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: Optional[int] = None):
+def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: Optional[int] = None, gamma_fix: bool = False):
   """Renderiza a cena usando a classe `Film` e salva como PNG.
 
   Comentário (PT): expõe parâmetros de amostragem por pixel (AA) conforme
@@ -36,7 +36,7 @@ def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: 
   r = Render()
   base = os.path.splitext(os.path.basename(out_name))[0]
   props = {'objects': len(scene.objects), 'lights': len(scene.lights)}
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=props, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=props, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 
 def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene:
@@ -76,6 +76,7 @@ def main():
   parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
   parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
+  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
 
   W, H = args.width, args.height
@@ -94,7 +95,7 @@ def main():
         # Monta a cena com os parâmetros atuais e renderiza uma nova imagem.
         scene = build_scene(sx=x, sy=y, sr=r, plane_y=-1.0)
         out_name = f"render_var_{idx:02d}_x{x}_y{y}_r{r}.png"
-        render_scene_with_film(scene=scene, cam=cam, W=W, H=H, out_name=out_name, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
+        render_scene_with_film(scene=scene, cam=cam, W=W, H=H, out_name=out_name, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
         idx += 1
 
   print("All renders complete.")

@@ -23,12 +23,12 @@ from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None):
+def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
   # Usa a classe Render para criar pastas e markdown
   from ray_tracing_2.render import Render
   r = Render()
   base = os.path.splitext(os.path.basename(out_path))[0]
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 
 def build_random_scene(rng: random.Random):
@@ -158,6 +158,7 @@ if __name__ == '__main__':
   parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
   parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
+  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
   # Chamamos main com parâmetros e passamos AA para o render via render_scene
   out_root = os.path.join(os.getcwd(), 'outputs')
@@ -173,7 +174,7 @@ if __name__ == '__main__':
     os.makedirs(sim_dir, exist_ok=True)
     img_path = os.path.join(sim_dir, 'render.png')
     md_path = os.path.join(sim_dir, 'properties.md')
-    render_scene(scene, cam=Camera(eye=glm.vec3(0,0,5), center=glm.vec3(0,0,0), up=glm.vec3(0,1,0), fov=45, width=W, height=H), W=W, H=H, out_path=img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
+    render_scene(scene, cam=Camera(eye=glm.vec3(0,0,5), center=glm.vec3(0,0,0), up=glm.vec3(0,1,0), fov=45, width=W, height=H), W=W, H=H, out_path=img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
     md_text = explain_properties_md(props)
     with open(md_path, 'w', encoding='utf-8') as f:
       f.write(md_text)

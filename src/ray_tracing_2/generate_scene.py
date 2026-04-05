@@ -28,7 +28,7 @@ from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None):
+def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
   # Usa a classe Render para organizar saída e gerar markdown
   r = Render()
   # out_path aqui é esperado ser o caminho completo do arquivo de imagem; a
@@ -36,7 +36,7 @@ def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, sampl
   # como base nome da cena quando chamamos Render.render.
   # Para compatibilidade com chamada anterior, extraímos um nome simples.
   base = os.path.splitext(os.path.basename(out_path))[0]
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 
 def _material_from_spec(spec: dict) -> PhongMaterial:
@@ -117,6 +117,7 @@ def main():
   parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
   parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
+  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
 
   with open(args.input, 'r', encoding='utf-8') as f:
@@ -138,7 +139,7 @@ def main():
   img_path = os.path.join(sim_dir, 'render.png')
   md_path = os.path.join(sim_dir, 'properties.md')
 
-  render_scene(scene, cam, args.width, args.height, img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
+  render_scene(scene, cam, args.width, args.height, img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
   md_text = explain_properties_md(props)
   with open(md_path, 'w', encoding='utf-8') as f:
     f.write(md_text)
