@@ -20,7 +20,7 @@ import json
 import argparse
 from datetime import datetime
 from ray_tracing_2.render import Render
-import glm
+from pyglm import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Sphere, Plane

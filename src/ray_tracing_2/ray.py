@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 
 class Ray:
   def __init__(self, origin: glm.vec3, direction: glm.vec3):

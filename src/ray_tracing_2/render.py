@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from typing import Optional, Any
 
-import glm
+from pyglm import glm
 
 from ray_tracing_2.film import Film
 
