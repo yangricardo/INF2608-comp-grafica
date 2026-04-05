@@ -24,10 +24,11 @@ from ray_tracing_2.light import PointLight
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None):
-  # Slide 4, p. 24-29: render usando Film com suporte a AA para consistência
-  from ray_tracing_2.film import Film
-  film = Film(width=W, height=H, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
-  film.render(scene=scene, camera=cam, filename=out_path)
+  # Usa a classe Render para criar pastas e markdown
+  from ray_tracing_2.render import Render
+  r = Render()
+  base = os.path.splitext(os.path.basename(out_path))[0]
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
 
 
 def build_random_scene(rng: random.Random):
