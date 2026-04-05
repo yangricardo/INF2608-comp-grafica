@@ -11,8 +11,14 @@ from enum import Enum
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
 
+
+# Enum público para escolher modo de amostragem (jittered ou stratified)
+class SamplingMode(Enum):
+  JITTERED = 'jittered'
+  STRATIFIED = 'stratified'
+
 class Film:
-  def __init__(self, width: int, height: int):
+  def __init__(self, width: int, height: int, samples_per_pixel: int = 16, sampling_mode: Optional[str] = None, seed: Optional[int] = None):
     self.width = width
     self.height = height
     self.resolution = (width, height)
@@ -20,18 +26,25 @@ class Film:
     self.image = np.zeros((height, width, 3))
     # Parâmetros de amostragem para Anti-aliasing
     # `samples_per_pixel`: número de amostras por pixel (Monte Carlo)
-    # `sampling_mode`: modo de amostragem (enum `SamplingMode`)
-    self.samples_per_pixel: int = 16
-    # Usa enum para controlar o modo de amostragem (jittered/stratified)
-    class SamplingMode(Enum):
-      JITTERED = 'jittered'
-      STRATIFIED = 'stratified'
+    self.samples_per_pixel: int = max(1, int(samples_per_pixel))
+    # `sampling_mode`: usa o enum `SamplingMode` definido no módulo
+    if sampling_mode is None:
+      self.sampling_mode: SamplingMode = SamplingMode.JITTERED
+    elif isinstance(sampling_mode, SamplingMode):
+      self.sampling_mode = sampling_mode
+    else:
+      # aceita string 'jittered' / 'stratified'
+      mode_str = str(sampling_mode).lower()
+      if mode_str == SamplingMode.STRATIFIED.value:
+        self.sampling_mode = SamplingMode.STRATIFIED
+      else:
+        self.sampling_mode = SamplingMode.JITTERED
 
-    self.SamplingMode = SamplingMode
-    self.sampling_mode: SamplingMode = SamplingMode.JITTERED
     # Semente para reprodutibilidade; pode ser None para variabilidade
-    self.seed: Optional[int] = None
+    self.seed: Optional[int] = seed
     self.rng: random.Random = random.Random()
+    if self.seed is not None:
+      self.rng.seed(self.seed)
 
   def set_pixel(self, i: int, j: int, color: glm.vec3):
     # Slide 4, p. 24-28: grava a cor calculada no pixel (i, j), já limitada ao intervalo válido.
@@ -54,7 +67,7 @@ class Film:
     spp = max(1, int(self.samples_per_pixel))
     samples: list[tuple[float, float]] = []
 
-    if self.sampling_mode == self.SamplingMode.JITTERED:
+    if self.sampling_mode == SamplingMode.JITTERED:
       # Slide 4, p. 25-29: jittered Monte Carlo dentro do pixel
       for _ in range(spp):
         rx = self.rng.random()
