@@ -28,7 +28,7 @@ def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, sampl
   from ray_tracing_2.render import Render
   r = Render()
   base = os.path.splitext(os.path.basename(out_path))[0]
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 
 def build_random_scene(rng: random.Random):
@@ -138,13 +138,9 @@ def main(n_sim: int = 5, W: int = 400, H: int = 300):
     sim_dir = os.path.join(out_root, f'sim_{ts}')
     os.makedirs(sim_dir, exist_ok=True)
     img_path = os.path.join(sim_dir, 'render.png')
-    md_path = os.path.join(sim_dir, 'properties.md')
 
-    # Renderiza e registra a explicação textual da cena em paralelo à imagem.
+    # Renderiza; Render criará properties.md automaticamente a partir da scene.
     render_scene(scene, cam, W, H, img_path)
-    md_text = explain_properties_md(props)
-    with open(md_path, 'w', encoding='utf-8') as f:
-      f.write(md_text)
 
     print(f'Wrote simulation {i:03d} -> {sim_dir}')
 
