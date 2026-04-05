@@ -23,16 +23,11 @@ from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
-  # Slide 4, p. 24-29: percorre a grade de pixels e gera um raio por amostra.
-  img = np.zeros((H, W, 3), dtype=np.uint8)
-  for j in range(H):
-    for i in range(W):
-      xn, yn = (i + 0.5) / W, (j + 0.5) / H
-      ray = cam.generate_ray(xn, yn)
-      color = glm.clamp(scene.trace_ray(ray), 0, 1)
-      img[j, i] = (color * 255)
-  Image.fromarray(img).save(out_path)
+def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None):
+  # Slide 4, p. 24-29: render usando Film com suporte a AA para consistência
+  from ray_tracing_2.film import Film
+  film = Film(width=W, height=H, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
+  film.render(scene=scene, camera=cam, filename=out_path)
 
 
 def build_random_scene(rng: random.Random):
@@ -154,4 +149,31 @@ def main(n_sim: int = 5, W: int = 400, H: int = 300):
 
 
 if __name__ == '__main__':
-  main(n_sim=5)
+  import argparse
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--n_sim', type=int, default=5)
+  parser.add_argument('--width', type=int, default=400)
+  parser.add_argument('--height', type=int, default=300)
+  parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
+  parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered')
+  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
+  args = parser.parse_args()
+  # Chamamos main com parâmetros e passamos AA para o render via render_scene
+  out_root = os.path.join(os.getcwd(), 'outputs')
+  os.makedirs(out_root, exist_ok=True)
+  rng = random.Random()
+  rng.seed(args.seed)
+
+  W, H = args.width, args.height
+  for i in range(args.n_sim):
+    scene, props = build_random_scene(rng)
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    sim_dir = os.path.join(out_root, f'sim_{ts}')
+    os.makedirs(sim_dir, exist_ok=True)
+    img_path = os.path.join(sim_dir, 'render.png')
+    md_path = os.path.join(sim_dir, 'properties.md')
+    render_scene(scene, cam=Camera(eye=glm.vec3(0,0,5), center=glm.vec3(0,0,0), up=glm.vec3(0,1,0), fov=45, width=W, height=H), W=W, H=H, out_path=img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
+    md_text = explain_properties_md(props)
+    with open(md_path, 'w', encoding='utf-8') as f:
+      f.write(md_text)
+    print(f'Wrote simulation {i:03d} -> {sim_dir}')
