@@ -17,6 +17,7 @@ from ray_tracing_2.shape import Plane, Sphere
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
 from ray_tracing_2.film import Film, SamplingMode
+from ray_tracing_2.render import Render
 import argparse
 
 
@@ -32,8 +33,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   """
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 400, 300
-  # Cria o filme com parâmetros de amostragem configuráveis (AA)
-  film = Film(width=W, height=H, samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed)
+  # Cria a câmera
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
   # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
@@ -50,9 +50,13 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
   # scene.lights.append(PointLight(pos=glm.vec3(0, 5, 0), power=glm.vec3(150.0)))
   scene.lights.append(PointLight(pos=glm.vec3(-5, 0, 0), power=glm.vec3(150.0)))
-
-  # Slide 4, p. 24-29: o Film percorre os pixels e pede ao Camera um raio por amostra.
-  film.render(scene=scene, camera=cam, filename="render_ray_tracing_2.png", gamma_fix=True)
+  # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
+  r = Render()
+  props = {
+    'objects': len(scene.objects),
+    'lights': len(scene.lights)
+  }
+  r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', props=props, samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=True)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
