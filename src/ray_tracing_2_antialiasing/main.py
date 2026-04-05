@@ -10,7 +10,7 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 from ray_tracing_2_antialiasing.camera import Camera
 from ray_tracing_2_antialiasing.scene import Scene
 from ray_tracing_2_antialiasing.shape import Plane, Sphere

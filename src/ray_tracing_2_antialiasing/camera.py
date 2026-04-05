@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 from ray_tracing_2_antialiasing.ray import Ray
 
 class Camera:

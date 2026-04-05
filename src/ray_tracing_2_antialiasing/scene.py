@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 from ray_tracing_2_antialiasing.hit import Hit
 from ray_tracing_2_antialiasing.light import Light
 from ray_tracing_2_antialiasing.ray import Ray

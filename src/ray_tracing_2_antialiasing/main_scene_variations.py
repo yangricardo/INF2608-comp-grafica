@@ -13,7 +13,7 @@ com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 from __future__ import annotations
 import os
 
-import glm
+from pyglm import glm
 from ray_tracing_2_antialiasing.camera import Camera
 from ray_tracing_2_antialiasing.scene import Scene
 from ray_tracing_2_antialiasing.shape import Sphere, Plane

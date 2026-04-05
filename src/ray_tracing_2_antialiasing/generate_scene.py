@@ -20,7 +20,7 @@ import json
 import argparse
 from datetime import datetime
 from ray_tracing_2_antialiasing.render import Render
-import glm
+from pyglm import glm
 from ray_tracing_2_antialiasing.camera import Camera
 from ray_tracing_2_antialiasing.scene import Scene
 from ray_tracing_2_antialiasing.shape import Sphere, Plane
