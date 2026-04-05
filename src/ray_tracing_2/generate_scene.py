@@ -28,8 +28,9 @@ from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str):
-  film = Film(width=W, height=H)
+def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None):
+  # Cria Film com parâmetros de amostragem (AA) e passa para render
+  film = Film(width=W, height=H, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
   film.render(scene=scene, camera=cam, filename=out_path)
 
 
@@ -108,6 +109,9 @@ def main():
   parser.add_argument('--name', '-n', default='scene', help='Base name for the simulation folder')
   parser.add_argument('--width', type=int, default=400)
   parser.add_argument('--height', type=int, default=300)
+  parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
+  parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered', help='Sampling mode for AA')
+  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   args = parser.parse_args()
 
   with open(args.input, 'r', encoding='utf-8') as f:
@@ -129,7 +133,7 @@ def main():
   img_path = os.path.join(sim_dir, 'render.png')
   md_path = os.path.join(sim_dir, 'properties.md')
 
-  render_scene(scene, cam, args.width, args.height, img_path)
+  render_scene(scene, cam, args.width, args.height, img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
   md_text = explain_properties_md(props)
   with open(md_path, 'w', encoding='utf-8') as f:
     f.write(md_text)
