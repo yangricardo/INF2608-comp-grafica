@@ -27,7 +27,7 @@ class PhongMaterial(Material):
     for light in scene.lights:
       # Slide 4, p. 38-40: PointLight continua com uma única amostra.
       # Para AreaLight, somamos várias amostras da superfície emissora.
-      samples = light.radiance(scene, hit) if hasattr(light, 'sample_radiance') else [light.radiance(scene, hit)]
+      samples = light.sample_radiance(scene, hit) if hasattr(light, 'sample_radiance') else [light.radiance(scene, hit)]
 
       for li, l in samples:
         # Slide 4, p. 38-39: se a radiância chegou zerada, aquela amostra está em sombra.
