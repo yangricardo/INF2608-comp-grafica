@@ -16,10 +16,12 @@ from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Plane, Sphere
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
-from ray_tracing_2.film import Film
+from ray_tracing_2.film import Film, SamplingMode
+import argparse
 
 
-def render():
+
+def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None):
   """Renderiza a cena de exemplo e salva `render_final.png`.
 
   O procedimento segue o pipeline principal:
@@ -30,7 +32,8 @@ def render():
   """
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 400, 300
-  film = Film(width=W, height=H)
+  # Cria o filme com parâmetros de amostragem configuráveis (AA)
+  film = Film(width=W, height=H, samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed)
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
   # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
@@ -52,4 +55,9 @@ def render():
   film.render(scene=scene, camera=cam, filename="render_ray_tracing_2.png", gamma_fix=True)
 
 if __name__ == "__main__":
-    render()
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
+  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
+  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
+  args = parser.parse_args()
+  render(spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed)
