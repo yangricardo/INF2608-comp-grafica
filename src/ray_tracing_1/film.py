@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from PIL import Image
-import glm
+from pyglm import glm
 import numpy as np
 
 from ray_tracing_1.camera import Camera

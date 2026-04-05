@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 from typing import TYPE_CHECKING
 
 from ray_tracing_1.ray import Ray

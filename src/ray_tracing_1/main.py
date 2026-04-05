@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import numpy as np
 from PIL import Image
-import glm
+from pyglm import glm
 from ray_tracing_1.ray import Ray
 from ray_tracing_1.camera import Camera
 from ray_tracing_1.scene import Scene

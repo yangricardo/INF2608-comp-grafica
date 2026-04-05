@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 from ray_tracing_1.hit import Hit
 from ray_tracing_1.light import Light
 from ray_tracing_1.ray import Ray

@@ -13,7 +13,7 @@ import json
 import math
 import numpy as np
 from PIL import Image
-import glm
+from pyglm import glm
 import random
 from datetime import datetime
 from ray_tracing_1.ray import Ray

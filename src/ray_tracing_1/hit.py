@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import glm
+from pyglm import glm
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
