@@ -36,7 +36,7 @@ def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, sampl
   # como base nome da cena quando chamamos Render.render.
   # Para compatibilidade com chamada anterior, extraímos um nome simples.
   base = os.path.splitext(os.path.basename(out_path))[0]
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, props=None, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, width=W, height=H, name=base, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 
 def _material_from_spec(spec: dict) -> PhongMaterial:
@@ -139,10 +139,8 @@ def main():
   img_path = os.path.join(sim_dir, 'render.png')
   md_path = os.path.join(sim_dir, 'properties.md')
 
+  # Passa `props` para que Render gere o markdown detalhado
   render_scene(scene, cam, args.width, args.height, img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
-  md_text = explain_properties_md(props)
-  with open(md_path, 'w', encoding='utf-8') as f:
-    f.write(md_text)
 
   print(f'Wrote scene -> {sim_dir}')
 
