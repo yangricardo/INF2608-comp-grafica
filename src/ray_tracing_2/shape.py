@@ -81,6 +81,7 @@ class Instance(Shape):
     self.shape = shape
     self.m = glm.mat4(matrix)
     self.m_inv = glm.inverse(self.m)
+    # Slide 5.12: A matriz para transformar normais é a inversa transposta
     self.m_inv_t = glm.transpose(self.m_inv) # Para transformar a normal corretamente
 
   def intersect(self, ray: Ray, hit: Hit):
@@ -92,21 +93,28 @@ class Instance(Shape):
     # 5. O parâmetro t é mantido consistente com o espaço global apenas se a direção local for normalizada.
     local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
     local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
-    local_d = glm.normalize(local_d)  # Normalização obrigatória para t correto
+    local_d = glm.normalize(local_d)  # O Slide 13 indica a normalização da direção local
     local_ray = Ray(local_o, local_d)
     local_hit = Hit()
-    if not self.shape.intersect(local_ray, local_hit):
-        return False
 
+    # 2. Calcula interseção raio-objeto no espaço local
+    if not self.shape.intersect(local_ray, local_hit):
+      return False
+
+    # 3. Transforma ponto e normal da interseção para o espaço global
     world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
     world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
 
-    if local_hit.t < hit.t:
-        hit.t = float(local_hit.t)
-        hit.pos = world_pos
-        hit.normal = world_normal
-        hit.material = local_hit.material
-        hit.backfacing = local_hit.backfacing
-        return True
+    # Como a direção local foi normalizada, precisamos calcular a distância real 
+    # no espaço global. Caso contrário, objetos escalonados teriam um 't' incorreto.
+    world_t = glm.distance(world_pos, ray.o)
+
+    if world_t < hit.t:
+      hit.t = world_t
+      hit.pos = world_pos
+      hit.normal = world_normal
+      hit.material = local_hit.material
+      hit.backfacing = local_hit.backfacing
+      return True
 
     return False
