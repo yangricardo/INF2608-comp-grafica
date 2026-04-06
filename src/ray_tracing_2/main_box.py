@@ -21,11 +21,17 @@ from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Instance, Plane
 
 
-def _transform(tx: float, ty: float, tz: float, sx: float, sy: float, sz: float) -> glm.mat4:
+def _transform(tx: float, ty: float, tz: float, sx: float, sy: float, sz: float, ry_deg: float = 0.0) -> glm.mat4:
+  ry = glm.radians(ry_deg)
+  c = glm.cos(ry)
+  s = glm.sin(ry)
+
   m = glm.mat4(1.0)
-  m[0][0] = sx
+  m[0][0] = c * sx
+  m[0][2] = -s * sx
   m[1][1] = sy
-  m[2][2] = sz
+  m[2][0] = s * sz
+  m[2][2] = c * sz
   m[3][0] = tx
   m[3][1] = ty
   m[3][2] = tz
@@ -62,6 +68,18 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
     specular=glm.vec3(0.0),
     shininess=1.0,
   )
+  light_gray = PhongMaterial(
+    ambient=glm.vec3(0.1),
+    diffuse=glm.vec3(0.6),
+    specular=glm.vec3(0.0),
+    shininess=1.0,
+  )
+  dark_gray = PhongMaterial(
+    ambient=glm.vec3(0.05),
+    diffuse=glm.vec3(0.3),
+    specular=glm.vec3(0.0),
+    shininess=1.0,
+  )
   gray = PhongMaterial(
     ambient=glm.vec3(0.1),
     diffuse=glm.vec3(0.5),
@@ -72,11 +90,16 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   scene = Scene()
 
   # Cornell-like room: floor, ceiling, back wall and side walls.
-  scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=white))
-  scene.objects.append(Plane(pos=glm.vec3(0, 3.0, 0), normal=glm.vec3(0, -1, 0), material=gray))
-  scene.objects.append(Plane(pos=glm.vec3(0, 0, -4.0), normal=glm.vec3(0, 0, 1), material=white))
-  scene.objects.append(Plane(pos=glm.vec3(-2.0, 0, 0), normal=glm.vec3(1, 0, 0), material=green))
-  scene.objects.append(Plane(pos=glm.vec3(2.0, 0, 0), normal=glm.vec3(-1, 0, 0), material=red))
+  floor = Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=white)
+  left_wall = Plane(pos=glm.vec3(-2.0, 0, 0), normal=glm.vec3(1, 0, 0), material=green)
+  right_wall = Plane(pos=glm.vec3(2.0, 0, 0), normal=glm.vec3(-1, 0, 0), material=red)
+  back_wall = Plane(pos=glm.vec3(0, 0, -4.0), normal=glm.vec3(0, 0, 1), material=light_gray)
+  top_wall = Plane(pos=glm.vec3(0, 3.0, 0), normal=glm.vec3(0, -1, 0), material=dark_gray)
+  scene.objects.append(floor)
+  scene.objects.append(left_wall)
+  scene.objects.append(right_wall)
+  scene.objects.append(back_wall)
+  scene.objects.append(top_wall)
 
   # Base box reused through instancing to demonstrate the slide concept.
   base_box = Box(
@@ -85,8 +108,8 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
     material=gray,
   )
 
-  tall_box = Instance(base_box, _transform(-0.65, -0.05, -2.2, 0.75, 1.55, 0.75))
-  short_box = Instance(base_box, _transform(0.65, -0.6, -1.7, 1.0, 0.7, 1.0))
+  tall_box = Instance(base_box, _transform(-0.65, -0.05, -2.2, 0.75, 1.55, 0.75, ry_deg=25.0))
+  short_box = Instance(base_box, _transform(0.65, -0.6, -1.7, 1.0, 0.7, 1.0, ry_deg=-35.0))
 
   scene.objects.append(tall_box)
   scene.objects.append(short_box)
