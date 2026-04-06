@@ -97,7 +97,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
       p=glm.vec3(-0.75, 2.95, -2.9),
       e_u=glm.vec3(1.5, 0.0, 0.0),
       e_v=glm.vec3(0.0, 0.0, 1.2),
-      power=glm.vec3(220.0),
+      power=glm.vec3(50.0),
       samples_u=6,
       samples_v=6,
       seed=seed,
