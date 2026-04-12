@@ -35,7 +35,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   W, H = 800, 600
   # Cria a câmera
   cam = Camera(eye=glm.vec3(2.7750, 2.775, 2.775), center=glm.vec3(2.775, 3.200, 12.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
-  scene = Scene(ambient_light=AmbientLight(30, 30, 30))
+  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
   # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
   mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=50.0)
   mat_gray = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(1), shininess=10.0)
@@ -48,7 +48,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
 
   # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
   scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(0.7, 0.7, 0.7)))
-  scene.lights.append(PointLight(pos=glm.vec3(0, 5, 5), power=glm.vec3(150.0)))
+  scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(150.0)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
