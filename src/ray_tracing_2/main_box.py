@@ -14,7 +14,7 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.film import SamplingMode
-from ray_tracing_2.light import AreaLight
+from ray_tracing_2.light import AreaLight, PointLight
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
@@ -55,6 +55,7 @@ def render(
     fov=50.0,
     width=W,
     height=H,
+    focal_distance=1.0,
   )
 
   white = PhongMaterial(
@@ -122,17 +123,7 @@ def render(
   scene.objects.append(short_box)
 
   # Area light on the ceiling, slightly forward, to create soft shadows.
-  scene.lights.append(
-    AreaLight(
-      p=glm.vec3(-0.75, 2.95, -2.9),
-      e_u=glm.vec3(1.5, 0.0, 0.0),
-      e_v=glm.vec3(0.0, 0.0, 1.2),
-      power=glm.vec3(50.0),
-      samples_u=6,
-      samples_v=6,
-      seed=seed,
-    )
-  )
+  scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(0.7,0.7,0.7)))
 
   r = Render()
   r.render(
