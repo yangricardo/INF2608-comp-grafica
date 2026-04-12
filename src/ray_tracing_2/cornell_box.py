@@ -70,8 +70,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red_phong_material)
   ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=white_phong_material)
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white_phong_material)
-  lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white_phong_material)
-  scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor, lamp])
+  scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
   # Blocos instanciados conforme proj1-exemplo.pdf
   small_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=gray_phong_material)

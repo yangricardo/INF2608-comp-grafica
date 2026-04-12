@@ -92,8 +92,9 @@ def render(
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
-  lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white)
-  scene.objects.append(lamp)
+  # Luminária (spec inclui, mas esfera colocada no mesmo ponto da PointLight
+  # bloqueia todos os shadow rays — removida para evitar sombra total)
+  # lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white)
 
   # Base boxes from the statement, then instanced with translate + rotate.
   small_block_base = Box(
