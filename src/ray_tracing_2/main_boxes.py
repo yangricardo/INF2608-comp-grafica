@@ -43,18 +43,29 @@ def main():
         shininess=0
     )
 
+    material_cinza = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(1), shininess=50.0)
+
     # 5. Adição de Objetos
     
     # Subsituição: Box no lugar da esfera original
     # Posicionada centralmente na base
-    bmin = glm.vec3(1.5, 0.0, 1.5)
-    bmax = glm.vec3(4.0, 2.5, 4.0)
-    scene.objects.append(Box(bmin, bmax, material_branco))
+    small_block = Box(
+      p_min=glm.vec3(0.0, 0.0, 0.0),
+      p_max=glm.vec3(1.65, 1.65, 1.65),
+      material=material_cinza,
+    )
+    big_block = Box(
+      p_min=glm.vec3(0.0, 0.0, 0.0),
+      p_max=glm.vec3(1.65, 3.30, 1.65),
+      material=material_cinza,
+    )
+    scene.objects.append(small_block)
+    scene.objects.append(big_block)
 
     # Adição: Esfera na mesma posição da PointLight
     # Raio pequeno (0.1) para não obstruir toda a luz mas ser visível
-    scene.objects.append(Sphere(light_pos, 0.1, material_luz))
-
+    scene.objects.append(Sphere(center=light_pos, radius=0.1, material=material_luz))
+    scene.lights.append(PointLight(pos=glm.vec3(0, 5, 5), power=glm.vec3(150.0)))
     # 6. Renderização
     # Configuração padrão de 800x600 e 25 raios por pixel para o teste
     render = Render(out_root="outputs")
