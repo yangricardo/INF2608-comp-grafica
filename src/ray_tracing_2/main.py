@@ -13,7 +13,7 @@ from __future__ import annotations
 from pyglm import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Plane, Sphere, Translate
+from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.film import Film, SamplingMode
@@ -49,6 +49,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
     material=mat_gray,
   )
   front_wall = Translate(3.40,1.2,3.65, front_wall)
+  front_wall = Rotate(angle_deg=-18.0, x=0, y=1, z=0, shape=front_wall)
   scene.objects.append(front_wall)
   scene.objects.append(Sphere(center=glm.vec3(2.775, 3.200, 12.775), radius=1, material=mat_red))
   scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=mat_gray))
