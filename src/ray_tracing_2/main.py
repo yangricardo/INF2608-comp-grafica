@@ -15,7 +15,7 @@ from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Plane, Sphere
 from ray_tracing_2.material import PhongMaterial
-from ray_tracing_2.light import PointLight
+from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.film import Film, SamplingMode
 from ray_tracing_2.render import Render
 import argparse
@@ -34,19 +34,20 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 800, 600
   # Cria a câmera
-  cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
-
+  cam = Camera(eye=glm.vec3(2.7750, 2.775, 2.775), center=glm.vec3(2.775, 3.200, 12.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
+  scene = Scene(ambient_light=AmbientLight(30, 30, 30))
   # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
   mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=50.0)
-  mat_gray = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(1), shininess=50.0)
+  mat_gray = PhongMaterial(ambient=glm.vec3(0.1), diffuse=glm.vec3(0.5), specular=glm.vec3(1), shininess=10.0)
 
   # Slide 4, p. 35-40: reúne objetos, luzes e o ambiente que o traçador precisa avaliar.
-  scene = Scene()
+  
   # Slide 4, p. 11-18: adiciona um plano e uma esfera para exercitar interseções.
-  scene.objects.append(Sphere(center=glm.vec3(0, 0, 0), radius=1.0, material=mat_red))
+  scene.objects.append(Sphere(center=glm.vec3(2.775, 3.200, 12.775), radius=1, material=mat_red))
   scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=mat_gray))
 
   # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
+  scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(0.7, 0.7, 0.7)))
   scene.lights.append(PointLight(pos=glm.vec3(0, 5, 5), power=glm.vec3(150.0)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
