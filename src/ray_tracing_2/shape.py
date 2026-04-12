@@ -44,14 +44,7 @@ class Sphere(Shape):
       hit.t = t_candidate
       hit.pos = ray.o + t_candidate * ray.d
       # Slide 4, p. 15-18: normal geométrica aponta do centro para fora.
-      hit.normal = (hit.pos - self.center) / self.radius
-      # Slide 4, p. 15-18: se o raio atingiu a face interna, inverte a normal para o shading.
-      if glm.dot(ray.d, hit.normal) > 0.0:
-          hit.normal = -hit.normal # Inverte a normal para o shading funcionar
-          hit.backfacing = True
-      else:
-          hit.normal = hit.normal
-          hit.backfacing = False
+      hit.set_face_normal(ray, (hit.pos - self.center) / self.radius)
       hit.material = self.material
       return True
     return False
@@ -71,7 +64,7 @@ class Plane(Shape):
         if 0.001 < t < hit.t:
             hit.t = t
             hit.pos = ray.o + t * ray.d
-            hit.normal = self.normal
+            hit.set_face_normal(ray, self.normal)
             hit.material = self.material
             return True
     return False
@@ -133,17 +126,16 @@ class Box(Shape):
     if t_far < 0.001:
       return False
 
-    t_candidate = t_near if t_near > 0.001 else t_far
+    use_near = t_near > 0.001
+    t_candidate = t_near if use_near else t_far
     if t_candidate >= hit.t:
       return False
 
     hit.t = t_candidate
     hit.pos = ray.o + t_candidate * ray.d
-    hit.normal = near_normal if t_candidate == t_near else far_normal
+    outward_normal = near_normal if use_near else far_normal
+    hit.set_face_normal(ray, outward_normal)
     hit.material = self.material
-    hit.backfacing = glm.dot(ray.d, hit.normal) > 0.0
-    if hit.backfacing:
-      hit.normal = -hit.normal
     return True
   
 class Instance(Shape):
@@ -171,7 +163,7 @@ class Instance(Shape):
 
     # 3. Transforma ponto e normal da interseção para o espaço global
     world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
-    world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
+    world_outward_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.geo_normal.x, local_hit.geo_normal.y, local_hit.geo_normal.z, 0.0)))
 
     # 4. Converte o ponto encontrado em um t paramétrico no espaço global.
     ray_d_len_sq = glm.dot(ray.d, ray.d)
@@ -184,11 +176,9 @@ class Instance(Shape):
 
     hit.t = world_t
     hit.pos = world_pos
-    hit.normal = world_normal
+    hit.set_face_normal(ray, world_outward_normal)
     hit.material = local_hit.material
-    hit.backfacing = glm.dot(ray.d, hit.normal) > 0.0
-    if hit.backfacing:
-      hit.normal = -hit.normal
+    hit.light = local_hit.light
     return True
   
 
