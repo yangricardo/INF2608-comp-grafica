@@ -25,6 +25,19 @@ class Light:
     return [self.radiance(scene, hit)]
 
 
+class AmbientLight:
+  def __init__(self, r: float | glm.vec3, g: float | None = None, b: float | None = None):
+    if isinstance(r, glm.vec3):
+      self.color = glm.vec3(r)
+    elif g is None or b is None:
+      self.color = glm.vec3(r)
+    else:
+      self.color = glm.vec3(r, g, b)
+
+  def __iter__(self):
+    return iter((self.color.x, self.color.y, self.color.z))
+
+
 class PointLight(Light):
   def __init__(self, pos: glm.vec3, power: glm.vec3):
     super().__init__(pos, power)
