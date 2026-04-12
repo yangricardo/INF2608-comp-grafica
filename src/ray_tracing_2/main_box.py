@@ -98,11 +98,11 @@ def render(
   scene = Scene()
 
   # Cornell-like room: floor, ceiling, back wall and side walls.
-  floor = Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=white)
+  floor = Box(p_min=glm.vec3(-0.1, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white)
   left_wall = Plane(pos=glm.vec3(-2.0, 0, 0), normal=glm.vec3(1, 0, 0), material=green)
   right_wall = Plane(pos=glm.vec3(2.0, 0, 0), normal=glm.vec3(-1, 0, 0), material=red)
   back_wall = Plane(pos=glm.vec3(0, 0, -4.0), normal=glm.vec3(0, 0, 1), material=light_gray)
-  top_wall = Plane(pos=glm.vec3(0, 3.0, 0), normal=glm.vec3(0, -1, 0), material=dark_gray)
+  top_wall = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=dark_gray)
   scene.objects.append(floor)
   scene.objects.append(left_wall)
   scene.objects.append(right_wall)
