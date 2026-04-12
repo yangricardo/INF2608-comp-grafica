@@ -47,7 +47,6 @@ class PointLight(Light):
     """Calcula a radiância incidente e a direção da luz no ponto de impacto"""
     # Slide 4, p. 40: a direção da luz vai do ponto atingido até a posição da fonte.
     l_vec = self.pos - hit.pos
-    # Slide 4, p. 40: a intensidade cai com o quadrado da distância.
     dist = glm.length(l_vec)
     if dist <= 0.0:
       return glm.vec3(0.0), glm.vec3(0, 0, 1)
@@ -57,8 +56,10 @@ class PointLight(Light):
     if _is_black(transmittance):
       return glm.vec3(0.0), l
 
-    # Slide 4, p. 40: potência dividida por r^2 fornece a radiância recebida.
-    li = (self.power / (dist ** 2)) * transmittance
+    # proj1-exemplo.pdf: PointLight(Intensity, Position) — Intensity é a radiância
+    # constante da fonte (não divide por r²). A intensidade 0.7 é o valor RGB recebido
+    # em qualquer superfície, conforme a definição do enunciado.
+    li = self.power * transmittance
     return li, l
 
 
