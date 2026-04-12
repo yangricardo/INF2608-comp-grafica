@@ -34,7 +34,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 800, 600
   # Cria a câmera
-  cam = Camera(eye=glm.vec3(2.775, 3.200, 12.775), center=glm.vec3(2.775, 2.775, 2.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
+  cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
   
   # Cria cena com luz ambiente
   scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
@@ -66,8 +66,8 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
 
   # Cria objetos da cena: paredes, blocos e luz pontual.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white_phong_material)
-  left_wall = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green_phong_material)
-  right_wall = Box(p_min=glm.vec3(5.55, -0.10, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red_phong_material)
+  left_wall = Box(p_min=glm.vec3(-0.1, -0.1, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green_phong_material)
+  right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red_phong_material)
   ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=white_phong_material)
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white_phong_material)
   lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white_phong_material)
@@ -81,7 +81,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(250.0, 250.0, 250.0)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
-  r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
