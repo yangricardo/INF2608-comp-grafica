@@ -14,6 +14,52 @@ class Render:
   def __init__(self, out_root: str = 'outputs'):
     self.out_root = out_root
 
+  def _serialize_material(self, material) -> dict[str, Any]:
+    info: dict[str, Any] = {'type': type(material).__name__}
+
+    def vec_to_list(v):
+      try:
+        return [float(v.x), float(v.y), float(v.z)]
+      except Exception:
+        return v
+
+    if hasattr(material, 'm_amb'):
+      info['ambient'] = vec_to_list(material.m_amb)
+    if hasattr(material, 'm_dif'):
+      info['diffuse'] = vec_to_list(material.m_dif)
+    if hasattr(material, 'm_spe'):
+      info['specular'] = vec_to_list(material.m_spe)
+    if hasattr(material, 'shi'):
+      info['shininess'] = float(material.shi)
+    if hasattr(material, 'reflectivity'):
+      info['reflectivity'] = vec_to_list(material.reflectivity)
+    if hasattr(material, 'transmission'):
+      info['transmission'] = vec_to_list(material.transmission)
+    if hasattr(material, 'reflection_tint'):
+      info['reflection_tint'] = vec_to_list(material.reflection_tint)
+    if hasattr(material, 'ior'):
+      info['ior'] = float(material.ior)
+    if hasattr(material, 'opacity'):
+      info['opacity'] = float(material.opacity)
+    return info
+
+  def _shape_chain(self, obj) -> list[str]:
+    chain: list[str] = []
+    current = obj
+    while current is not None:
+      chain.append(type(current).__name__)
+      current = getattr(current, 'shape', None)
+    return chain
+
+  def _extract_material(self, obj):
+    current = obj
+    while current is not None:
+      material = getattr(current, 'material', None)
+      if material is not None:
+        return material
+      current = getattr(current, 'shape', None)
+    return None
+
   def explain_properties_md(self, props: dict) -> str:
     """Gera o texto Markdown com as propriedades da simulação.
 
@@ -31,6 +77,31 @@ class Render:
     lines.append('')
     lines.append('![Imagem da Simulação](render.png)')
     lines.append('')
+
+    render_settings: dict[str, Any] | None = props.get('render') if isinstance(props, dict) else None
+    if render_settings:
+      lines.append('## Render')
+      lines.append('')
+      for key, value in render_settings.items():
+        lines.append(f'- **{key}**: {value}')
+      lines.append('')
+
+    scene_settings: dict[str, Any] | None = props.get('scene') if isinstance(props, dict) else None
+    if scene_settings:
+      lines.append('## Scene')
+      lines.append('')
+      for key, value in scene_settings.items():
+        lines.append(f'- **{key}**: {value}')
+      lines.append('')
+
+    camera_settings: dict[str, Any] | None = props.get('camera') if isinstance(props, dict) else None
+    if camera_settings:
+      lines.append('## Camera')
+      lines.append('')
+      for key, value in camera_settings.items():
+        lines.append(f'- **{key}**: {value}')
+      lines.append('')
+
     lines.append('## Objetos (detalhado)')
     lines.append('')
     objs: list[dict[str, Any]] | None = props.get('objects') if isinstance(props, dict) else None
@@ -38,6 +109,8 @@ class Render:
       for i, o in enumerate(objs):
         o: dict[str, Any] = o
         lines.append(f'### Objeto {i+1}: {o.get("type", "Unknown")}')
+        if 'shape_chain' in o:
+          lines.append(f'- **shape_chain**: {o.get("shape_chain")}')
         if 'center' in o:
           lines.append(f'- **center**: {vec_to_list(o.get("center"))}')
         if 'pos' in o:
@@ -140,18 +213,12 @@ class Render:
         entry['p_min'] = glm_to_list(getattr(o, 'p_min'))
       if hasattr(o, 'p_max'):
         entry['p_max'] = glm_to_list(getattr(o, 'p_max'))
-      mat = getattr(o, 'material', None)
+      shape_chain = self._shape_chain(o)
+      if len(shape_chain) > 1:
+        entry['shape_chain'] = shape_chain
+      mat = self._extract_material(o)
       if mat is not None:
-        m: dict[str, Any] = {}
-        if hasattr(mat, 'm_amb'):
-          m['ambient'] = glm_to_list(mat.m_amb)
-        if hasattr(mat, 'm_dif'):
-          m['diffuse'] = glm_to_list(mat.m_dif)
-        if hasattr(mat, 'm_spe'):
-          m['specular'] = glm_to_list(mat.m_spe)
-        if hasattr(mat, 'shi'):
-          m['shininess'] = float(mat.shi)
-        entry['material'] = m
+        entry['material'] = self._serialize_material(mat)
       objects_list.append(entry)
 
     lights_list: list[dict[str, Any]] = []
@@ -163,7 +230,47 @@ class Render:
         lentry['power'] = glm_to_list(getattr(L, 'power'))
       lights_list.append(lentry)
 
-    props = {'objects': objects_list, 'lights': lights_list}
+    render_settings: dict[str, Any] = {
+      'name': name,
+      'width': width,
+      'height': height,
+      'samples_per_pixel': samples_per_pixel,
+      'sampling_mode': sampling_mode,
+      'seed': seed,
+      'gamma_fix': gamma_fix,
+    }
+
+    scene_settings: dict[str, Any] = {}
+    if hasattr(scene, 'ambient_light'):
+      scene_settings['ambient_light'] = glm_to_list(scene.ambient_light)
+    if hasattr(scene, 'background_color'):
+      scene_settings['background_color'] = glm_to_list(scene.background_color)
+    if hasattr(scene, 'max_depth'):
+      scene_settings['max_depth'] = int(scene.max_depth)
+    if hasattr(scene, 'ray_epsilon'):
+      scene_settings['ray_epsilon'] = float(scene.ray_epsilon)
+
+    camera_settings: dict[str, Any] = {}
+    if hasattr(cam, 'eye'):
+      camera_settings['eye'] = glm_to_list(cam.eye)
+    if hasattr(cam, 'center'):
+      camera_settings['center'] = glm_to_list(cam.center)
+    if hasattr(cam, 'up'):
+      camera_settings['up'] = glm_to_list(cam.up)
+    if hasattr(cam, 'angle'):
+      camera_settings['fov'] = float(cam.angle)
+    if hasattr(cam, 'focal_distance'):
+      camera_settings['focal_distance'] = float(cam.focal_distance)
+    if hasattr(cam, 'aspect'):
+      camera_settings['aspect'] = float(cam.aspect)
+
+    props = {
+      'render': render_settings,
+      'scene': scene_settings,
+      'camera': camera_settings,
+      'objects': objects_list,
+      'lights': lights_list,
+    }
 
     md_text = self.explain_properties_md(props)
     md_path = os.path.join(sim_dir, 'properties.md')
