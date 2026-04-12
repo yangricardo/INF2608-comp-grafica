@@ -108,11 +108,12 @@ def render(spp: int = 1,
   scene.objects.extend([small_block, large_block])
 
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
-  # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
-  # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
-  # permanece visível para raios primários como uma esfera de vidro.
+  # Centro lowered to y=5.45 so the sphere fits entirely inside the room
+  # (y=5.35 to y=5.55) without overlapping the ceiling face at y=5.55.
+  # Material transparente com attenuation=1.0: shadow_transmittance retorna
+  # vec3(1.0) em ambas as faces — a esfera não bloqueia raios de sombra.
   lamp_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1.0))
-  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_mat)
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.45, 2.775), radius=0.1, material=lamp_mat)
   scene.objects.append(lamp_sphere)
 
   # Fonte de luz conforme proj1-exemplo.pdf

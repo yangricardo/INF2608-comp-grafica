@@ -116,10 +116,10 @@ def render(
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
-  # TransparentMaterial com attenuation=1.0 não bloqueia shadow rays
-  # (shadow_transmittance retorna vec3(1.0) na entrada E na saída).
+  # Centro lowered to y=5.45 so the sphere fits entirely inside the room
+  # (y=5.35 to y=5.55) without overlapping the ceiling face at y=5.55.
   lamp_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1.0))
-  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_mat)
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.45, 2.775), radius=0.1, material=lamp_mat)
   scene.objects.append(lamp_sphere)
 
   # Base boxes from the statement, then instanced with translate + rotate.
