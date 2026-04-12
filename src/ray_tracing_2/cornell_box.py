@@ -80,8 +80,8 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   large_block = Translate(0.65, 0.0, 1.30, Rotate(22.5, 0, 1, 0, large_block_base))
   scene.objects.extend([small_block, large_block])
 
-  # Fonte de luz conforme proj1-exemplo.pdf
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
+  # Fonte de luz conforme proj1-exemplo.pdf (power escalado para compensar r² no PointLight)
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(150.0, 150.0, 150.0)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
