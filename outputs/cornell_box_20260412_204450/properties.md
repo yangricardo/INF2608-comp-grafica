@@ -10,7 +10,7 @@
 - **samples_per_pixel**: 1
 - **sampling_mode**: jittered
 - **seed**: None
-- **gamma_fix**: True
+- **gamma_fix**: False
 
 ## Scene
 
@@ -32,6 +32,7 @@
 
 ### Objeto 1: Box
 - **material**:
+  - **type**: PhongMaterial
   - **ambient**: [0.07999999821186066, 0.07999999821186066, 0.07999999821186066]
   - **diffuse**: [0.75, 0.75, 0.75]
   - **specular**: [0.0, 0.0, 0.0]
@@ -39,6 +40,7 @@
 
 ### Objeto 2: Box
 - **material**:
+  - **type**: PhongMaterial
   - **ambient**: [0.0, 0.07999999821186066, 0.0]
   - **diffuse**: [0.05000000074505806, 0.75, 0.05000000074505806]
   - **specular**: [0.0, 0.0, 0.0]
@@ -46,6 +48,7 @@
 
 ### Objeto 3: Box
 - **material**:
+  - **type**: PhongMaterial
   - **ambient**: [0.07999999821186066, 0.0, 0.0]
   - **diffuse**: [0.75, 0.05000000074505806, 0.05000000074505806]
   - **specular**: [0.0, 0.0, 0.0]
@@ -53,6 +56,7 @@
 
 ### Objeto 4: Box
 - **material**:
+  - **type**: PhongMaterial
   - **ambient**: [0.07999999821186066, 0.07999999821186066, 0.07999999821186066]
   - **diffuse**: [0.75, 0.75, 0.75]
   - **specular**: [0.0, 0.0, 0.0]
@@ -60,20 +64,46 @@
 
 ### Objeto 5: Box
 - **material**:
+  - **type**: PhongMaterial
   - **ambient**: [0.07999999821186066, 0.07999999821186066, 0.07999999821186066]
   - **diffuse**: [0.75, 0.75, 0.75]
   - **specular**: [0.0, 0.0, 0.0]
   - **shininess**: 1.0
 
 ### Objeto 6: Translate
+- **shape_chain**: ['Translate', 'Rotate', 'Box']
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.10000000149011612, 0.10000000149011612, 0.10000000149011612]
+  - **diffuse**: [0.5, 0.5, 0.5]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
 
 ### Objeto 7: Translate
+- **shape_chain**: ['Translate', 'Rotate', 'Box']
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.10000000149011612, 0.10000000149011612, 0.10000000149011612]
+  - **diffuse**: [0.5, 0.5, 0.5]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 8: Sphere
+- **center**: [2.7750000953674316, 5.550000190734863, 2.7750000953674316]
+- **radius**: 0.1
+- **material**:
+  - **type**: TransparentMaterial
+  - **ambient**: [0.0, 0.0, 0.0]
+  - **diffuse**: [0.0, 0.0, 0.0]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+  - **ior**: 1.5
 
 ## Luzes (detalhado)
 
 - **Light 1**:
-  - pos: [2.7750000953674316, 5.400000095367432, 2.7750000953674316]
-  - power: [150.0, 150.0, 150.0]
+  - pos: [2.7750000953674316, 5.550000190734863, 2.7750000953674316]
+  - power: [0.699999988079071, 0.699999988079071, 0.699999988079071]
 
 ## Debug (raw JSON)
 
@@ -86,7 +116,7 @@
     "samples_per_pixel": 1,
     "sampling_mode": "jittered",
     "seed": null,
-    "gamma_fix": true
+    "gamma_fix": false
   },
   "scene": {
     "ambient_light": [
@@ -136,6 +166,7 @@
         0.0
       ],
       "material": {
+        "type": "PhongMaterial",
         "ambient": [
           0.07999999821186066,
           0.07999999821186066,
@@ -167,6 +198,7 @@
         5.550000190734863
       ],
       "material": {
+        "type": "PhongMaterial",
         "ambient": [
           0.0,
           0.07999999821186066,
@@ -198,6 +230,7 @@
         5.550000190734863
       ],
       "material": {
+        "type": "PhongMaterial",
         "ambient": [
           0.07999999821186066,
           0.0,
@@ -229,6 +262,7 @@
         5.550000190734863
       ],
       "material": {
+        "type": "PhongMaterial",
         "ambient": [
           0.07999999821186066,
           0.07999999821186066,
@@ -260,6 +294,7 @@
         5.550000190734863
       ],
       "material": {
+        "type": "PhongMaterial",
         "ambient": [
           0.07999999821186066,
           0.07999999821186066,
@@ -279,23 +314,100 @@
       }
     },
     {
-      "type": "Translate"
+      "type": "Translate",
+      "shape_chain": [
+        "Translate",
+        "Rotate",
+        "Box"
+      ],
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.10000000149011612,
+          0.10000000149011612,
+          0.10000000149011612
+        ],
+        "diffuse": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      }
     },
     {
-      "type": "Translate"
+      "type": "Translate",
+      "shape_chain": [
+        "Translate",
+        "Rotate",
+        "Box"
+      ],
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.10000000149011612,
+          0.10000000149011612,
+          0.10000000149011612
+        ],
+        "diffuse": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      }
+    },
+    {
+      "type": "Sphere",
+      "center": [
+        2.7750000953674316,
+        5.550000190734863,
+        2.7750000953674316
+      ],
+      "radius": 0.1,
+      "material": {
+        "type": "TransparentMaterial",
+        "ambient": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "diffuse": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0,
+        "ior": 1.5
+      }
     }
   ],
   "lights": [
     {
       "pos": [
         2.7750000953674316,
-        5.400000095367432,
+        5.550000190734863,
         2.7750000953674316
       ],
       "power": [
-        150.0,
-        150.0,
-        150.0
+        0.699999988079071,
+        0.699999988079071,
+        0.699999988079071
       ]
     }
   ]
