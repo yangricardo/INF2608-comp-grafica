@@ -1,9 +1,8 @@
 """
-Entrada principal para demonstrar instanciação de caixas (Box) em uma cena
-estilo Cornell Box, semelhante à imagem do slide 27.
+Entrada principal para uma cena de teste inspirada na Cornell Box.
 
-A cena usa duas caixas instanciadas a partir da mesma geometria-base, com
-paredes coloridas e uma luz de área no teto para produzir sombras suaves.
+A montagem segue o enunciado com paredes em `Box`, dois blocos instanciados,
+uma luminária esférica e uma luz pontual no teto, além de luz ambiente global.
 """
 
 from __future__ import annotations
@@ -14,24 +13,24 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.film import SamplingMode
-from ray_tracing_2.light import AreaLight, PointLight
+from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Instance, Plane, Sphere
+from ray_tracing_2.shape import Box, Instance, Sphere
 
 
-def _transform(tx: float, ty: float, tz: float, sx: float, sy: float, sz: float, ry_deg: float = 0.0) -> glm.mat4:
+def _translate_rotate_y(tx: float, ty: float, tz: float, ry_deg: float = 0.0) -> glm.mat4:
   ry = glm.radians(ry_deg)
   c = glm.cos(ry)
   s = glm.sin(ry)
 
   m = glm.mat4(1.0)
-  m[0][0] = c * sx
-  m[0][2] = -s * sx
-  m[1][1] = sy
-  m[2][0] = s * sz
-  m[2][2] = c * sz
+  m[0][0] = c
+  m[0][2] = -s
+  m[1][1] = 1.0
+  m[2][0] = s
+  m[2][2] = c
   m[3][0] = tx
   m[3][1] = ty
   m[3][2] = tz
@@ -50,7 +49,7 @@ def render(
   W, H = width, height
   cam = Camera(
     eye=glm.vec3(2.775, 3.200, 12.775),
-    center=glm.vec3(2.775,2.775, 2.775),
+    center=glm.vec3(2.775, 2.775, 2.775),
     up=glm.vec3(0, 1, 0),
     fov=50.0,
     width=W,
@@ -76,18 +75,6 @@ def render(
     specular=glm.vec3(0.0),
     shininess=1.0,
   )
-  light_gray = PhongMaterial(
-    ambient=glm.vec3(0.1),
-    diffuse=glm.vec3(0.6),
-    specular=glm.vec3(0.0),
-    shininess=1.0,
-  )
-  dark_gray = PhongMaterial(
-    ambient=glm.vec3(0.05),
-    diffuse=glm.vec3(0.3),
-    specular=glm.vec3(0.0),
-    shininess=1.0,
-  )
   gray = PhongMaterial(
     ambient=glm.vec3(0.1),
     diffuse=glm.vec3(0.5),
@@ -95,36 +82,38 @@ def render(
     shininess=1.0,
   )
 
-  scene = Scene()
+  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
 
-  # Cornell-like room: floor, ceiling, back wall and side walls.
-  floor = Box(p_min=glm.vec3(-0.1, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white)
-  left_wall = Plane(pos=glm.vec3(-2.0, 0, 0), normal=glm.vec3(1, 0, 0), material=green)
-  right_wall = Plane(pos=glm.vec3(2.0, 0, 0), normal=glm.vec3(-1, 0, 0), material=red)
-  back_wall = Plane(pos=glm.vec3(0, 0, -4.0), normal=glm.vec3(0, 0, 1), material=light_gray)
-  top_wall = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=dark_gray)
-  scene.objects.append(floor)
-  scene.objects.append(left_wall)
-  scene.objects.append(right_wall)
-  scene.objects.append(back_wall)
-  scene.objects.append(top_wall)
+  # Cornell Box literal: front wall, left wall, right wall, ceiling and floor.
+  front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white)
+  left_wall = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green)
+  right_wall = Box(p_min=glm.vec3(5.55, -0.10, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red)
+  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=white)
+  floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white)
+  scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
+
   lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white)
   scene.objects.append(lamp)
-  # Base box reused through instancing to demonstrate the slide concept.
-  base_box = Box(
-    p_min=glm.vec3(-0.5, -0.5, -0.5),
-    p_max=glm.vec3(0.5, 0.5, 0.5),
+
+  # Base boxes from the statement, then instanced with translate + rotate.
+  small_block_base = Box(
+    p_min=glm.vec3(0.0, 0.0, 0.0),
+    p_max=glm.vec3(1.65, 1.65, 0.30),
+    material=gray,
+  )
+  large_block_base = Box(
+    p_min=glm.vec3(0.0, 0.0, 0.0),
+    p_max=glm.vec3(1.65, 3.30, 1.65),
     material=gray,
   )
 
-  tall_box = Instance(base_box, _transform(-0.65, -0.05, -2.2, 0.75, 1.55, 0.75, ry_deg=25.0))
-  short_box = Instance(base_box, _transform(0.65, -0.6, -1.7, 1.0, 0.7, 1.0, ry_deg=-35.0))
+  small_block = Instance(small_block_base, _translate_rotate_y(3.40, 1.2, 3.65, ry_deg=-18.0))
+  large_block = Instance(large_block_base, _translate_rotate_y(0.65, 0.0, 1.30, ry_deg=22.5))
 
-  scene.objects.append(tall_box)
-  scene.objects.append(short_box)
+  scene.objects.extend([small_block, large_block])
 
-  # Area light on the ceiling, slightly forward, to create soft shadows.
-  scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(0.7,0.7,0.7)))
+  # Point light on the ceiling, matching the statement.
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
 
   r = Render()
   r.render(
