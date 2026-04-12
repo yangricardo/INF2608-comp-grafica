@@ -14,7 +14,7 @@ from pyglm import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import AmbientLight, PointLight
-from ray_tracing_2.material import PhongMaterial
+from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Instance, Sphere
@@ -37,6 +37,29 @@ def _translate_rotate_y(tx: float, ty: float, tz: float, ry_deg: float = 0.0) ->
   return m
 
 
+def _build_block_material(kind: str):
+  if kind == 'reflective':
+    return ReflectiveMaterial(
+      ambient=glm.vec3(0.03),
+      diffuse=glm.vec3(0.25),
+      specular=glm.vec3(0.05),
+      shininess=32.0,
+      reflectivity=glm.vec3(0.55),
+    )
+  if kind == 'transparent':
+    # 5.tracado_de_raios2.pdf - p.36: cena com vidro (a = (0.8, 0.9, 0.8))
+    return TransparentMaterial(
+      ior=1.5,
+      attenuation=glm.vec3(0.8, 0.9, 0.8),
+    )
+  return PhongMaterial(
+    ambient=glm.vec3(0.1),
+    diffuse=glm.vec3(0.5),
+    specular=glm.vec3(0.0),
+    shininess=1.0,
+  )
+
+
 def render(
   width: int = 800,
   height: int = 600,
@@ -44,6 +67,11 @@ def render(
   sampling_mode: str = 'jittered',
   seed: int | None = None,
   gamma_fix: bool = False,
+  light_power: float = 150.0,
+  light_y: float = 5.40,
+  max_depth: int = 4,
+  small_block_material: str = 'opaque',
+  large_block_material: str = 'opaque',
 ):
   """Renderiza uma cena tipo Cornell Box com caixas instanciadas."""
   W, H = width, height
@@ -75,14 +103,9 @@ def render(
     specular=glm.vec3(0.0),
     shininess=1.0,
   )
-  gray = PhongMaterial(
-    ambient=glm.vec3(0.1),
-    diffuse=glm.vec3(0.5),
-    specular=glm.vec3(0.0),
-    shininess=1.0,
-  )
+  gray = _build_block_material('opaque')
 
-  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
+  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3), max_depth=max_depth)
 
   # Cornell Box literal: front wall, left wall, right wall, ceiling and floor.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white)
@@ -100,12 +123,12 @@ def render(
   small_block_base = Box(
     p_min=glm.vec3(0.0, 0.0, 0.0),
     p_max=glm.vec3(1.65, 1.65, 0.30),
-    material=gray,
+    material=_build_block_material(small_block_material),
   )
   large_block_base = Box(
     p_min=glm.vec3(0.0, 0.0, 0.0),
     p_max=glm.vec3(1.65, 3.30, 1.65),
-    material=gray,
+    material=_build_block_material(large_block_material),
   )
 
   small_block = Instance(small_block_base, _translate_rotate_y(3.40, 1.2, 3.65, ry_deg=-18.0))
@@ -114,7 +137,7 @@ def render(
   scene.objects.extend([small_block, large_block])
 
   # Point light on the ceiling, matching the statement.
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(150.0, 150.0, 150.0)))
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, light_y, 2.775), power=glm.vec3(light_power, light_power, light_power)))
 
   r = Render()
   r.render(
@@ -137,6 +160,23 @@ if __name__ == '__main__':
   parser.add_argument('--spp', type=int, default=25, help='Samples per pixel (anti-aliasing)')
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser.add_argument('--light_power', type=float, default=150.0, help='Point light power for the Cornell Box scene')
+  parser.add_argument('--light_y', type=float, default=5.40, help='Y position of the point light inside the box')
+  parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
+  parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the small block')
+  parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the large block')
   args = parser.parse_args()
-  render(width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(
+    width=args.width,
+    height=args.height,
+    spp=args.spp,
+    sampling_mode=args.sampling_mode,
+    seed=args.seed,
+    gamma_fix=args.gamma_fix,
+    light_power=args.light_power,
+    light_y=args.light_y,
+    max_depth=args.max_depth,
+    small_block_material=args.small_block_material,
+    large_block_material=args.large_block_material,
+  )

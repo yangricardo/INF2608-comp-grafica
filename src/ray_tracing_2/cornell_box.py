@@ -14,7 +14,7 @@ from pyglm import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate
-from ray_tracing_2.material import PhongMaterial
+from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.film import Film, SamplingMode
 from ray_tracing_2.render import Render
@@ -22,7 +22,39 @@ import argparse
 
 
 
-def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
+def _build_block_material(kind: str):
+  if kind == 'reflective':
+    return ReflectiveMaterial(
+      ambient=glm.vec3(0.03),
+      diffuse=glm.vec3(0.25),
+      specular=glm.vec3(0.05),
+      shininess=32.0,
+      reflectivity=glm.vec3(0.55),
+    )
+  if kind == 'transparent':
+    # 5.tracado_de_raios2.pdf - p.36: cena com vidro (a = (0.8, 0.9, 0.8))
+    return TransparentMaterial(
+      ior=1.5,
+      attenuation=glm.vec3(0.8, 0.9, 0.8),
+    )
+  return PhongMaterial(
+    ambient=glm.vec3(0.1),
+    diffuse=glm.vec3(0.5),
+    specular=glm.vec3(0.0),
+    shininess=1.0,
+  )
+
+
+
+def render(spp: int = 1,
+           sampling_mode: str = 'jittered',
+           seed: int | None = None,
+           gamma_fix: bool = False,
+           light_power: float = 150.0,
+           light_y: float = 5.40,
+           max_depth: int = 4,
+           small_block_material: str = 'opaque',
+           large_block_material: str = 'opaque'):
   """Renderiza a cena de exemplo e salva `render_final.png`.
 
   O procedimento segue o pipeline principal:
@@ -37,7 +69,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   cam = Camera(eye=glm.vec3(2.775, 3.200, 12.775), center=glm.vec3(2.775, 2.775, 2.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H, focal_distance=1.0)
   
   # Cria cena com luz ambiente
-  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
+  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3), max_depth=max_depth)
   
   white_phong_material = PhongMaterial(
     ambient=glm.vec3(0.08),
@@ -57,12 +89,8 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
     specular=glm.vec3(0.0),
     shininess=1.0,
   )
-  gray_phong_material = PhongMaterial(
-    ambient=glm.vec3(0.1),
-    diffuse=glm.vec3(0.5),
-    specular=glm.vec3(0.0),
-    shininess=1.0,
-  )
+  small_block_surface = _build_block_material(small_block_material)
+  large_block_surface = _build_block_material(large_block_material)
 
   # Cria objetos da cena: paredes, blocos e luz pontual.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white_phong_material)
@@ -73,14 +101,14 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
   # Blocos instanciados conforme proj1-exemplo.pdf
-  small_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=gray_phong_material)
+  small_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=small_block_surface)
   small_block = Translate(3.40, 1.2, 3.65, Rotate(-18.0, 0, 1, 0, small_block_base))
-  large_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=gray_phong_material)
+  large_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=large_block_surface)
   large_block = Translate(0.65, 0.0, 1.30, Rotate(22.5, 0, 1, 0, large_block_base))
   scene.objects.extend([small_block, large_block])
 
   # Fonte de luz conforme proj1-exemplo.pdf (power escalado para compensar r² no PointLight)
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, light_y, 2.775), power=glm.vec3(light_power, light_power, light_power)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
@@ -90,6 +118,21 @@ if __name__ == "__main__":
   parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser.add_argument('--light_power', type=float, default=150.0, help='Point light power for the Cornell Box scene')
+  parser.add_argument('--light_y', type=float, default=5.40, help='Y position of the point light inside the box')
+  parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
+  parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the small block')
+  parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the large block')
   args = parser.parse_args()
-  render(spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(
+    spp=args.spp,
+    sampling_mode=args.sampling_mode,
+    seed=args.seed,
+    gamma_fix=args.gamma_fix,
+    light_power=args.light_power,
+    light_y=args.light_y,
+    max_depth=args.max_depth,
+    small_block_material=args.small_block_material,
+    large_block_material=args.large_block_material,
+  )
