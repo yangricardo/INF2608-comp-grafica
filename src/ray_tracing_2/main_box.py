@@ -113,7 +113,7 @@ def render(
   scene.objects.extend([small_block, large_block])
 
   # Point light on the ceiling, matching the statement.
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(150.0, 150.0, 150.0)))
 
   r = Render()
   r.render(
