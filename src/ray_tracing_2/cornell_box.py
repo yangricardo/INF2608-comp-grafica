@@ -102,18 +102,17 @@ def render(spp: int = 1,
 
   # Blocos instanciados conforme proj1-exemplo.pdf
   small_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=small_block_surface)
-  small_block = Translate(3.40, 1.2, 3.65, Rotate(-18.0, 0, 1, 0, small_block_base))
+  small_block = Translate(3.40, 0.2, 3.65, Rotate(-18.0, 0, 1, 0, small_block_base))
   large_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=large_block_surface)
   large_block = Translate(0.65, 0.0, 1.30, Rotate(22.5, 0, 1, 0, large_block_base))
   scene.objects.extend([small_block, large_block])
 
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
-  # Centro lowered to y=5.45 so the sphere fits entirely inside the room
-  # (y=5.35 to y=5.55) without overlapping the ceiling face at y=5.55.
-  # Material transparente com attenuation=1.0: shadow_transmittance retorna
-  # vec3(1.0) em ambas as faces — a esfera não bloqueia raios de sombra.
+  # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
+  # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
+  # permanece visível para raios primários como uma esfera de vidro.
   lamp_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1.0))
-  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.45, 2.775), radius=0.1, material=lamp_mat)
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_mat)
   scene.objects.append(lamp_sphere)
 
   # Fonte de luz conforme proj1-exemplo.pdf
