@@ -61,12 +61,19 @@ class Scene:
     throughput = glm.vec3(1.0)
     dir_norm = glm.normalize(glm.vec3(direction))
     origin = self.offset_point(pos, normal, dir_norm)
-    remaining = float(max_distance)
+    # Subtrai ray_epsilon para compensar o offset inicial da origem:
+    # sem isso, objetos que estão xatamente na posição da luz (como o teto na y=5.55
+    # quando a luz também está em y=5.55) aparecem dentro do alcance máximo e
+    # bloqueiam todos os raios de sombra.
+    remaining = float(max_distance) - self.ray_epsilon
 
     for _ in range(max_steps):
       shadow_ray = Ray(origin, dir_norm)
       shadow_hit = self.compute_intersection(shadow_ray)
-      if shadow_hit is None or shadow_hit.t >= remaining:
+      # Usa remaining - ray_epsilon para dar margem de tolerância acumulada:
+      # cada offset_point adiciona um epsilon, então objetos na fronteira da luz
+      # (t ≈ remaining) não devem bloquear o raio.
+      if shadow_hit is None or shadow_hit.t >= remaining - self.ray_epsilon:
         return throughput
 
       if shadow_hit.material is None:
