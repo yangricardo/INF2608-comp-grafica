@@ -157,13 +157,11 @@ class Instance(Shape):
   def intersect(self, ray: Ray, hit: Hit):
     # Slide 4, p. 44-46:
     # 1. Transforma o raio do mundo para o espaço local da instância usando a inversa da matriz.
-    # 2. Normaliza a direção do raio local para garantir que o parâmetro t represente distância real (essencial para instâncias com escala).
-    # 3. Realiza o teste de interseção no espaço local.
-    # 4. Se houver hit, transforma a posição e a normal de volta para o mundo.
-    # 5. O parâmetro t é mantido consistente com o espaço global apenas se a direção local for normalizada.
+    # 2. Realiza o teste de interseção no espaço local.
+    # 3. Se houver hit, transforma a posição e a normal de volta para o mundo.
+    # 4. Converte a posição encontrada para o parâmetro t do raio original no espaço global.
     local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
     local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
-    local_d = glm.normalize(local_d)  # O Slide 13 indica a normalização da direção local
     local_ray = Ray(local_o, local_d)
     local_hit = Hit()
 
@@ -175,16 +173,20 @@ class Instance(Shape):
     world_pos = glm.vec3(self.m * glm.vec4(local_hit.pos.x, local_hit.pos.y, local_hit.pos.z, 1.0))
     world_normal = glm.normalize(glm.vec3(self.m_inv_t * glm.vec4(local_hit.normal.x, local_hit.normal.y, local_hit.normal.z, 0.0)))
 
-    # Como a direção local foi normalizada, precisamos calcular a distância real 
-    # no espaço global. Caso contrário, objetos escalonados teriam um 't' incorreto.
-    world_t = glm.distance(world_pos, ray.o)
+    # 4. Converte o ponto encontrado em um t paramétrico no espaço global.
+    ray_d_len_sq = glm.dot(ray.d, ray.d)
+    if ray_d_len_sq <= 1e-12:
+      return False
 
-    if world_t < hit.t:
-      hit.t = world_t
-      hit.pos = world_pos
-      hit.normal = world_normal
-      hit.material = local_hit.material
-      hit.backfacing = local_hit.backfacing
-      return True
+    world_t = glm.dot(world_pos - ray.o, ray.d) / ray_d_len_sq
+    if world_t <= 0.001 or world_t >= hit.t:
+      return False
 
-    return False
+    hit.t = world_t
+    hit.pos = world_pos
+    hit.normal = world_normal
+    hit.material = local_hit.material
+    hit.backfacing = glm.dot(ray.d, hit.normal) > 0.0
+    if hit.backfacing:
+      hit.normal = -hit.normal
+    return True
