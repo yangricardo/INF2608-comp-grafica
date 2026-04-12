@@ -13,7 +13,7 @@ from __future__ import annotations
 from pyglm import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Plane, Sphere
+from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.film import Film, SamplingMode
@@ -33,8 +33,8 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   """
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 800, 600
-  # Cria a câmera
-  cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
+  # Cria a câmera (proj1-exemplo.pdf)
+  cam = Camera(eye=glm.vec3(2.775, 3.200, 12.775), center=glm.vec3(2.775, 2.775, 2.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H, focal_distance=1.0)
   
   # Cria cena com luz ambiente
   scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
@@ -73,12 +73,15 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white_phong_material)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor, lamp])
 
-  scene.objects.append(Sphere(center=glm.vec3(0, 0, 0), radius=1.0, material=red_phong_material))
-  #scene.objects.append(Plane(pos=glm.vec3(0, -1.0, 0), normal=glm.vec3(0, 1, 0), material=gray_phong_material))
+  # Blocos instanciados conforme proj1-exemplo.pdf
+  small_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=gray_phong_material)
+  small_block = Translate(3.40, 1.2, 3.65, Rotate(-18.0, 0, 1, 0, small_block_base))
+  large_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=gray_phong_material)
+  large_block = Translate(0.65, 0.0, 1.30, Rotate(22.5, 0, 1, 0, large_block_base))
+  scene.objects.extend([small_block, large_block])
 
-  # Slide 4, p. 40: luz pontual usada no cálculo de difusa, especular e sombra.
-  scene.lights.append(PointLight(pos=glm.vec3(0, 5, 5), power=glm.vec3(150.0)))
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(250.0, 250.0, 250.0)))
+  # Fonte de luz conforme proj1-exemplo.pdf
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
