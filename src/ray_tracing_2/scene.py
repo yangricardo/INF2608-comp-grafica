@@ -2,15 +2,18 @@ from __future__ import annotations
 
 from pyglm import glm
 from ray_tracing_2.hit import Hit
-from ray_tracing_2.light import Light
+from ray_tracing_2.light import AmbientLight, Light
 from ray_tracing_2.ray import Ray
 from ray_tracing_2.shape import Shape
 
 class Scene:
-  def __init__(self, ambient_light: glm.vec3 = glm.vec3(0.1)):
+  def __init__(self, ambient_light: glm.vec3 | AmbientLight = glm.vec3(0.1)):
     self.objects: list[Shape] = []
     self.lights: list[Light] = []
-    self.ambient_light = ambient_light
+    if isinstance(ambient_light, AmbientLight):
+      self.ambient_light = glm.vec3(ambient_light.color)
+    else:
+      self.ambient_light = glm.vec3(ambient_light)
     self.background_color = glm.vec3(0.02, 0.02, 0.05)
 
   def compute_intersection(self, ray: Ray):
