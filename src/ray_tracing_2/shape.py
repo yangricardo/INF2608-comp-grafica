@@ -190,3 +190,18 @@ class Instance(Shape):
     if hit.backfacing:
       hit.normal = -hit.normal
     return True
+  
+
+class Translate(Instance):
+    """Especialização de Instance para translação simples."""
+    def __init__(self, x: float, y: float, z: float, shape: Shape):
+        # Cria uma matriz de translação usando GLM
+        matrix = glm.translate(glm.mat4(1.0), glm.vec3(x, y, z))
+        super().__init__(shape, matrix)
+
+class Rotate(Instance):
+    """Especialização de Instance para rotação em torno de um eixo."""
+    def __init__(self, angle_deg: float, x: float, y: float, z: float, shape: Shape):
+        # Cria uma matriz de rotação (converte graus para radianos)
+        matrix = glm.rotate(glm.mat4(1.0), glm.radians(angle_deg), glm.vec3(x, y, z))
+        super().__init__(shape, matrix)
