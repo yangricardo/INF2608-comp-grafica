@@ -50,8 +50,8 @@ def render(spp: int = 1,
            sampling_mode: str = 'jittered',
            seed: int | None = None,
            gamma_fix: bool = False,
-           light_power: float = 150.0,
-           light_y: float = 5.40,
+           light_power: float = 0.7,   # proj1-exemplo.pdf: PointLight(vec3(0.7,0.7,0.7), ...)
+           light_y: float = 5.55,     # proj1-exemplo.pdf: posição y da luz = 5.55
            max_depth: int = 4,
            small_block_material: str = 'opaque',
            large_block_material: str = 'opaque'):
@@ -107,7 +107,15 @@ def render(spp: int = 1,
   large_block = Translate(0.65, 0.0, 1.30, Rotate(22.5, 0, 1, 0, large_block_base))
   scene.objects.extend([small_block, large_block])
 
-  # Fonte de luz conforme proj1-exemplo.pdf (power escalado para compensar r² no PointLight)
+  # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
+  # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
+  # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
+  # permanece visível para raios primários como uma esfera de vidro.
+  lamp_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1.0))
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_mat)
+  scene.objects.append(lamp_sphere)
+
+  # Fonte de luz conforme proj1-exemplo.pdf
   scene.lights.append(PointLight(pos=glm.vec3(2.775, light_y, 2.775), power=glm.vec3(light_power, light_power, light_power)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
@@ -119,8 +127,8 @@ if __name__ == "__main__":
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
-  parser.add_argument('--light_power', type=float, default=150.0, help='Point light power for the Cornell Box scene')
-  parser.add_argument('--light_y', type=float, default=5.40, help='Y position of the point light inside the box')
+  parser.add_argument('--light_power', type=float, default=0.7, help='Point light power (proj1-exemplo.pdf: 0.7)')
+  parser.add_argument('--light_y', type=float, default=5.55, help='Y position of the point light (proj1-exemplo.pdf: 5.55)')
   parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
   parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the small block')
   parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the large block')
