@@ -19,7 +19,7 @@ def main():
     cam = Camera(eye, center, up, fov, width=800, height=600)
 
     # 2. Criação da Cena
-    scene = Scene(ambient_light=AmbientLight(0.1, 0.1, 0.1))  # Luz ambiente fraca para evitar escuridão total
+    scene = Scene(ambient_light=AmbientLight(10, 10, 10))  # Luz ambiente fraca para evitar escuridão total
     
 
     # 3. Definição das Luzes (Conforme proj1-exemplo.pdf)
@@ -65,7 +65,7 @@ def main():
     # Adição: Esfera na mesma posição da PointLight
     # Raio pequeno (0.1) para não obstruir toda a luz mas ser visível
     scene.objects.append(Sphere(center=light_pos, radius=0.1, material=material_luz))
-    scene.lights.append(PointLight(pos=glm.vec3(0, 5, 5), power=glm.vec3(150.0)))
+    scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(0.7, 0.7, 0.7)))
     # 6. Renderização
     # Configuração padrão de 800x600 e 25 raios por pixel para o teste
     render = Render(out_root="outputs")
