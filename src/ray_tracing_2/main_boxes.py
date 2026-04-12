@@ -66,6 +66,7 @@ def main():
     # Raio pequeno (0.1) para não obstruir toda a luz mas ser visível
     scene.objects.append(Sphere(center=light_pos, radius=0.1, material=material_luz))
     scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(0.7, 0.7, 0.7)))
+    scene.lights.append(PointLight(pos=glm.vec3(0, 5, 5), power=glm.vec3(150.0)))
     # 6. Renderização
     # Configuração padrão de 800x600 e 25 raios por pixel para o teste
     render = Render(out_root="outputs")
