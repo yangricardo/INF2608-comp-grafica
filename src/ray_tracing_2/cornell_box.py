@@ -34,7 +34,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = 800, 600
   # Cria a câmera
-  cam = Camera(eye=glm.vec3(2.775, 2.775, 2.775), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
+  cam = Camera(eye=glm.vec3(2.775, 3.200, 12.775), center=glm.vec3(2.775, 2.775, 2.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
 
   # Slide 4, p. 41-49: materiais Phong para o objeto principal e para o chão.
   mat_red = PhongMaterial(ambient=glm.vec3(0.1, 0, 0), diffuse=glm.vec3(0.7, 0, 0), specular=glm.vec3(1, 1, 1), shininess=50.0)
