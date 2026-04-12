@@ -98,7 +98,7 @@ def render(
   # Base boxes from the statement, then instanced with translate + rotate.
   small_block_base = Box(
     p_min=glm.vec3(0.0, 0.0, 0.0),
-    p_max=glm.vec3(1.65, 1.65, 0.30),
+    p_max=glm.vec3(1.65, 1.65, 1.65),
     material=gray,
   )
   large_block_base = Box(
@@ -107,13 +107,13 @@ def render(
     material=gray,
   )
 
-  small_block = Instance(small_block_base, _translate_rotate_y(3.40, 1.2, 3.65, ry_deg=-18.0))
+  small_block = Instance(small_block_base, _translate_rotate_y(3.40, 0.0, 3.65, ry_deg=-18.0))
   large_block = Instance(large_block_base, _translate_rotate_y(0.65, 0.0, 1.30, ry_deg=22.5))
 
   scene.objects.extend([small_block, large_block])
 
   # Point light on the ceiling, matching the statement.
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(250.0, 250.0, 250.0)))
 
   r = Render()
   r.render(

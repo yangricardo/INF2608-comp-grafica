@@ -7,7 +7,7 @@ from ray_tracing_2.ray import Ray
 from ray_tracing_2.shape import Shape
 
 class Scene:
-  def __init__(self, ambient_light: glm.vec3 | AmbientLight = glm.vec3(0.1)):
+  def __init__(self, ambient_light: glm.vec3 | AmbientLight = glm.vec3(1,1,1)):
     self.objects: list[Shape] = []
     self.lights: list[Light] = []
     if isinstance(ambient_light, AmbientLight):
