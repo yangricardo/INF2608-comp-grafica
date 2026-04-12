@@ -82,7 +82,7 @@ def render(
     shininess=1.0,
   )
 
-  scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
+  scene = Scene(ambient_light=AmbientLight(10, 10, 10))
 
   # Cornell Box literal: front wall, left wall, right wall, ceiling and floor.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white)
