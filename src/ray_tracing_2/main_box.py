@@ -49,10 +49,10 @@ def render(
   """Renderiza uma cena tipo Cornell Box com caixas instanciadas."""
   W, H = width, height
   cam = Camera(
-    eye=glm.vec3(0, 1, 5),
-    center=glm.vec3(0, 1, -2),
+    eye=glm.vec3(2.775, 3.200, 12.775),
+    center=glm.vec3(2.775,2.775, 2.775),
     up=glm.vec3(0, 1, 0),
-    fov=40.0,
+    fov=50.0,
     width=W,
     height=H,
   )
