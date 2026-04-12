@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from pyglm import glm
-import math
 import random
 from typing import TYPE_CHECKING
-
-from ray_tracing_2.ray import Ray
 
 if TYPE_CHECKING:
   from ray_tracing_2.hit import Hit
   from ray_tracing_2.scene import Scene
+
+
+def _is_black(color: glm.vec3) -> bool:
+  return color.x <= 0.0 and color.y <= 0.0 and color.z <= 0.0
 
 class Light:
   def __init__(self, pos: glm.vec3, power: glm.vec3):
@@ -47,21 +48,17 @@ class PointLight(Light):
     # Slide 4, p. 40: a direção da luz vai do ponto atingido até a posição da fonte.
     l_vec = self.pos - hit.pos
     # Slide 4, p. 40: a intensidade cai com o quadrado da distância.
-    dist = glm.distance(self.pos, hit.pos)
+    dist = glm.length(l_vec)
+    if dist <= 0.0:
+      return glm.vec3(0.0), glm.vec3(0, 0, 1)
     l = glm.normalize(l_vec)
 
-    # Slide 4, p. 38-39 e p. 51-52: lança um shadow ray para testar visibilidade.
-    # O epsilon evita que o próprio ponto de impacto seja reintersectado.
-    shadow_origin = hit.pos + hit.normal * 0.001
-    shadow_ray = Ray(shadow_origin, l)
-    shadow_hit = scene.compute_intersection(shadow_ray)
-
-    # Slide 4, p. 38-39: se algo estiver entre o ponto e a luz, o ponto fica em sombra.
-    if shadow_hit and shadow_hit.t < dist:
-      return glm.vec3(0), l
+    transmittance = scene.transmittance(hit.pos, hit.geo_normal, l, dist)
+    if _is_black(transmittance):
+      return glm.vec3(0.0), l
 
     # Slide 4, p. 40: potência dividida por r^2 fornece a radiância recebida.
-    li = self.power / (dist ** 2)
+    li = (self.power / (dist ** 2)) * transmittance
     return li, l
 
 
@@ -97,23 +94,21 @@ class AreaLight(Light):
     if sample_count <= 0:
       return samples
 
-    shadow_origin = hit.pos + hit.normal * 0.001
     for iu in range(self.samples_u):
       for iv in range(self.samples_v):
         pos = self._sample_position(iu, iv)
         l_vec = pos - hit.pos
-        dist = glm.distance(pos, hit.pos)
+        dist = glm.length(l_vec)
         if dist <= 0.0:
           continue
         l = glm.normalize(l_vec)
 
-        shadow_ray = Ray(shadow_origin, l)
-        shadow_hit = scene.compute_intersection(shadow_ray)
-        if shadow_hit and shadow_hit.t < dist:
-          samples.append((glm.vec3(0), l))
+        transmittance = scene.transmittance(hit.pos, hit.geo_normal, l, dist)
+        if _is_black(transmittance):
+          samples.append((glm.vec3(0.0), l))
           continue
 
-        li = (self.power / float(sample_count)) / (dist ** 2)
+        li = ((self.power / float(sample_count)) / (dist ** 2)) * transmittance
         samples.append((li, l))
 
     return samples
@@ -128,7 +123,7 @@ class AreaLight(Light):
     l_sum = glm.vec3(0)
     valid = 0
     for li, l in samples:
-      if li == glm.vec3(0):
+      if _is_black(li):
         continue
       li_sum += li
       l_sum += l
