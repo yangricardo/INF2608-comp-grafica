@@ -38,9 +38,16 @@ def _transform(tx: float, ty: float, tz: float, sx: float, sy: float, sz: float,
   return m
 
 
-def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
+def render(
+  width: int = 800,
+  height: int = 600,
+  spp: int = 25,
+  sampling_mode: str = 'jittered',
+  seed: int | None = None,
+  gamma_fix: bool = False,
+):
   """Renderiza uma cena tipo Cornell Box com caixas instanciadas."""
-  W, H = 400, 300
+  W, H = width, height
   cam = Camera(
     eye=glm.vec3(0, 1, 5),
     center=glm.vec3(0, 1, -2),
@@ -143,9 +150,11 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
+  parser.add_argument('--width', type=int, default=800, help='Image width in pixels')
+  parser.add_argument('--height', type=int, default=600, help='Image height in pixels')
+  parser.add_argument('--spp', type=int, default=25, help='Samples per pixel (anti-aliasing)')
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
-  render(spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
