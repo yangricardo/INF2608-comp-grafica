@@ -18,7 +18,7 @@ from ray_tracing_2.light import AreaLight, PointLight
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Instance, Plane
+from ray_tracing_2.shape import Box, Instance, Plane, Sphere
 
 
 def _transform(tx: float, ty: float, tz: float, sx: float, sy: float, sz: float, ry_deg: float = 0.0) -> glm.mat4:
@@ -108,7 +108,8 @@ def render(
   scene.objects.append(right_wall)
   scene.objects.append(back_wall)
   scene.objects.append(top_wall)
-
+  lamp = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white)
+  scene.objects.append(lamp)
   # Base box reused through instancing to demonstrate the slide concept.
   base_box = Box(
     p_min=glm.vec3(-0.5, -0.5, -0.5),
