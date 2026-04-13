@@ -101,6 +101,13 @@ def render(spp: int = 1,
     shininess=32.0,
     reflectivity=glm.vec3(0.55),
   )
+  reflexive_white_phong_material = ReflectiveMaterial(
+    ambient=glm.vec3(0.08),
+    diffuse=glm.vec3(0.75),
+    specular=glm.vec3(0.05),
+    shininess=32.0,
+    reflectivity=glm.vec3(0.55),
+  )
   transparent_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1))
   small_block_surface = _build_block_material(small_block_material)
   large_block_surface = _build_block_material(large_block_material)
@@ -128,10 +135,10 @@ def render(spp: int = 1,
   # permanece visível para raios primários como uma esfera de vidro.
   transparent_sphere = Sphere(center=glm.vec3(4, 2, 5), radius=0.6, material=transparent_mat)
   scene.objects.append(transparent_sphere)
-  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.50, 2.775), radius=0.1, material=white_phong_material)
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=reflexive_white_phong_material)
   scene.objects.append(lamp_sphere)
   # Fonte de luz conforme proj1-exemplo.pdf
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.35, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
