@@ -1,4 +1,4 @@
-@startuml
+@startuml ray_tracing_1.puml
 actor User
 participant Film
 participant Camera
