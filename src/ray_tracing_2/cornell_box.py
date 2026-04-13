@@ -138,6 +138,24 @@ def render(spp: int = 1,
   lamp_material = TransparentMaterial(ior=0.5, attenuation=glm.vec3(0.3))
   lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_material)
   scene.objects.append(lamp_sphere)
+
+  # 5.tracado_de_raios2.pdf - p.35: area light no teto, centralizada entre as paredes laterais.
+  # Inset de ~10% em cada lado do volume útil do box: x/z de 0.555 até 5.0.
+  area_light_origin = glm.vec3(0.555, 5.54, 0.555)
+  area_light_e_u = glm.vec3(4.44, 0.0, 0.0)
+  area_light_e_v = glm.vec3(0.0, 0.0, 4.44)
+  scene.lights.append(
+    AreaLight(
+      p=area_light_origin,
+      e_u=area_light_e_u,
+      e_v=area_light_e_v,
+      power=glm.vec3(25.0, 25.0, 25.0),
+      samples_u=2,
+      samples_v=2,
+      seed=seed,
+    )
+  )
+
   # Fonte de luz conforme proj1-exemplo.pdf
   scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.35, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
