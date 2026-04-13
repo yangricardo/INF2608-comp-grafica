@@ -113,7 +113,7 @@ def render(spp: int = 1,
   large_block_surface = _build_block_material(large_block_material)
 
   # Cria objetos da cena: paredes, blocos e luz pontual.
-  front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white_phong_material)
+  front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=reflexive_white_phong_material)
   left_wall = Box(p_min=glm.vec3(-0.1, -0.1, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=reflexive_green_phong_material)
   right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=reflexive_red_phong_material)
   ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=transparent_mat)
