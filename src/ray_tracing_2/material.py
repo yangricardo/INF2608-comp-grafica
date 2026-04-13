@@ -115,7 +115,7 @@ class ReflectiveMaterial(PhongMaterial):
 
     if scene.can_spawn_ray(depth, max_depth):
       # p.27: r̂ = normalize(reflect(−v̂, n̂)); ray = Ray(p, r̂); c += R * scene.TraceRay(ray)
-      reflected_dir = glm.normalize(glm.reflect(-v, n))
+      reflected_dir = glm.normalize(glm.vec3(glm.reflect(-v, n)))
       reflected_origin = scene.offset_point(p, hit.geo_normal, reflected_dir)
       reflected_color = scene.trace_ray(Ray(reflected_origin, reflected_dir), depth=depth + 1, max_depth=max_depth)
       c += R * reflected_color
@@ -189,7 +189,7 @@ class TransparentMaterial(PhongMaterial):
     R = R0 + (glm.vec3(1.0) - R0) * ((1.0 - cos_theta) ** 5)
 
     # p.34: r̂ = normalize(reflect(−v̂, n̂)); ray = Ray(p, r̂); c = R * scene.TraceRay(ray)
-    reflected_dir = glm.normalize(glm.reflect(-v, n))
+    reflected_dir = glm.normalize(glm.vec3(glm.reflect(-v, n)))
     c = glm.vec3(0.0)
     if scene.can_spawn_ray(depth, max_depth):
       reflected_origin = scene.offset_point(p, hit.geo_normal, reflected_dir)
@@ -216,11 +216,11 @@ class TransparentMaterial(PhongMaterial):
       # p.32: glm::refract(d̂, n̂, ηi/ηt) — retorna vec3(0) em reflexão interna total
       # p.34: r̂ = normalize(−v̂, n̂, ratio)  →  glm.refract(incident, n̂, ratio)
       incident = glm.normalize(ray.d)  # d̂: direção do raio incidente (de ray.o para hit.pos)
-      refracted = glm.refract(incident, n, ratio)
+      refracted = glm.vec3(glm.refract(incident, n, float(ratio)))
       if float(glm.dot(refracted, refracted)) > 0.5:  # p.34: if r̂ (não-nulo = sem TIR)
         # p.34: ray = Ray(p, r̂); c += (1 − R) * scene.TraceRay(ray)
-        refracted_origin = scene.offset_point(p, hit.geo_normal, refracted)
-        c += (glm.vec3(1.0) - R) * scene.trace_ray(Ray(refracted_origin, refracted), depth=depth + 1, max_depth=max_depth)
+        refracted_origin = scene.offset_point(p, hit.geo_normal, glm.vec3(refracted))
+        c += (glm.vec3(1.0) - R) * scene.trace_ray(Ray(refracted_origin, glm.vec3(refracted)), depth=depth + 1, max_depth=max_depth)
 
     # p.34: return I * c
     return I * c
