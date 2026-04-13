@@ -20,6 +20,8 @@ from ray_tracing_2.film import Film, SamplingMode
 from ray_tracing_2.render import Render
 import argparse
 
+from ray_tracing_2_antialiasing import scene
+
 
 
 def _build_block_material(kind: str):
@@ -116,7 +118,7 @@ def render(spp: int = 1,
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=reflexive_white_phong_material)
   left_wall = Box(p_min=glm.vec3(-0.1, -0.1, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green_phong_material)
   right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red_phong_material)
-  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=reflexive_white_phong_material)
+  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=white_phong_material)
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white_phong_material)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
@@ -135,29 +137,34 @@ def render(spp: int = 1,
   # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
   # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
   # permanece visível para raios primários como uma esfera de vidro.
-  lamp_material = TransparentMaterial(ior=0.5, attenuation=glm.vec3(0.3))
+  lamp_material = PhongMaterial(
+    diffuse=glm.vec3(0.0),   # Não precisa de cor difusa (não recebe luz de outros objetos)
+    specular=glm.vec3(1),  # Sem brilho especular
+    shininess=0,             # Sem rugosidade
+    ambient=glm.vec3(1.0)    # Brilho constante máximo (cor branca pura)
+  )
   lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_material)
   scene.objects.append(lamp_sphere)
-
-  # 5.tracado_de_raios2.pdf - p.35: area light no teto, centralizada entre as paredes laterais.
-  # Inset de ~10% em cada lado do volume útil do box: x/z de 0.555 até 5.0.
-  area_light_origin = glm.vec3(0.555, 5.54, 0.555)
-  area_light_e_u = glm.vec3(4.44, 0.0, 0.0)
-  area_light_e_v = glm.vec3(0.0, 0.0, 4.44)
-  scene.lights.append(
-    AreaLight(
-      p=area_light_origin,
-      e_u=area_light_e_u,
-      e_v=area_light_e_v,
-      power=glm.vec3(0.7, 0.7, 0.7),
-      samples_u=2,
-      samples_v=2,
-      seed=seed,
-    )
-  )
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
+  # # 5.tracado_de_raios2.pdf - p.35: area light no teto, centralizada entre as paredes laterais.
+  # # Inset de ~10% em cada lado do volume útil do box: x/z de 0.555 até 5.0.
+  # area_light_origin = glm.vec3(0.555, 5.54, 0.555)
+  # area_light_e_u = glm.vec3(4.44, 0.0, 0.0)
+  # area_light_e_v = glm.vec3(0.0, 0.0, 4.44)
+  # scene.lights.append(
+  #   AreaLight(
+  #     p=area_light_origin,
+  #     e_u=area_light_e_u,
+  #     e_v=area_light_e_v,
+  #     power=glm.vec3(0.7, 0.7, 0.7),
+  #     samples_u=2,
+  #     samples_v=2,
+  #     seed=seed,
+  #   )
+  # )
 
   # Fonte de luz conforme proj1-exemplo.pdf
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.35, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
