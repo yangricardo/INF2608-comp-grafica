@@ -128,15 +128,15 @@ def render(spp: int = 1,
   large_block = Rotate(angle_deg=22.5, x=0, y=1, z=0, shape=large_block)
   large_block = Translate(0.65, 0.0, 1.30, large_block)
   scene.objects.extend([small_block, large_block])
+  red_sphere = Sphere(center=glm.vec3(3, 1, 5), radius=0.6, material=red_phong_material)
+  scene.objects.append(red_sphere)
   
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
   # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
   # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
   # permanece visível para raios primários como uma esfera de vidro.
-  transparent_sphere = Sphere(center=glm.vec3(4, 4, 4), radius=0.6, material=red_phong_material)
-
-  scene.objects.append(transparent_sphere)
-  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white_phong_material)
+  lamp_material = TransparentMaterial(ior=0.5, attenuation=glm.vec3(0.3))
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_material)
   scene.objects.append(lamp_sphere)
   # Fonte de luz conforme proj1-exemplo.pdf
   scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.35, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
