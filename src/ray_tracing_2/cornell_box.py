@@ -145,6 +145,17 @@ def render(spp: int = 1,
   )
   lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=lamp_material)
   scene.objects.append(lamp_sphere)
+  # Luz de área atrás da câmera para iluminar a cena pela direção do observador.
+  camera_fill_light = AreaLight(
+    p=glm.vec3(1.25, 1.95, 13.45),
+    e_u=glm.vec3(3.05, 0.0, 0.0),
+    e_v=glm.vec3(0.0, 2.35, 0.0),
+    power=glm.vec3(80.0, 80.0, 80.0),
+    samples_u=2,
+    samples_v=2,
+    seed=seed,
+  )
+  scene.lights.append(camera_fill_light)
   scene.lights.append(PointLight(pos=glm.vec3(2.775, 5, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
   # # 5.tracado_de_raios2.pdf - p.35: area light no teto, centralizada entre as paredes laterais.
   # # Inset de ~10% em cada lado do volume útil do box: x/z de 0.555 até 5.0.
