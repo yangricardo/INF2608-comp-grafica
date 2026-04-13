@@ -115,13 +115,13 @@ def render(spp: int = 1,
   # Cria objetos da cena: paredes, blocos e luz pontual.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=reflexive_white_phong_material)
   left_wall = Box(p_min=glm.vec3(-0.1, -0.1, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green_phong_material)
-  right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=reflexive_red_phong_material)
-  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=transparent_mat)
+  right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red_phong_material)
+  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=reflexive_white_phong_material)
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white_phong_material)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
   # Blocos instanciados conforme proj1-exemplo.pdf
-  small_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=reflexive_green_phong_material)
+  small_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=transparent_mat)
   small_block = Rotate(angle_deg=-18.0, x=0, y=1, z=0, shape=small_block)
   small_block = Translate(3.40, 1.2, 5.65, small_block)
   large_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=reflexive_red_phong_material)
@@ -133,7 +133,8 @@ def render(spp: int = 1,
   # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
   # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
   # permanece visível para raios primários como uma esfera de vidro.
-  transparent_sphere = Sphere(center=glm.vec3(4, 2, 5), radius=0.6, material=transparent_mat)
+  transparent_sphere = Sphere(center=glm.vec3(4, 4, 4), radius=0.6, material=red_phong_material)
+
   scene.objects.append(transparent_sphere)
   lamp_sphere = Sphere(center=glm.vec3(2.775, 5.55, 2.775), radius=0.1, material=white_phong_material)
   scene.objects.append(lamp_sphere)
