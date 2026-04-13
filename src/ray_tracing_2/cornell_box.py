@@ -15,7 +15,7 @@ from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate
 from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
-from ray_tracing_2.light import AmbientLight, PointLight
+from ray_tracing_2.light import AmbientLight, AreaLight, PointLight
 from ray_tracing_2.film import Film, SamplingMode
 from ray_tracing_2.render import Render
 import argparse
@@ -99,22 +99,32 @@ def render(spp: int = 1,
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
   # Blocos instanciados conforme proj1-exemplo.pdf
-  small_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=small_block_surface)
-  small_block = Translate(3.40, 0.2, 3.65, Rotate(-18.0, 0, 1, 0, small_block_base))
-  large_block_base = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=large_block_surface)
-  large_block = Translate(0.65, 0.0, 1.30, Rotate(22.5, 0, 1, 0, large_block_base))
+  small_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.3), material=small_block_surface)
+  small_block = Rotate(angle_deg=-18.0, x=0, y=1, z=0, shape=small_block)
+  small_block = Translate(3.40, 1.2, 5.65, small_block)
+  large_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=large_block_surface)
+  large_block = Rotate(angle_deg=22.5, x=0, y=1, z=0, shape=large_block)
+  large_block = Translate(0.65, 0.0, 1.30, large_block)
   scene.objects.extend([small_block, large_block])
-
+  
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
   # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
   # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
   # permanece visível para raios primários como uma esfera de vidro.
   lamp_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1))
-  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.65, 2.775), radius=0.1, material=lamp_mat)
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.50, 2.775), radius=0.1, material=lamp_mat)
   scene.objects.append(lamp_sphere)
 
   # Fonte de luz conforme proj1-exemplo.pdf
-  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.35, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))
+  scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.50, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
+  scene.lights.append(
+    AreaLight(
+      p=glm.vec3(2.775, 5.50, 2.775),
+      e_u=glm.vec3(0.2, 0, 0),
+      e_v=glm.vec3(0, 0, 0.2),
+      power=glm.vec3(0.7, 0.7, 0.7),
+    )
+  )
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
