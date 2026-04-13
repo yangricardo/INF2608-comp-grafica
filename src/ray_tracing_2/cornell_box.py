@@ -124,11 +124,11 @@ def render(spp: int = 1,
   small_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=transparent_mat)
   small_block = Rotate(angle_deg=-18.0, x=0, y=1, z=0, shape=small_block)
   small_block = Translate(3.40, 1.2, 5.65, small_block)
-  large_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=reflexive_red_phong_material)
+  large_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=red_phong_material)
   large_block = Rotate(angle_deg=22.5, x=0, y=1, z=0, shape=large_block)
   large_block = Translate(0.65, 0.0, 1.30, large_block)
   scene.objects.extend([small_block, large_block])
-  red_sphere = Sphere(center=glm.vec3(2.5, 0.8, 5.0), radius=0.6, material=red_phong_material)
+  red_sphere = Sphere(center=glm.vec3(2.5, 0.5, 5.0), radius=0.6, material=green_phong_material)
   scene.objects.append(red_sphere)
   
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
