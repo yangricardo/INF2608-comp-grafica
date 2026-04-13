@@ -81,20 +81,35 @@ def render(spp: int = 1,
     specular=glm.vec3(0.0),
     shininess=1.0,
   )
+  reflexive_red_phong_material = ReflectiveMaterial(
+    ambient=glm.vec3(0.08, 0.0, 0.0),
+    diffuse=glm.vec3(0.75, 0.05, 0.05),
+    specular=glm.vec3(0.05),
+    shininess=32.0,
+    reflectivity=glm.vec3(0.55),
+  )
   green_phong_material = PhongMaterial(
     ambient=glm.vec3(0.0, 0.08, 0.0),
     diffuse=glm.vec3(0.05, 0.75, 0.05),
     specular=glm.vec3(0.0),
     shininess=1.0,
   )
+  reflexive_green_phong_material = ReflectiveMaterial(
+    ambient=glm.vec3(0.0, 0.08, 0.0),
+    diffuse=glm.vec3(0.05, 0.75, 0.05),
+    specular=glm.vec3(0.05),
+    shininess=32.0,
+    reflectivity=glm.vec3(0.55),
+  )
+  transparent_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1))
   small_block_surface = _build_block_material(small_block_material)
   large_block_surface = _build_block_material(large_block_material)
 
   # Cria objetos da cena: paredes, blocos e luz pontual.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white_phong_material)
-  left_wall = Box(p_min=glm.vec3(-0.1, -0.1, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green_phong_material)
-  right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red_phong_material)
-  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=white_phong_material)
+  left_wall = Box(p_min=glm.vec3(-0.1, -0.1, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=reflexive_green_phong_material)
+  right_wall = Box(p_min=glm.vec3(5.55, -0.1, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=reflexive_red_phong_material)
+  ceiling = Box(p_min=glm.vec3(0.0, 5.55, 0.0), p_max=glm.vec3(5.55, 5.65, 5.55), material=transparent_mat)
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white_phong_material)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
@@ -111,11 +126,10 @@ def render(spp: int = 1,
   # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
   # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
   # permanece visível para raios primários como uma esfera de vidro.
-  transparent_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1))
-  transparent_sphere = Sphere(center=glm.vec3(4, 4, 5), radius=0.8, material=transparent_mat)
+  transparent_sphere = Sphere(center=glm.vec3(4, 2, 5), radius=0.6, material=transparent_mat)
   scene.objects.append(transparent_sphere)
-  #lamp_sphere = Sphere(center=glm.vec3(2.775, 5.50, 2.775), radius=0.1, material=lamp_mat)
-
+  lamp_sphere = Sphere(center=glm.vec3(2.775, 5.50, 2.775), radius=0.1, material=white_phong_material)
+  scene.objects.append(lamp_sphere)
   # Fonte de luz conforme proj1-exemplo.pdf
   scene.lights.append(PointLight(pos=glm.vec3(2.775, 5, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
