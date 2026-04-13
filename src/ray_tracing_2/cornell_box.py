@@ -114,10 +114,10 @@ def render(spp: int = 1,
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
   # Blocos instanciados conforme proj1-exemplo.pdf
-  small_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=small_block_surface)
+  small_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 1.65, 0.30), material=green_phong_material)
   small_block = Rotate(angle_deg=-18.0, x=0, y=1, z=0, shape=small_block)
   small_block = Translate(3.40, 1.2, 5.65, small_block)
-  large_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=large_block_surface)
+  large_block = Box(p_min=glm.vec3(0, 0, 0), p_max=glm.vec3(1.65, 3.30, 1.65), material=red_phong_material)
   large_block = Rotate(angle_deg=22.5, x=0, y=1, z=0, shape=large_block)
   large_block = Translate(0.65, 0.0, 1.30, large_block)
   scene.objects.extend([small_block, large_block])
