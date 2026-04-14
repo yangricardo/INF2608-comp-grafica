@@ -1,0 +1,201 @@
+@startuml ray_tracing_2
+title Traçado de Raios — Parte II\n(Antialiasing, Instanciação, Reflexão, Refração, Luz de Área)
+
+actor User
+participant Film
+participant Camera
+participant Scene
+participant "compute_intersection()" as Compute
+participant "Shape\n(Sphere/Plane/Box)" as Shape
+participant "Instance\n(Translate/Rotate)" as Instance
+participant "PhongMaterial" as Phong
+participant "ReflectiveMaterial\n(PhongMetal)" as Metal
+participant "TransparentMaterial\n(PhongDieletrics)" as Dieletrics
+participant "PointLight" as PLight
+participant "AreaLight" as ALight
+participant "transmittance()" as Transmit
+
+== Render com Antialiasing (Slide p.5–6) ==
+
+User -> Film : render(scene, camera)
+note right of Film
+  n = SampleCount()
+  Para cada pixel (i, j):
+    c = 0
+    for k = 1..n:
+      (xn, yn) = GetSample(i, j)
+end note
+
+loop para cada pixel (i,j) no filme
+  loop para cada amostra k = 1..n
+    Film -> Film : (xn, yn) = get_samples_for_pixel(i, j)\n  jittered: (i+ξ)/w, (j+ξ)/h\n  stratified: subcélula G×G
+    Film -> Camera : generate_ray(xn, yn)
+    Camera --> Film : Ray(eye, direction)
+    Film -> Scene : trace_ray(Ray, depth=0)
+
+    == Interseção com Cena ==
+
+    Scene -> Compute : compute_intersection(Ray)
+
+    alt objeto é Instance (Translate/Rotate)
+      Compute -> Instance : intersect(Ray, Hit)
+      note right of Instance
+        1. o' = M⁻¹ · o  (ray para espaço local)
+        2. d' = M⁻¹ · d  (w=0 para direção)
+      end note
+      Instance -> Shape : intersect(Ray_local, Hit_local)
+      Shape --> Instance : Hit_local(t', pos', normal')
+      note right of Instance
+        3. p = M · p'  (volta ao mundo)
+        4. n = normalize(M⁻ᵀ · n')
+        5. t = (p-o)·d / |d|²
+      end note
+      Instance --> Compute : Hit(t, pos, normal, material)
+    else objeto direto (Sphere/Plane/Box)
+      Compute -> Shape : intersect(Ray, Hit)
+      Shape --> Compute : Hit(t, pos, normal, material)
+    end
+
+    alt hit encontrado
+      Compute --> Scene : nearest Hit
+
+      alt material == PhongMaterial (opaco)
+        Scene -> Phong : eval(scene, hit, ray, depth)
+        ref over Phong, PLight, ALight, Transmit : Iluminação Direta (Phong)
+        Phong --> Scene : color
+      else material == ReflectiveMaterial
+        Scene -> Metal : eval(scene, hit, ray, depth)
+        ref over Metal, Phong, PLight, ALight, Transmit, Scene : Reflexão (PhongMetal)
+        Metal --> Scene : color
+      else material == TransparentMaterial
+        Scene -> Dieletrics : eval(scene, hit, ray, depth)
+        ref over Dieletrics, Scene, Transmit : Refração (PhongDieletrics)
+        Dieletrics --> Scene : color
+      end
+
+      Scene --> Film : color
+    else sem hit
+      Scene --> Film : background_color
+    end
+  end
+  Film -> Film : pixel(i,j) = Σ colors / n
+end
+
+Film -> Film : gamma_fix? → c = c^(1/2.2)
+Film -> User : save render.png
+
+== Iluminação Direta — PhongMaterial.Eval (Slide p.27) ==
+
+group Iluminação Direta (Phong)
+  Phong -> Phong : c = m_amb * l_amb\nv̂ = normalize(o − p)
+
+  loop para cada fonte de luz ls
+    alt ls é PointLight
+      Phong -> PLight : sample_radiance(scene, hit)
+      PLight -> Transmit : transmittance(hit.pos, geo_normal, l̂, dist)
+      hnote over Transmit : ver Loop de Transmitância
+      Transmit --> PLight : throughput
+      alt throughput > 0 (visível)
+        PLight --> Phong : (Li, l̂)\n  Li = power * throughput
+      else ocluído
+        PLight --> Phong : (0, l̂)
+      end
+    else ls é AreaLight (Slide p.17–19)
+      Phong -> ALight : sample_radiance(scene, hit)
+      loop para cada subcélula (iu, iv) em samples_u × samples_v
+        ALight -> ALight : pos = p + ((iu+ξ)/su)·e_u + ((iv+ξ)/sv)·e_v
+        ALight -> Transmit : transmittance(hit.pos, geo_normal, l̂, dist)
+        hnote over Transmit : ver Loop de Transmitância
+        Transmit --> ALight : throughput
+        ALight -> ALight : Li = (power/N) / r² * throughput
+      end
+      ALight --> Phong : [(Li₁, l̂₁), (Li₂, l̂₂), ...]
+    end
+
+    loop para cada amostra (Li, l̂)
+      Phong -> Phong : c += m_dif * Li * max(0, n̂·l̂)
+      Phong -> Phong : r̂ = reflect(−l̂, n̂)\nc += m_spe * Li * max(0, r̂·v̂)^shi
+    end
+  end
+
+  Phong --> Phong : return c
+end
+
+== Reflexão — PhongMetal.Eval (Slide p.26–27) ==
+
+group Reflexão (PhongMetal)
+  Metal -> Metal : v̂ = normalize(o − p)\ncos θ = v̂ · n̂
+  Metal -> Metal : R = R₀ + (1−R₀)(1−cosθ)⁵  (Fresnel-Schlick)
+  Metal -> Phong : (1−R) × direct_lighting(scene, hit, ray)
+  Phong --> Metal : c_direct
+
+  alt depth < max_depth
+    Metal -> Metal : r̂ = reflect(−v̂, n̂)\norigin = offset_point(p, n̂, r̂)
+    Metal -> Scene : trace_ray(Ray(origin, r̂), depth+1)
+    Scene --> Metal : reflected_color
+    Metal -> Metal : c = c_direct + R × reflected_color
+  else profundidade máxima atingida
+    Metal -> Metal : c = c_direct
+  end
+
+  Metal --> Metal : return c
+end
+
+== Refração — PhongDieletrics.Eval (Slide p.29–34) ==
+
+group Refração (PhongDieletrics)
+  Dieletrics -> Dieletrics : v̂ = normalize(o − p)\nR₀ = ((η−1)/(η+1))²
+  Dieletrics -> Dieletrics : R = R₀ + (1−R₀)(1−cosθ)⁵
+
+  alt depth < max_depth
+    Dieletrics -> Dieletrics : r̂_reflect = reflect(−v̂, n̂)
+    Dieletrics -> Scene : trace_ray(Ray(p, r̂_reflect), depth+1)
+    Scene --> Dieletrics : c_reflect
+    Dieletrics -> Dieletrics : c = R × c_reflect
+  end
+
+  alt hit.IsBackfacing() (saindo do material)
+    Dieletrics -> Dieletrics : I = a^||o-p||  (Lei de Beer, Slide p.33)\nratio = η/1
+  else entrando no material
+    Dieletrics -> Dieletrics : I = 1\nratio = 1/η
+  end
+
+  alt depth < max_depth
+    Dieletrics -> Dieletrics : t = refract(-v, n, ratio)  (Lei de Snell, Slide p.31-32)
+    alt t != 0 (refração possível)
+      Dieletrics -> Scene : trace_ray(Ray(p, t), depth+1)
+      Scene --> Dieletrics : c_refract
+      Dieletrics -> Dieletrics : c += (1-R) * c_refract
+    else reflexão interna total
+      note right of Dieletrics : Sem refração; toda\nenergia vai para reflexão
+    end
+  end
+
+  Dieletrics --> Dieletrics : return I * c
+end
+
+== Loop de Transmitância — scene.transmittance() (Slide p.35) ==
+
+group Loop de Transmitância
+  Transmit -> Transmit : throughput = 1\norigin = offset_point(p, n, l)
+
+  loop max_steps vezes
+    Transmit -> Compute : compute_intersection(shadow_ray)
+    Compute -> Shape : intersect(shadow_ray, Hit)
+
+    alt sem hit ou hit.t >= dist_restante
+      Transmit --> Transmit : return throughput  (luz visível)
+    else hit com material opaco
+      Transmit --> Transmit : return vec3(0)  (bloqueado)
+    else hit com material transparente
+      alt hit.IsBackfacing()
+        Transmit -> Transmit : throughput *= a^(hit.t)  (Beer)
+      else
+        Transmit -> Transmit : throughput *= 1  (entrando)
+      end
+      Transmit -> Transmit : origin = offset_point(hit.pos, n, l)\ndist_restante -= hit.t
+    end
+  end
+end
+
+@enduml
