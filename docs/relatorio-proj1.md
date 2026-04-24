@@ -8,42 +8,65 @@ O mecanismo consiste na simulação do trajeto inverso da luz — partindo da c�
 
 ---
 
-## 2. Embasamento Físico e Implementação Analítica
+## 2. Embasamento Físico e Mapeamento da Implementação
 
-O desenvolvimento priorizou o fisicalismo nos modelos de iluminação e na interação luz-matéria. A seguir, descrimina-se a abordagem para cada técnica adotada:
+O desenvolvimento priorizou o fisicalismo nos modelos de iluminação e na interação luz-matéria. A seguir, expandimos cada técnica adotada, efetuando o cruzamento exato entre a teoria (slides) e os métodos do código-fonte:
 
-### 2.1. Modelo de Interação de Phong (Superfícies Opacas)
+### 2.1. Câmera Pinhole e Geração de Raios
 
-O modelo empírico de iluminação local de Phong foi implementado na classe `PhongMaterial` localizada em `src/ray_tracing_2/material.py`. O cálculo computa a radiância que atinge o olho resolvendo o balanço de energia na superfície visível com três componentes principais:
+**Referência Teórica:** `4.tracado_de_raios.pdf` (p. 14, p. 25-29)
+De acordo com os slides, a câmera é definida pela posição do olho (`eye`), ponto de foco (`center` ou _target_) e o vetor orientação (`up`). O mapeamento da grade sub-pixel para o espaço da câmera e, posteriormente, espaço do mundo ocorre de forma normalizada.
 
-- **Espalhamento Lambertiano (Difuso):** A luz espalhada varia conforme o cosseno do ângulo de incidência da luz em relação à normal da superfície. Fisicamente, áreas oblíquas interceptam menos densidade de fluxo magnético. O método `direct_lighting` avalia $\max(\hat{n} \cdot \hat{l}, 0)$.
-- **Brilho Especular:** Simula a reflexão direcional da fonte luminosa (comportamento de micro-facetas foscas). Adotou-se o vetor de reflexão exato ou o modelo de Blinn-Phong dependendo da otimização geométrica ($\hat{r} \cdot \hat{v}$).
-- **Constante Ambiente:** Um limite inferior da integral de renderização simulando radiância inter-refletida uniforme.
+- **Implementação (`src/ray_tracing_2/camera.py`):** O método `Camera.generate_ray(xn, yn)` aplica trigonometria em cima do campo de visão (`fov_tan`). O raio primário é construído convertendo coordenadas normalizadas da tela via transformação inversa da visão (`inv_view`).
 
-### 2.2. Sombras e Efeitos de Penumbra (Hard & Soft Shadows)
+### 2.2. Intersecções Geométricas (Raios x Formas)
 
-De acordo com os slides 4 (`4.tracado_de_raios.pdf`), o motor executa Raios de Sombreamento (_Shadow Rays_) da origem da intersecção primária em direção às fontes luminosas na classe `Scene` (`trace_ray` dependente do `transmittance`).
+**Referência Teórica:** `4.tracado_de_raios.pdf` (p. 15-18) e Instanciação (Slides anexos ao projeto)
+Para descobrir se o raio proveniente da câmera alcançou uma silhueta sólida:
 
-- **Hard Shadows (Umbra):** Com luzes do tipo `PointLight` (representando um delta de Dirac espacial), ou a visibilidade é $L_i = 1$ ou $L_i = 0$, resultando em arestas duras (visto na oclusão total típica descrita em `proj1-exemplo.pdf`).
-- **Soft Shadows (Penumbra):** Implementou-se instâncias flexíveis através da subdivisão diferencial usando `AreaLight` (`main_area_light.py`). A integral de contribuição da luz extensa é aproximada pelo método estocástico de _Jittering_, lançando vários raios em amostragem uniforme para gerar atenuação contínua de sombra e bordas difusas.
+- **Esferas (`Shape.Sphere.intersect` em `shape.py`):** Determina as intersecções calculando as raízes da equação quadrática $\Delta = b^2 - 4ac$ baseada no vetor de direção do raio partindo da origem da câmera, resgatando a raiz estritamente positiva mais próxima.
+- **Oclusão Universal (`Scene.compute_intersection` em `scene.py`):** Conforme `4.tracado_de_raios.pdf` p. 35 e 47-48, a rotina faz a varredura linear iterando entre todos os primitivos instanciados em `scene.objects` coletando e retendo apenas o `closest_hit` (Intersecção mais próxima do raio).
 
-### 2.3. Reflexão Especular Ideal
+### 2.3. Iluminação Direta (Modelo de Phong)
 
-Modelado no arquivo de materiais (`ReflectiveMaterial`), a superfície comporta-se como um espelho ideal recursivo.
-A física das equações de Maxwell demonstra que a refletividade varia em função do ângulo de visão da faceta geométrica. Empregamos a **Aproximação de Fresnel-Schlick**, conforme exigências textuais do slide p. 26-27 do pdf 5:
-$$ R(\theta) = R_0 + (1 - R_0)(1 - \cos\theta)^5 $$
-A energia incidente do raio refletido realimenta o algoritmo de forma recursiva multiplicando pela cor refletida.
+**Referência Teórica:** `4.tracado_de_raios.pdf` (p. 41-49) e `5.tracado_de_raios2.pdf` (p. 27 - `PhongMaterial.Eval`)
+Definição da radiância refletida para superfícies opacas locais:
 
-### 2.4. Refração Geométrica e Atenuação Volumétrica
+- **Implementação (`PhongMaterial.direct_lighting` em `material.py`):**
+  - **Difuso (Espalhamento Lambertiano):** O cosseno do ângulo de incidência é obtido por `glm.dot(normal, light_dir)`. A luz de chegada é diluída dependendo de sua obliqüidade perante a superfície. O método avalia $\max(\hat{n} \cdot \hat{l}, 0)$.
+  - **Especular (Brilho e Polimento):** É o cômputo da chance do vetor raio estar alinhado com o eixo refletido ou (_Half-vector_). A dependência do raio visual baseia-se na rugosidade da cena controlada por _shininess_ ($\hat{r} \cdot \hat{v}$).
+  - **Constante Ambiente:** Um limite inferior da integral de renderização simulando radiância inter-refletida uniforme.
 
-Materiais cristalinos como o vidro baseiam-se na ótica de retransmissão de onda. O sistema implementou na classe `TransparentMaterial` todo o balanço exigido pelos requisitos (_Slide 5, p. 29-34_):
+### 2.4. Sombreamento Parcial e Total (Transmissividade)
 
-- **Fator de Refração (Lei de Snell-Descartes):** Obtendo a angulação exata da refringência do raio transitando pelas fronteiras (Ar $\rightarrow$ Vidro, Vidro $\rightarrow$ Ar) ditada por $\eta_i \sin\theta_i = \eta_t \sin\theta_t$. O código avalia os vetores de fronteira para também determinar se ocorreu Reflexão Interna Total (TIR).
-- **Lei de Absorção de Beer-Lambert:** Para um feixe se movendo de uma intersecção a outra _dentro_ do encapsulamento translúcido do objeto sólido, há uma perda progressiva da energia pela absorção molecular e espalhamento. O cálculo executa decaimento exponencial sobre a cor via $I = I_0 \cdot \alpha^t$.
+**Referência Teórica:** `5.tracado_de_raios2.pdf` (p. 35 - `Light.SampleRadiance`) e `4.tracado_de_raios.pdf` (p. 40)
 
-### 2.5. Suavização e Amostragem (Anti-Aliasing)
+- **Shadow Rays / Umbra (Hard Shadows):** A rotina `PointLight.radiance` (`light.py`) captura o vetor subtraindo a posição iluminada da posição exata da Fonte (`self.pos - hit.pos`), lançando um raio de sombreamento da intersecção primária em direção às fontes luminosas na classe `Scene` (`trace_ray` dependente do `transmittance`). A aresta limitante vista no `proj1-exemplo.pdf` denota essa barreira binária.
+- **Transmissividade Dinâmica (`Scene.transmittance` em `scene.py`):** Simula a oclusão e refração parcial pela atenuação contínua em caso de múltiplas bordas.
+- **Penumbra (Soft Shadows):** Subdivide espacialmente as áreas de uma `AreaLight` (`main_area_light.py`) coletando múltiplos raios interpolados da superfície luminosa estocasticamente.
 
-Dado o problema de alta frequência (_nyquist limit_) do grid bidimensional da matriz final de pixel (aliasing), a classe `Film` (`src/ray_tracing_2/film.py`) incorpora a simulação Monte Carlo. Diversos raios independentes são lançados deslocados pela grade de _Jittering_ estocástica. Os resultados convergem as contribuições no integrador, borrando as serrilhas excessivamente agudas.
+### 2.5. Reflexão Especular Recursiva
+
+**Referência Teórica:** `5.tracado_de_raios2.pdf` (p. 26-27 - `PhongMetal.Eval`)
+Superfícies compostas por metais atuam sob as propriedades eletromagnéticas espelhadas de Maxwell.
+
+- **Equação de Fresnel-Schlick (`ReflectiveMaterial.eval` em `material.py`):** Calcula-se o percentual de energia retida (Refletância) baseado em:
+  $$ R(\theta) = R_0 + (1 - R_0)(1 - \cos\theta)^5 $$
+- **Recursividade no Traçador (`Scene.trace_ray`):** Um raio de "rebatimento" é instanciado, multiplicando recursivamente pela refletância.
+
+### 2.6. Transparência Dielétrica, Refração e Volume
+
+**Referência Teórica:** `5.tracado_de_raios2.pdf` (p. 29-34 - `PhongDieletrics.Eval`)
+Ao atingir blocos transparentes instanciados, como vidros (`TransparentMaterial` em `material.py`):
+
+- **Fator de Refração (Lei de Snell-Descartes, Slide 5 p. 31-32):** Determina os desvios sub-angulares na propagação interna obtendo angulação de `glm.refract` ($\eta_i \sin\theta_i = \eta_t \sin\theta_t$). Monitora-se a Reflexão Interna Total (TIR).
+- **Lei de Absorção de Beer-Lambert (Slide 5 p. 33):** Ao constatar raio interno em `Scene.transmittance` (`hit.backfacing == True`), deduz-se o decaimento exponencial sobre a cor via distância cristalina ($I = I_0 \cdot \alpha^{||p - hit.p||}$).
+
+### 2.7. Integração Monte Carlo e Anti-Aliasing
+
+**Referência Teórica:** `4.tracado_de_raios.pdf` (p. 24-29 - Amostragem)
+
+- **Implementação (`Film` em `film.py`):** Resolve a alta frequência nas grades das matrizes (aliasing). Deslocando-se sucessivamente dentro da microjanela do pixel (_Jittering_ Monte Carlo).
 
 ---
 
