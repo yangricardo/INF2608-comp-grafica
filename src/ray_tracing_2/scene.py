@@ -31,11 +31,17 @@ class Scene:
     return closest_hit if found else None
 
   def offset_point(self, pos: glm.vec3, normal: glm.vec3, direction: glm.vec3) -> glm.vec3:
+    # O pequeno deslocamento ao longo da normal separa numericamente o novo raio
+    # da superfície que o gerou, evitando auto-interseção em sombra, reflexão e
+    # refração. Sem isso surgem artefatos clássicos de shadow acne.
     reference_normal = glm.normalize(glm.vec3(normal))
     sign = 1.0 if glm.dot(direction, reference_normal) >= 0.0 else -1.0
     return glm.vec3(pos) + reference_normal * (self.ray_epsilon * sign)
 
   def can_spawn_ray(self, depth: int, max_depth: int | None = None) -> bool:
+    # Slide 5, p. 26-34: o segundo conjunto de slides estende o traçador local
+    # do Slide 4 para um traçador recursivo. Este limite mantém a aproximação
+    # finita e controla o custo das cadeias de reflexão/refração.
     allowed_depth = self.max_depth if max_depth is None else max_depth
     return depth < allowed_depth
 
@@ -46,6 +52,9 @@ class Scene:
                     max_distance: float,
                     max_steps: int = 16) -> glm.vec3:
     # 5.tracado_de_raios2.pdf - p.35: Light.SampleRadiance com suporte a materiais transparentes.
+            # Conceitualmente, este método é a evolução do teste binário de sombra do
+            # Slide 4: em vez de responder apenas "bloqueado" ou "livre", ele acumula
+            # throughput através de interfaces transparentes até atingir a luz.
     # Implementa o loop:
     #   while hits.material.IsTransparent() do
     #     if hits.IsBackfacing() then I = I * hits.material.a^||p-hits.p||
@@ -99,7 +108,9 @@ class Scene:
     return throughput
 
   def trace_ray(self, ray: Ray, depth: int = 0, max_depth: int | None = None):
-    # Slide 4, p. 35 e p. 55: se houver interseção visível, delega o cálculo de cor ao material.
+    # Slide 4, p. 35 e p. 55: o núcleo do traçador local é encontrar o hit e
+    # delegar a cor ao material. Slide 5 reaproveita esse mesmo ponto de entrada
+    # para raios secundários, mudando apenas depth/max_depth.
     hit = self.compute_intersection(ray)    
     if hit and hit.material:
       return hit.material.eval(self, hit, ray, depth=depth, max_depth=max_depth)
