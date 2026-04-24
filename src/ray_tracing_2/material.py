@@ -43,7 +43,9 @@ class PhongMaterial(Material):
     self.shi = shininess
 
   def direct_lighting(self, scene: 'Scene', hit: Hit, ray: Ray) -> glm.vec3:
-    # 5.tracado_de_raios2.pdf - p.27: PhongMaterial.Eval
+    # 5.tracado_de_raios2.pdf - p.27: esta é a parcela local herdada do Slide 4.
+    # Os materiais avançados continuam usando esse termo como contribuição não
+    # recursiva antes de somar reflexão e/ou refração.
     # c = 0; v̂ = normalize(o − hit.p)
     color = self.m_amb * scene.ambient_light  # componente ambiente
     v = glm.normalize(ray.o - hit.pos)  # p.27: v̂ = normalize(o − p)
@@ -80,7 +82,9 @@ class PhongMaterial(Material):
 class ReflectiveMaterial(PhongMaterial):
   # 5.tracado_de_raios2.pdf - p.26-27: PhongMetal.Eval
   # Reflexão com Fresnel-Schlick: R(θ,λ) = R0(λ) + (1 − R0(λ))(1 − cos θ)^5
-  # R0(λ): reflectância à incidência normal (p.26)
+  # R0(λ): reflectância à incidência normal (p.26). O material não substitui
+  # Phong; ele redistribui energia entre a resposta local (1 - R) e o raio
+  # refletido recursivo R, preservando a narrativa incremental do Slide 5.
 
   def __init__(self,
                ambient: glm.vec3,
@@ -111,6 +115,8 @@ class ReflectiveMaterial(PhongMaterial):
     R = self.reflectivity + (glm.vec3(1.0) - self.reflectivity) * schlick_factor
 
     # p.27: c = (1 − R) PhongMaterial.Eval(scene, hit, o)
+    # A iluminação direta continua existindo; apenas passa a ser ponderada pelo
+    # complemento da refletância angular calculada por Schlick.
     c = (glm.vec3(1.0) - R) * self.direct_lighting(scene, hit, ray)
 
     if scene.can_spawn_ray(depth, max_depth):
@@ -125,7 +131,9 @@ class ReflectiveMaterial(PhongMaterial):
 
 class TransparentMaterial(PhongMaterial):
   # 5.tracado_de_raios2.pdf - p.29-34: PhongDieletrics.Eval
-  # Refração com Lei de Snell (p.31-32) + Fresnel-Schlick (p.26) + Lei de Beer (p.33)
+  # Refração com Lei de Snell (p.31-32) + Fresnel-Schlick (p.26) + Lei de Beer (p.33).
+  # Aqui o Slide 5 incrementa o pipeline de Phong com ótica de dielétricos:
+  # reflexão angular, mudança de meio, TIR e absorção volumétrica.
 
   def __init__(self,
                ambient: glm.vec3 = glm.vec3(0.0),
@@ -156,6 +164,8 @@ class TransparentMaterial(PhongMaterial):
     # while hits.material.IsTransparent() do
     #   if hits.IsBackfacing() then I = I * hits.material.a^||p-hits.p||
     # Só atenua pela Lei de Beer ao SAIR do material (backfacing = face de saída).
+    # Isso distingue a absorção volumétrica em raios de sombra do cálculo de
+    # refração recursiva feito em eval().
     if hit.backfacing:
       # Lei de Beer: I(s) = I0 * a(λ)^s, s = distância percorrida no material = hit.t
       # (5.tracado_de_raios2.pdf - p.33)
@@ -175,6 +185,9 @@ class TransparentMaterial(PhongMaterial):
            depth: int = 0,
            max_depth: int | None = None):
     # 5.tracado_de_raios2.pdf - p.34: PhongDieletrics.Eval
+    # A lógica abaixo encadeia três decisões físicas: quanto reflete (Schlick),
+    # como refrata ao cruzar a interface (Snell) e quanto absorve ao percorrer
+    # o volume (Beer-Lambert), sempre respeitando entrada/saída do meio.
     # p = hit.p; n̂ = hit.n̂; v̂ = normalize(o − p)
     p = hit.pos
     n = hit.normal
@@ -197,6 +210,8 @@ class TransparentMaterial(PhongMaterial):
 
     # p.34: if hit.IsBackfacing() then I = a^||o−p||; ratio = η/1
     #        else I = 1; ratio = 1/η
+    # front_face/backfacing, calculados em Hit.set_face_normal(), determinam se
+    # o raio cruza ar->vidro ou vidro->ar e, portanto, qual razão ηi/ηt usar.
     if hit.backfacing:
       # Lei de Beer (p.33): I = a^s onde s = ||o−p|| = distância percorrida no material
       s = float(glm.length(ray.o - p))
