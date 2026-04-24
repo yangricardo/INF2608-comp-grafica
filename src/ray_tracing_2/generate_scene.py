@@ -70,7 +70,9 @@ def build_scene_from_json(spec: dict) -> tuple[Scene, dict]:
     scene.objects.append(Sphere(center=glm.vec3(*center), radius=radius, material=mat))
     props['spheres'].append({'center': center, 'radius': radius, 'material': s.get('material', {})})
 
-  # Slide 4, p. 40: luz pontual armazena posição e potência para a atenuação por distância.
+  # Slide 4, p. 40: luz pontual armazena posição e potência. Nesta base, a
+  # PointLight segue a convenção do enunciado com intensidade constante, sem
+  # queda explícita por distância no próprio modelo da fonte.
   for L in spec.get('lights', []):
     pos = L.get('pos', [5,5,5])
     power = L.get('power', [150,150,150])
