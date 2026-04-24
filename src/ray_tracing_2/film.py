@@ -61,14 +61,16 @@ class Film:
     Suporta dois modos: 'jittered' (Monte Carlo jittered) e 'stratified'.
 
     Comentário (PT): Implementação de amostragem por pixel baseada nos slides
-    de amostragem/anti-aliasing (Slide 4, p. 25-29). Em 'stratified' usamos uma
-    subdivisão GxG do pixel para reduzir variância por amostra.
+    de amostragem/anti-aliasing (Slide 4, p. 25-29). As amostras aproximam a
+    integral da radiância sobre a área do pixel; mudar o padrão de amostragem
+    altera principalmente a variância, não a câmera nem a cena em si.
     """
     spp = max(1, int(self.samples_per_pixel))
     samples: list[tuple[float, float]] = []
 
     if self.sampling_mode == SamplingMode.JITTERED:
-      # Slide 4, p. 25-29: jittered Monte Carlo dentro do pixel
+      # Slide 4, p. 25-29: jittered Monte Carlo dentro do pixel. As amostras são
+      # independentes e simples de gerar, mas podem concentrar mais ruído local.
       for _ in range(spp):
         rx = self.rng.random()
         ry = self.rng.random()
@@ -78,7 +80,8 @@ class Film:
       return samples
 
     # stratified
-    # Slide (amostragem estratificada): subdivide o pixel em GxG subcelulas
+    # A amostragem estratificada impõe cobertura espacial mínima ao subdividir o
+    # pixel em GxG subcélulas, reduzindo variância em comparação ao jitter puro.
     G = math.ceil(math.sqrt(spp))
     count = 0
     for a in range(G):
@@ -102,7 +105,8 @@ class Film:
   def render(self, scene: Scene, camera: Camera, filename: str, gamma_fix: bool = False) -> None:
     # Slide 4, p. 24-29: percorre todos os pixels e pede um raio para cada amostra.
     # Comentário (PT): início do render com múltiplas amostras por pixel conforme
-    # Slide 4, p. 25-29. Aqui usamos `self.samples_per_pixel` e `self.sampling_mode`.
+    # Slide 4, p. 25-29. Aqui usamos `self.samples_per_pixel` e `self.sampling_mode`
+    # para aproximar numericamente a cor média do pixel pela média Monte Carlo.
     print("Renderizando a cena com AA (spp=", self.samples_per_pixel, ", mode=", self.sampling_mode.name, ")...")
     for j in range(self.height):
       for i in range(self.width):
