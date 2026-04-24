@@ -85,7 +85,8 @@ class Box(Shape):
     self.material = material
 
   def intersect(self, ray: Ray, hit: Hit):
-    # Slabs: calcula os intervalos de entrada/saída do raio em cada eixo.
+    # Slabs: calcula os intervalos de entrada/saída do raio em cada eixo e
+    # intersecta esses intervalos para obter a primeira face visível da caixa.
     t_near = -float('inf')
     t_far = float('inf')
     near_normal = glm.vec3(0)
@@ -143,8 +144,9 @@ class Instance(Shape):
     self.shape = shape
     self.m = glm.mat4(matrix)
     self.m_inv = glm.inverse(self.m)
-    # Slide 5.12: A matriz para transformar normais é a inversa transposta
-    self.m_inv_t = glm.transpose(self.m_inv) # Para transformar a normal corretamente
+    # Slide 5, p. 12-13: a normal não pode usar a mesma matriz do ponto quando
+    # há escala não uniforme. A inversa transposta preserva perpendicularidade.
+    self.m_inv_t = glm.transpose(self.m_inv)
 
   def intersect(self, ray: Ray, hit: Hit):
     # Slide 4, p. 44-46:
@@ -152,6 +154,8 @@ class Instance(Shape):
     # 2. Realiza o teste de interseção no espaço local.
     # 3. Se houver hit, transforma a posição e a normal de volta para o mundo.
     # 4. Converte a posição encontrada para o parâmetro t do raio original no espaço global.
+    # Esse desacoplamento permite reutilizar primitivas simples como esfera, plano
+    # e box em cenas mais ricas sem reescrever a matemática de interseção.
     local_o = glm.vec3(self.m_inv * glm.vec4(ray.o.x, ray.o.y, ray.o.z, 1.0))
     local_d = glm.vec3(self.m_inv * glm.vec4(ray.d.x, ray.d.y, ray.d.z, 0.0))
     local_ray = Ray(local_o, local_d)
