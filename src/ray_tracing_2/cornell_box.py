@@ -134,9 +134,9 @@ def render(spp: int = 1,
   scene.objects.append(red_sphere)
   
   # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
-  # Usa TransparentMaterial(ior=1.5, attenuation=1.0) para que os raios de sombra
-  # passem sem atenuação (shadow_transmittance retorna vec3(1.0)) enquanto
-  # permanece visível para raios primários como uma esfera de vidro.
+  # Aqui a esfera visível da luminária usa PhongMaterial com componente ambiente
+  # alta para funcionar como marcador emissivo aparente; a iluminação efetiva da
+  # cena continua vindo das luzes explícitas adicionadas logo abaixo.
   lamp_material = PhongMaterial(
     diffuse=glm.vec3(0.0),   # Não precisa de cor difusa (não recebe luz de outros objetos)
     specular=glm.vec3(1),  # Sem brilho especular
