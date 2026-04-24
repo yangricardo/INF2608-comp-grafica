@@ -56,9 +56,10 @@ class PointLight(Light):
     if _is_black(transmittance):
       return glm.vec3(0.0), l
 
-    # proj1-exemplo.pdf: PointLight(Intensity, Position) — Intensity é a radiância
-    # constante da fonte (não divide por r²). A intensidade 0.7 é o valor RGB recebido
-    # em qualquer superfície, conforme a definição do enunciado.
+    # proj1-exemplo.pdf: PointLight(Intensity, Position) segue a convenção do
+    # enunciado, em que Intensity é a radiância constante da fonte. Por isso,
+    # esta implementação deliberadamente não divide por r^2; a única redução
+    # de energia aqui vem da transmitância geométrica/volumétrica até a luz.
     li = self.power * transmittance
     return li, l
 
@@ -91,6 +92,9 @@ class AreaLight(Light):
   def sample_radiance(self, scene: "Scene", hit: "Hit") -> list[tuple[glm.vec3, glm.vec3]]:
     """Amostra múltiplos pontos na superfície da luz para produzir penumbra."""
     samples: list[tuple[glm.vec3, glm.vec3]] = []
+    # Slide 5, p. 35: a luz de área aproxima a integral sobre uma fonte extensa
+    # por soma discreta de amostras. Cada subamostra enxerga uma visibilidade
+    # ligeiramente diferente, produzindo penumbra nas regiões parcialmente ocluídas.
     sample_count = self.samples_u * self.samples_v
     if sample_count <= 0:
       return samples
@@ -109,6 +113,8 @@ class AreaLight(Light):
           samples.append((glm.vec3(0.0), l))
           continue
 
+        # Ao contrário da PointLight do enunciado, aqui a contribuição é
+        # distribuída entre amostras de uma área emissiva e decai com 1/r^2.
         li = ((self.power / float(sample_count)) / (dist ** 2)) * transmittance
         samples.append((li, l))
 
