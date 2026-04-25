@@ -36,7 +36,7 @@ def _material_from_spec(spec: dict | None, default_ambient, default_diffuse, def
   return PhongMaterial(ambient=_vec3(ambient), diffuse=_vec3(diffuse), specular=_vec3(specular), shininess=float(shininess))
 
 
-def _triangle_mesh_from_spec(spec: dict) -> TriangleMesh:
+def _triangle_mesh_from_spec(spec: dict, accelerator_override: str | None = None) -> TriangleMesh:
   # Slide 4, p. 35 e p. 47-48: a malha JSON é convertida para triângulos e usa o mesmo closest-hit das demais primitivas.
   vertices = [_vec3(vertex) for vertex in spec.get('vertices', [])]
   faces: list[tuple[int, int, int]] = []
@@ -57,11 +57,27 @@ def _triangle_mesh_from_spec(spec: dict) -> TriangleMesh:
     default_specular=(1.0, 1.0, 1.0),
     default_shininess=50.0,
   )
-  return TriangleMesh.from_vertices_faces(vertices, faces, material, name=spec.get('name'))
+  # O seletor de acelerador existe só para comparar baseline linear e BVH;
+  # ele não altera a geometria nem os materiais da malha.
+  accelerator = accelerator_override if accelerator_override is not None else spec.get('accelerator')
+  if accelerator in ('', 'linear', 'none'):
+    accelerator = None
+  # leaf_size controla a granularidade da poda: folhas menores reduzem testes
+  # de triângulo, mas podem aprofundar a árvore.
+  bvh_leaf_size = int(spec.get('bvh_leaf_size', 4))
+  return TriangleMesh.from_vertices_faces(
+    vertices,
+    faces,
+    material,
+    name=spec.get('name'),
+    accelerator=accelerator,
+    bvh_leaf_size=bvh_leaf_size,
+  )
 
 
 def _mesh_transform_from_spec(spec: dict | None) -> glm.mat4:
   # Slide 5, p. 12-13: a malha é instanciada com translação, rotação e escala.
+  # A BVH permanece no espaço local; Instance é quem leva o raio até esse espaço.
   matrix = glm.mat4(1.0)
   if spec is None:
     return matrix
@@ -89,6 +105,7 @@ def render(
   sampling_mode: str = 'jittered',
   seed: int | None = None,
   gamma_fix: bool = False,
+  accelerator: str | None = None,
 ):
   default_scene = Path(__file__).resolve().parents[2] / 'inputs' / 'triangle_pyramid.json'
   spec_path = Path(scene_path) if scene_path is not None else default_scene
@@ -122,7 +139,9 @@ def render(
     mesh_specs.append(spec['mesh'])
   mesh_specs.extend(spec.get('meshes', []))
   for mesh_spec in mesh_specs:
-    mesh = _triangle_mesh_from_spec(mesh_spec)
+    # O override de linha de comando permite comparar o baseline linear com a
+    # BVH sem alterar a cena descrita no JSON.
+    mesh = _triangle_mesh_from_spec(mesh_spec, accelerator_override=accelerator)
     mesh = Instance(mesh, _mesh_transform_from_spec(mesh_spec.get('transform')))
     scene.objects.append(mesh)
 
@@ -182,5 +201,15 @@ if __name__ == '__main__':
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser.add_argument('--accelerator', choices=['linear', 'bvh'], default=None, help='Override the triangle mesh accelerator')
   args = parser.parse_args()
-  render(scene_path=args.scene, width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(
+    scene_path=args.scene,
+    width=args.width,
+    height=args.height,
+    spp=args.spp,
+    sampling_mode=args.sampling_mode,
+    seed=args.seed,
+    gamma_fix=args.gamma_fix,
+    accelerator=args.accelerator,
+  )
