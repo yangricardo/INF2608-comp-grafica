@@ -215,15 +215,17 @@ Na cena inspirada na Cornell Box, o objetivo experimental muda. O foco deixa de 
 
 Ela **não** comprova diretamente reflexão ou refração recursiva nos blocos, pois os materiais padrão não as ativam. A evidência óptica avançada — reflexão com Fresnel-Schlick e refração com Beer-Lambert — pode ser obtida substituindo os materiais dos blocos por `ReflectiveMaterial` ou `TransparentMaterial` na mesma cena, ou observando a cena carregada via `src/ray_tracing_2/cornell_box.py`, que usa esses materiais por definição. A importância desta cena para o projeto é, portanto, infraestrutural: ela valida que todos os mecanismos de suporte às extensões do Slide 5 estão corretamente montados.
 
-### 3.4. Geometria triangulada: malha OBJ sem aceleração
+### 3.4. Geometria triangulada: malha JSON com BVH
 
 Arquivo de referência: `src/ray_tracing_2/main_triangles.py`.
 
-Para atender ao requisito de geometria representada por triângulos, a implementação adiciona uma especificação JSON simples carregada como cena e convertida em uma coleção de triângulos sem estrutura de aceleração. A cena foi ajustada para usar dois materiais Phong distintos, vermelho e azul, além do plano cinza, porque a versão anterior ficava visualmente lavada e a sombra não aparecia com clareza suficiente. Isso não indicava falha no caminho de sombras: o problema era a encenação da cena, com luz muito central e ambiente alto. A versão final reposiciona a esfera para que ela projete uma sombra visível sobre a própria malha triangulada e adiciona uma segunda luz no lado oposto para equilibrar a iluminação. A figura abaixo mostra uma pequena pirâmide triangulada, descrita em `inputs/triangle_pyramid.json` e renderizada com a mesma infraestrutura de câmera, luz e materiais usada nas demais cenas.
+Para atender ao requisito de geometria representada por triângulos, a implementação adiciona uma especificação JSON simples carregada como cena e convertida em uma coleção de triângulos. A versão atual da cena ativa uma BVH sobre a malha triangulada via `accelerator: "bvh"`, e o executável ainda aceita o override `--accelerator linear` quando se quer comparar o caminho sem aceleração. A cena foi ajustada para usar dois materiais Phong distintos, vermelho e azul, além do plano cinza, porque a versão anterior ficava visualmente lavada e a sombra não aparecia com clareza suficiente. Isso não indicava falha no caminho de sombras: o problema era a encenação da cena, com luz muito central e ambiente alto. A versão final reposiciona a esfera para que ela projete uma sombra visível sobre a própria malha triangulada e adiciona uma segunda luz no lado oposto para equilibrar a iluminação. A figura abaixo mostra uma pequena pirâmide triangulada, descrita em `inputs/triangle_pyramid.json` e renderizada com a mesma infraestrutura de câmera, luz, materiais e aceleração usada nas demais cenas.
 
-![Malha triangulada com OBJ](../outputs/main_triangles_20260424_231333/render.png)
+Do ponto de vista matemático, a BVH não altera a interseção do triângulo em si: o teste local continua sendo o Möller-Trumbore do Slide 4, p. 35 e p. 47-48, enquanto a instância da malha continua dependendo da transformação inversa transposta discutida no Slide 5, p. 12-13. O que a BVH acrescenta é apenas uma camada de poda baseada em AABB para reduzir quantas faces chegam ao teste exato.
 
-O valor dessa cena é estritamente geométrico: ela valida a interseção raio-triângulo, a triangulação de faces poligonais no carregador OBJ e a compatibilidade da nova malha com o pipeline existente de `Scene`, `Hit` e `Instance`. O arquivo `properties.md` gerado para essa renderização registra 5 vértices e 6 triângulos, além de manter visíveis os três materiais da cena e a sombra da esfera sobre a pirâmide, o que facilita a conferência da malha carregada. Como o enunciado pede a geometria triangulada sem estrutura de aceleração, a varredura permanece linear sobre os triângulos da malha. As anotações no código indicam as páginas dos slides usadas como base para câmera, Phong, interseções, instanciação e o raciocínio de sombra.
+![Malha triangulada com BVH](../outputs/main_triangles_20260424_233034/render.png)
+
+O valor dessa cena é estritamente geométrico: ela valida a interseção raio-triângulo, a triangulação de faces poligonais no carregador e a compatibilidade da nova malha com o pipeline existente de `Scene`, `Hit` e `Instance`. O arquivo `properties.md` gerado para essa renderização registra 5 vértices e 6 triângulos, além de expor o uso da BVH com `bvh_node_count`, `bvh_leaf_count` e `bvh_max_depth`, o que facilita a conferência da malha carregada. As anotações no código indicam as páginas dos slides usadas como base para câmera, Phong, interseções, instanciação e o raciocínio de sombra.
 
 ## 4. Critérios, Extensões e Limitações
 
@@ -240,16 +242,26 @@ O valor dessa cena é estritamente geométrico: ela valida a interseção raio-t
 
 - [x] Transformações de modelagem na instanciação geométrica, com `Translate`, `Rotate` e `Instance`.
 - [x] Luz de área retangular com amostragem discreta e formação de penumbra.
-- [x] Geometria representada por triângulos, com interseção raio-triângulo e carregamento de malha OBJ sem aceleração espacial.
+- [x] Geometria representada por triângulos, com interseção raio-triângulo e carregamento de malha via JSON/OBJ.
+- [x] Estrutura espacial de aceleração por BVH na malha triangulada, configurável por JSON ou linha de comando.
 - [x] Objetos reflexivos com ponderação angular por Fresnel-Schlick.
 - [x] Objetos refratários com Lei de Snell, reflexão interna total, absorção Beer-Lambert e sombras translúcidas.
 
 ### 4.3. Extensões opcionais não implementadas
 
-- [ ] Estrutura espacial de aceleração, como BVH ou kd-tree.
 - [ ] Comparação de diferentes distribuições de amostras na fonte retangular.
 
-### 4.4. Limitações adicionais e trabalhos futuros
+### 4.4. Lacunas da BVH
+
+A BVH adicionada para a malha triangulada é intencionalmente conservadora e ainda não cobre o conjunto completo de técnicas que aparecem na literatura de aceleração espacial. Ela preserva a matemática dos slides para a interseção exata e para a instanciação, mas ainda deixa as seguintes lacunas de implementação:
+
+- [ ] O particionamento usa mediana no eixo dominante; ainda não há SAH nem split espacial.
+- [ ] A estrutura é estática e não faz refit ou rebuild incremental para malhas deformáveis.
+- [ ] A aceleração está restrita à malha triangulada da cena de demonstração, não ao `Scene.compute_intersection` inteiro.
+- [ ] Ainda não há benchmark comparando baseline linear e BVH com métricas de tempo ou número de testes de triângulo.
+- [ ] A malha ainda não expõe normais de vértice, UVs ou materiais por face.
+
+### 4.5. Limitações adicionais e trabalhos futuros
 
 - [ ] Câmera com lente fina e profundidade de campo. A câmera implementada é estritamente pinhole.
 - [ ] Calibração radiométrica estrita entre todas as fontes. O projeto preserva a convenção do enunciado para `PointLight` e mantém a `AreaLight` com queda por $1/r^2$.
