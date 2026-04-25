@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from ray_tracing_2.hit import Hit
 from ray_tracing_2.ray import Ray
+from ray_tracing_2.triangle_bvh import TriangleBVH
 
 if TYPE_CHECKING:
   from ray_tracing_2.material import Material
@@ -192,12 +193,29 @@ class TriangleMesh(Shape):
     vertices: list[glm.vec3] | None = None,
     faces: list[tuple[int, int, int]] | None = None,
     name: str | None = None,
+    accelerator: str | None = None,
+    bvh_leaf_size: int = 4,
   ):
     self.triangles = list(triangles)
     self.material = material
     self.vertices = [glm.vec3(v) for v in vertices] if vertices is not None else []
     self.faces = [tuple(face) for face in faces] if faces is not None else []
     self.name = name
+    # A aceleração é opcional e permanece confinada ao espaço local da malha.
+    # Isso preserva o fluxo de closest-hit do Slide 4, p. 35 e p. 47-48, e
+    # deixa a transformação de instância no papel descrito no Slide 5, p. 12-13.
+    self.accelerator = accelerator.lower().strip() if accelerator is not None else None
+    self.bvh_leaf_size = None
+    self.bvh = None
+    if self.accelerator == 'bvh':
+      # A BVH é construída uma única vez no espaço local; Instance não precisa
+      # recriar a hierarquia, apenas transformar o raio antes da travessia.
+      leaf_size = max(1, int(bvh_leaf_size))
+      self.bvh_leaf_size = leaf_size
+      self.bvh = TriangleBVH(self.triangles, leaf_size=leaf_size)
+      self.bvh_node_count = self.bvh.node_count
+      self.bvh_leaf_count = self.bvh.leaf_count
+      self.bvh_max_depth = self.bvh.max_depth
 
   @classmethod
   def from_vertices_faces(
@@ -206,12 +224,26 @@ class TriangleMesh(Shape):
     faces: list[tuple[int, int, int]],
     material: Material,
     name: str | None = None,
+    accelerator: str | None = None,
+    bvh_leaf_size: int = 4,
   ):
     triangles = [Triangle(vertices[i0], vertices[i1], vertices[i2], material) for i0, i1, i2 in faces]
-    return cls(triangles=triangles, material=material, vertices=vertices, faces=faces, name=name)
+    return cls(
+      triangles=triangles,
+      material=material,
+      vertices=vertices,
+      faces=faces,
+      name=name,
+      accelerator=accelerator,
+      bvh_leaf_size=bvh_leaf_size,
+    )
 
   def intersect(self, ray: Ray, hit: Hit):
-    # Slide 4, p. 35 e p. 47-48: a malha apenas percorre os triângulos e conserva o hit mais próximo.
+    # Slide 4, p. 35 e p. 47-48: a malha conserva o mesmo fluxo de closest-hit;
+    # a BVH só reduz quantos triângulos precisam ser testados por raio.
+    if self.bvh is not None:
+      return self.bvh.intersect(ray, hit)
+
     found = False
     for triangle in self.triangles:
       if triangle.intersect(ray, hit):
