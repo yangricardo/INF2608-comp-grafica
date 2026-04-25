@@ -215,6 +215,14 @@ class Render:
         entry['pos'] = glm_to_list(getattr(o, 'pos'))
       if hasattr(o, 'normal'):
         entry['normal'] = glm_to_list(getattr(o, 'normal'))
+      if hasattr(o, 'v0'):
+        entry['v0'] = glm_to_list(getattr(o, 'v0'))
+      if hasattr(o, 'v1'):
+        entry['v1'] = glm_to_list(getattr(o, 'v1'))
+      if hasattr(o, 'v2'):
+        entry['v2'] = glm_to_list(getattr(o, 'v2'))
+      if hasattr(o, 'geo_normal'):
+        entry['geo_normal'] = glm_to_list(getattr(o, 'geo_normal'))
       if hasattr(o, 'radius'):
         entry['radius'] = float(getattr(o, 'radius'))
       if hasattr(o, 'p_min'):

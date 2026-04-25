@@ -227,6 +227,16 @@ Do ponto de vista matemático, a BVH não altera a interseção do triângulo em
 
 O valor dessa cena é estritamente geométrico: ela valida a interseção raio-triângulo, a triangulação de faces poligonais no carregador e a compatibilidade da nova malha com o pipeline existente de `Scene`, `Hit` e `Instance`. O arquivo `properties.md` gerado para essa renderização registra 5 vértices e 6 triângulos, além de expor o uso da BVH com `bvh_node_count`, `bvh_leaf_count` e `bvh_max_depth`, o que facilita a conferência da malha carregada. As anotações no código indicam as páginas dos slides usadas como base para câmera, Phong, interseções, instanciação e o raciocínio de sombra.
 
+### 3.5. Cornell Box com pirâmides espelhada e transparente
+
+Arquivo de referência: `src/ray_tracing_2/cornell_box_pyramid.py`.
+
+Esta cena reutiliza a Cornell Box do projeto, mas troca o foco experimental para a convivência entre materiais recursivos e duas malhas trianguladas simples. A pirâmide à esquerda da esfera usa `TransparentMaterial`, enquanto a cópia à direita usa `ReflectiveMaterial`. A composição mantém os blocos internos da Cornell Box e adiciona essas duas pirâmides para comparar, no mesmo enquadramento, transparência, reflexão e sombreamento direto.
+
+![Cornell Box com pirâmides](../outputs/cornell_box_pyramid_20260425_002801/render.png)
+
+O valor técnico dessa cena é duplo. Primeiro, ela confirma que a primitiva `TriangleMesh` já integrada ao traçador participa da mesma cadeia de visibilidade dos demais objetos, sem exigir tratamento especial no núcleo de `Scene`. Segundo, ela evidencia que a reflexão e a refração continuam operando dentro de uma cena que mistura caixas, esfera e duas pirâmides no mesmo espaço de modelagem. O arquivo `properties.md` correspondente registra ambas as malhas trianguladas com seus materiais distintos, o que facilita verificar a geometria efetivamente renderizada e a orientação visual esperada da composição.
+
 ## 4. Critérios, Extensões e Limitações
 
 ### 4.1. Requisitos básicos atendidos
