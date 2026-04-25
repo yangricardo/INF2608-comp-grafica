@@ -138,6 +138,85 @@ class Box(Shape):
     hit.set_face_normal(ray, outward_normal)
     hit.material = self.material
     return True
+
+
+class Triangle(Shape):
+  # Slide 4, p. 35 e p. 47-48: a primitiva participa do mesmo fluxo de closest hit das demais.
+  def __init__(self, v0: glm.vec3, v1: glm.vec3, v2: glm.vec3, material: Material):
+    self.v0 = glm.vec3(v0)
+    self.v1 = glm.vec3(v1)
+    self.v2 = glm.vec3(v2)
+    self.e1 = self.v1 - self.v0
+    self.e2 = self.v2 - self.v0
+    normal = glm.cross(self.e1, self.e2)
+    if glm.dot(normal, normal) <= 1e-12:
+      raise ValueError('Triangle vertices are degenerate or collinear')
+    self.geo_normal = glm.normalize(normal)
+    self.material = material
+
+  def intersect(self, ray: Ray, hit: Hit):
+    # Slide 4, p. 35 e p. 47-48: Möller-Trumbore testa a primitiva e devolve o hit local.
+    eps = 1e-6
+    pvec = glm.cross(ray.d, self.e2)
+    det = glm.dot(self.e1, pvec)
+    if abs(det) < eps:
+      return False
+
+    inv_det = 1.0 / det
+    tvec = ray.o - self.v0
+    u = glm.dot(tvec, pvec) * inv_det
+    if u < 0.0 or u > 1.0:
+      return False
+
+    qvec = glm.cross(tvec, self.e1)
+    v = glm.dot(ray.d, qvec) * inv_det
+    if v < 0.0 or (u + v) > 1.0:
+      return False
+
+    t_candidate = glm.dot(self.e2, qvec) * inv_det
+    if t_candidate <= 0.001 or t_candidate >= hit.t:
+      return False
+
+    hit.t = t_candidate
+    hit.pos = ray.o + t_candidate * ray.d
+    hit.set_face_normal(ray, self.geo_normal)
+    hit.material = self.material
+    return True
+
+
+class TriangleMesh(Shape):
+  def __init__(
+    self,
+    triangles: list[Triangle],
+    material: Material,
+    vertices: list[glm.vec3] | None = None,
+    faces: list[tuple[int, int, int]] | None = None,
+    name: str | None = None,
+  ):
+    self.triangles = list(triangles)
+    self.material = material
+    self.vertices = [glm.vec3(v) for v in vertices] if vertices is not None else []
+    self.faces = [tuple(face) for face in faces] if faces is not None else []
+    self.name = name
+
+  @classmethod
+  def from_vertices_faces(
+    cls,
+    vertices: list[glm.vec3],
+    faces: list[tuple[int, int, int]],
+    material: Material,
+    name: str | None = None,
+  ):
+    triangles = [Triangle(vertices[i0], vertices[i1], vertices[i2], material) for i0, i1, i2 in faces]
+    return cls(triangles=triangles, material=material, vertices=vertices, faces=faces, name=name)
+
+  def intersect(self, ray: Ray, hit: Hit):
+    # Slide 4, p. 35 e p. 47-48: a malha apenas percorre os triângulos e conserva o hit mais próximo.
+    found = False
+    for triangle in self.triangles:
+      if triangle.intersect(ray, hit):
+        found = True
+    return found
   
 class Instance(Shape):
   def __init__(self, shape: Shape, matrix: glm.mat4):

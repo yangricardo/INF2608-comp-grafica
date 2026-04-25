@@ -60,6 +60,14 @@ class Render:
       current = getattr(current, 'shape', None)
     return None
 
+  def _extract_attr(self, obj, attr_name: str):
+    current = obj
+    while current is not None:
+      if hasattr(current, attr_name):
+        return getattr(current, attr_name)
+      current = getattr(current, 'shape', None)
+    return None
+
   def explain_properties_md(self, props: dict) -> str:
     """Gera o texto Markdown com as propriedades da simulação.
 
@@ -213,6 +221,15 @@ class Render:
         entry['p_min'] = glm_to_list(getattr(o, 'p_min'))
       if hasattr(o, 'p_max'):
         entry['p_max'] = glm_to_list(getattr(o, 'p_max'))
+      vertices = self._extract_attr(o, 'vertices')
+      if vertices is not None:
+        entry['vertex_count'] = len(vertices)
+      faces = self._extract_attr(o, 'faces')
+      if faces is not None:
+        entry['face_count'] = len(faces)
+      triangles = self._extract_attr(o, 'triangles')
+      if triangles is not None:
+        entry['triangle_count'] = len(triangles)
       shape_chain = self._shape_chain(o)
       if len(shape_chain) > 1:
         entry['shape_chain'] = shape_chain

@@ -1,0 +1,75 @@
+{
+  "name": "triangle_pyramid_scene",
+  "width": 320,
+  "height": 240,
+  "ambient_light": [0.12, 0.12, 0.12],
+  "background_color": [0.02, 0.02, 0.05],
+  "max_depth": 4,
+  "camera": {
+    "eye": [0.0, 0.55, 4.35],
+    "center": [0.0, 0.05, 0.0],
+    "up": [0.0, 1.0, 0.0],
+    "fov": 45
+  },
+  "meshes": [
+    {
+      "name": "triangle_pyramid",
+      "vertices": [
+        [0.0, 0.8, 0.0],
+        [-0.7, -0.6, 0.7],
+        [0.7, -0.6, 0.7],
+        [0.7, -0.6, -0.7],
+        [-0.7, -0.6, -0.7]
+      ],
+      "faces": [
+        [1, 2, 3],
+        [1, 3, 4],
+        [1, 4, 5],
+        [1, 5, 2],
+        [2, 5, 4, 3]
+      ],
+      "transform": {
+        "translate": [0.0, 0.12, 0.0],
+        "rotate_y": -18.0,
+        "scale": [1.4, 1.4, 1.4]
+      },
+      "material": {
+        "ambient": [0.1, 0.0, 0.0],
+        "diffuse": [0.7, 0.0, 0.0],
+        "specular": [1.0, 1.0, 1.0],
+        "shininess": 50
+      }
+    }
+  ],
+  "spheres": [
+    {
+      "center": [1.05, 0.55, 0.75],
+      "radius": 0.34,
+      "material": {
+        "ambient": [0.0, 0.0, 0.1],
+        "diffuse": [0.0, 0.0, 0.7],
+        "specular": [1.0, 1.0, 1.0],
+        "shininess": 40
+      }
+    }
+  ],
+  "plane": {
+    "y": -1.0,
+    "material": {
+      "ambient": [0.08, 0.08, 0.08],
+      "diffuse": [0.4, 0.4, 0.4],
+      "specular": [0.0, 0.0, 0.0],
+      "shininess": 1
+    }
+  },
+  "lights": [
+    {
+      "pos": [2.4, 4.9, 3.4],
+      "power": [110.0, 110.0, 110.0]
+    },
+    {
+      "pos": [-2.4, 4.9, -3.4],
+      "power": [110.0, 110.0, 110.0]
+    }
+  ]
+}

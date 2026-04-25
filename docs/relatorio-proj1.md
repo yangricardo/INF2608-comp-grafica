@@ -215,6 +215,16 @@ Na cena inspirada na Cornell Box, o objetivo experimental muda. O foco deixa de 
 
 Ela **não** comprova diretamente reflexão ou refração recursiva nos blocos, pois os materiais padrão não as ativam. A evidência óptica avançada — reflexão com Fresnel-Schlick e refração com Beer-Lambert — pode ser obtida substituindo os materiais dos blocos por `ReflectiveMaterial` ou `TransparentMaterial` na mesma cena, ou observando a cena carregada via `src/ray_tracing_2/cornell_box.py`, que usa esses materiais por definição. A importância desta cena para o projeto é, portanto, infraestrutural: ela valida que todos os mecanismos de suporte às extensões do Slide 5 estão corretamente montados.
 
+### 3.4. Geometria triangulada: malha OBJ sem aceleração
+
+Arquivo de referência: `src/ray_tracing_2/main_triangles.py`.
+
+Para atender ao requisito de geometria representada por triângulos, a implementação adiciona uma especificação JSON simples carregada como cena e convertida em uma coleção de triângulos sem estrutura de aceleração. A cena foi ajustada para usar dois materiais Phong distintos, vermelho e azul, além do plano cinza, porque a versão anterior ficava visualmente lavada e a sombra não aparecia com clareza suficiente. Isso não indicava falha no caminho de sombras: o problema era a encenação da cena, com luz muito central e ambiente alto. A versão final reposiciona a esfera para que ela projete uma sombra visível sobre a própria malha triangulada e adiciona uma segunda luz no lado oposto para equilibrar a iluminação. A figura abaixo mostra uma pequena pirâmide triangulada, descrita em `inputs/triangle_pyramid.json` e renderizada com a mesma infraestrutura de câmera, luz e materiais usada nas demais cenas.
+
+![Malha triangulada com OBJ](../outputs/main_triangles_20260424_231333/render.png)
+
+O valor dessa cena é estritamente geométrico: ela valida a interseção raio-triângulo, a triangulação de faces poligonais no carregador OBJ e a compatibilidade da nova malha com o pipeline existente de `Scene`, `Hit` e `Instance`. O arquivo `properties.md` gerado para essa renderização registra 5 vértices e 6 triângulos, além de manter visíveis os três materiais da cena e a sombra da esfera sobre a pirâmide, o que facilita a conferência da malha carregada. Como o enunciado pede a geometria triangulada sem estrutura de aceleração, a varredura permanece linear sobre os triângulos da malha. As anotações no código indicam as páginas dos slides usadas como base para câmera, Phong, interseções, instanciação e o raciocínio de sombra.
+
 ## 4. Critérios, Extensões e Limitações
 
 ### 4.1. Requisitos básicos atendidos
@@ -230,12 +240,12 @@ Ela **não** comprova diretamente reflexão ou refração recursiva nos blocos, 
 
 - [x] Transformações de modelagem na instanciação geométrica, com `Translate`, `Rotate` e `Instance`.
 - [x] Luz de área retangular com amostragem discreta e formação de penumbra.
+- [x] Geometria representada por triângulos, com interseção raio-triângulo e carregamento de malha OBJ sem aceleração espacial.
 - [x] Objetos reflexivos com ponderação angular por Fresnel-Schlick.
 - [x] Objetos refratários com Lei de Snell, reflexão interna total, absorção Beer-Lambert e sombras translúcidas.
 
 ### 4.3. Extensões opcionais não implementadas
 
-- [ ] Geometria representada por triângulos.
 - [ ] Estrutura espacial de aceleração, como BVH ou kd-tree.
 - [ ] Comparação de diferentes distribuições de amostras na fonte retangular.
 
