@@ -230,6 +230,21 @@ class Render:
       triangles = self._extract_attr(o, 'triangles')
       if triangles is not None:
         entry['triangle_count'] = len(triangles)
+      accelerator = self._extract_attr(o, 'accelerator')
+      if accelerator is not None:
+        entry['accelerator'] = accelerator
+      bvh_leaf_size = self._extract_attr(o, 'bvh_leaf_size')
+      if bvh_leaf_size is not None:
+        entry['bvh_leaf_size'] = bvh_leaf_size
+      bvh_node_count = self._extract_attr(o, 'bvh_node_count')
+      if bvh_node_count is not None:
+        entry['bvh_node_count'] = bvh_node_count
+      bvh_leaf_count = self._extract_attr(o, 'bvh_leaf_count')
+      if bvh_leaf_count is not None:
+        entry['bvh_leaf_count'] = bvh_leaf_count
+      bvh_max_depth = self._extract_attr(o, 'bvh_max_depth')
+      if bvh_max_depth is not None:
+        entry['bvh_max_depth'] = bvh_max_depth
       shape_chain = self._shape_chain(o)
       if len(shape_chain) > 1:
         entry['shape_chain'] = shape_chain
