@@ -6,6 +6,7 @@ from time import perf_counter
 from typing import Optional
 
 from ray_tracing_2.film import Film
+from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.render_snapshot import RenderSnapshot
 
 
@@ -33,9 +34,16 @@ class Render:
 
     img_path = os.path.join(sim_dir, 'render.png')
     properties_json_path = os.path.join(sim_dir, 'properties.json')
+    effective_samples_per_pixel = 1 if sampling_mode == SamplingMode.CENTER.value else samples_per_pixel
 
     # Cria o Film com parâmetros de AA e renderiza para o arquivo de saída
-    film = Film(width=width, height=height, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed)
+    film = Film(
+      width=width,
+      height=height,
+      samples_per_pixel=effective_samples_per_pixel,
+      sampling_mode=sampling_mode,
+      seed=seed,
+    )
     render_start = perf_counter()
     film.render(scene=scene, camera=cam, filename=img_path, gamma_fix=gamma_fix)
     render_time_seconds = perf_counter() - render_start
@@ -46,7 +54,7 @@ class Render:
       width=width,
       height=height,
       name=name,
-      samples_per_pixel=samples_per_pixel,
+      samples_per_pixel=effective_samples_per_pixel,
       sampling_mode=sampling_mode,
       seed=seed,
       gamma_fix=gamma_fix,

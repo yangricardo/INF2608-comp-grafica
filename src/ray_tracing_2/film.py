@@ -13,8 +13,9 @@ from ray_tracing_2.sampling import stratified_grid_samples_2d, uniform_samples_2
 from ray_tracing_2.scene import Scene
 
 
-# Enum público para escolher modo de amostragem (jittered ou stratified)
+# Enum público para escolher modo de amostragem no filme.
 class SamplingMode(Enum):
+  CENTER = 'center'
   JITTERED = 'jittered'
   STRATIFIED = 'stratified'
 
@@ -35,9 +36,11 @@ class Film:
     elif isinstance(sampling_mode, SamplingMode):
       self.sampling_mode = sampling_mode
     else:
-      # aceita string 'jittered' / 'stratified'
+      # aceita string 'center' / 'jittered' / 'stratified'
       mode_str = str(sampling_mode).lower()
-      if mode_str == SamplingMode.STRATIFIED.value:
+      if mode_str == SamplingMode.CENTER.value:
+        self.sampling_mode = SamplingMode.CENTER
+      elif mode_str == SamplingMode.STRATIFIED.value:
         self.sampling_mode = SamplingMode.STRATIFIED
       else:
         self.sampling_mode = SamplingMode.JITTERED
@@ -61,7 +64,7 @@ class Film:
   def get_samples_for_pixel(self, i: int, j: int) -> list[tuple[float, float]]:
     """
     Gera uma lista de amostras normalizadas (xn, yn) para o pixel (i, j).
-    Suporta dois modos: 'jittered' (Monte Carlo jittered) e 'stratified'.
+    Suporta três modos: 'center', 'jittered' e 'stratified'.
 
     Comentário (PT): `get_sample()` preserva a fórmula central do Slide 4,
     enquanto este método implementa a extensão de anti-aliasing do Slide 5
@@ -75,6 +78,12 @@ class Film:
     """
     spp = max(1, int(self.samples_per_pixel))
     samples: list[tuple[float, float]] = []
+
+    if self.sampling_mode == SamplingMode.CENTER:
+      # Slide 4, p. 25-29: preserva explicitamente o pipeline original do
+      # projeto, no qual cada pixel usa apenas a amostra central da câmera
+      # pinhole, sem jitter nem estratificação subpixel.
+      return [self.get_sample(i, j)]
 
     if self.sampling_mode == SamplingMode.JITTERED:
       # Slide 5, p. 4-8: jittered Monte Carlo dentro do pixel. As amostras são

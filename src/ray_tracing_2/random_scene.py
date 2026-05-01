@@ -21,6 +21,7 @@ from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Sphere, Plane
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.light import PointLight
+from ray_tracing_2.film import SamplingMode
 
 
 def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
@@ -152,7 +153,7 @@ if __name__ == '__main__':
   parser.add_argument('--width', type=int, default=400)
   parser.add_argument('--height', type=int, default=300)
   parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
-  parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered')
+  parser.add_argument('--sampling_mode', choices=[mode.value for mode in SamplingMode], default=SamplingMode.JITTERED.value)
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
