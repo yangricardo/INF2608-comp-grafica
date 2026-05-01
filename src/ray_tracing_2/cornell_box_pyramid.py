@@ -12,14 +12,12 @@ from __future__ import annotations
 from pyglm import glm
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate, TriangleMesh
+from ray_tracing_2.shape import Box, Rotate, Sphere, Translate, TriangleMesh
 from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.light import AmbientLight, AreaLight, PointLight
-from ray_tracing_2.film import Film, SamplingMode
+from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.render import Render
 import argparse
-
-from ray_tracing_2_antialiasing import scene
 
 
 
