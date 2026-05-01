@@ -259,22 +259,22 @@ PBRT 4e de apoio: §11.2.
 
 ### 4.9. Quadro de aderência entre Slide 5 e implementação
 
-| Conceito do Slide 5                                             | Situação no repositório         | Evidência                                                                      |
-| --------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
-| Antialiasing por múltiplas amostras por pixel                   | Implementado com extensão       | `Film.get_samples_for_pixel()`; `Film.render()`                                |
-| Jitter subpixel aleatório                                       | Implementado                    | `SamplingMode.JITTERED`; `Film.get_samples_for_pixel()`                        |
-| Amostragem estratificada                                        | Implementado como extensão      | `SamplingMode.STRATIFIED`; `Film.get_samples_for_pixel()`                      |
-| Instanciação por transformações afins em coordenadas homogêneas | Implementado                    | `Instance.intersect()`; `main_ellipse.py`; `main_box.py`                       |
-| Transformação correta de normais por inversa transposta         | Implementado                    | `m_inv_t` em `Instance.intersect()`                                            |
-| Luz de área com integração discreta e penumbra                  | Implementado com aproximação    | `AreaLight.sample_radiance()`; `AreaLight.radiance()`; `main_area_light.py`    |
-| Padrões regular e uniforme puros para amostragem da luz         | Não implementado explicitamente | `AreaLight` usa grade com jitter por célula, não modos separados de amostragem |
-| Caixa/AABB e método de slabs                                    | Implementado                    | `Box.intersect()`; `AABB.intersects()`                                         |
-| Traçador recursivo com profundidade finita                      | Implementado                    | `Scene.can_spawn_ray()`; `Scene.trace_ray()`                                   |
-| Reflexão especular com Fresnel-Schlick                          | Implementado com aproximação    | `ReflectiveMaterial.eval()`                                                    |
-| Refração dielétrica com Snell, TIR e Beer-Lambert               | Implementado com simplificação  | `TransparentMaterial.eval()`; `TransparentMaterial.shadow_transmittance()`     |
-| Generalização do shadow ray para transmitância acumulada        | Implementado                    | `Scene.transmittance()`                                                        |
+| Conceito do Slide 5                                             | Situação no repositório           | Evidência                                                                                        |
+| --------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Antialiasing por múltiplas amostras por pixel                   | Implementado com extensão         | `Film.get_samples_for_pixel()`; `Film.render()`                                                  |
+| Jitter subpixel aleatório                                       | Implementado                      | `SamplingMode.JITTERED`; `Film.get_samples_for_pixel()`                                          |
+| Amostragem estratificada                                        | Implementado como extensão        | `SamplingMode.STRATIFIED`; `Film.get_samples_for_pixel()`                                        |
+| Instanciação por transformações afins em coordenadas homogêneas | Implementado                      | `Instance.intersect()`; `main_ellipse.py`; `main_box.py`                                         |
+| Transformação correta de normais por inversa transposta         | Implementado                      | `m_inv_t` em `Instance.intersect()`                                                              |
+| Luz de área com integração discreta e penumbra                  | Implementado com aproximação      | `AreaLight.sample_radiance()`; `AreaLight.radiance()`; `main_area_light.py`                      |
+| Padrões regular e uniforme puros para amostragem da luz         | Implementado com modos explícitos | `AreaLightSamplingMode.REGULAR`; `AreaLightSamplingMode.UNIFORM`; `AreaLight._iter_sample_uvs()` |
+| Caixa/AABB e método de slabs                                    | Implementado                      | `Box.intersect()`; `AABB.intersects()`                                                           |
+| Traçador recursivo com profundidade finita                      | Implementado                      | `Scene.can_spawn_ray()`; `Scene.trace_ray()`                                                     |
+| Reflexão especular com Fresnel-Schlick                          | Implementado com aproximação      | `ReflectiveMaterial.eval()`                                                                      |
+| Refração dielétrica com Snell, TIR e Beer-Lambert               | Implementado com simplificação    | `TransparentMaterial.eval()`; `TransparentMaterial.shadow_transmittance()`                       |
+| Generalização do shadow ray para transmitância acumulada        | Implementado                      | `Scene.transmittance()`                                                                          |
 
-O quadro mostra que o Slide 5 é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com jitter estratificado, e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
+O quadro mostra que o Slide 5 é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com padrão configurável (`regular`, `uniform`, `stratified`), e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
 
 ## 5. Slide 6: Triângulos e Estruturas de Aceleração
 

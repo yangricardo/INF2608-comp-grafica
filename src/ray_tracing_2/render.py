@@ -156,11 +156,18 @@ class Render:
     if lights:
       for i, L in enumerate(lights):
         L: dict[str, Any] = L
-        lines.append(f'- **Light {i+1}**:')
+        light_type = L.get('type', 'Light')
+        lines.append(f'- **Light {i+1} ({light_type})**:')
         if 'pos' in L:
           lines.append(f'  - pos: {vec_to_list(L.get("pos"))}')
         if 'power' in L:
           lines.append(f'  - power: {vec_to_list(L.get("power"))}')
+        if 'samples_u' in L:
+          lines.append(f'  - samples_u: {L.get("samples_u")}')
+        if 'samples_v' in L:
+          lines.append(f'  - samples_v: {L.get("samples_v")}')
+        if 'light_sampling_mode' in L:
+          lines.append(f'  - light_sampling_mode: {L.get("light_sampling_mode")}')
         lines.append('')
     else:
       lines.append('- (Nenhuma luz detalhada fornecida)')
@@ -263,11 +270,18 @@ class Render:
 
     lights_list: list[dict[str, Any]] = []
     for L in scene.lights:
-      lentry: dict[str, Any] = {}
+      lentry: dict[str, Any] = {'type': type(L).__name__}
       if hasattr(L, 'pos'):
         lentry['pos'] = glm_to_list(getattr(L, 'pos'))
       if hasattr(L, 'power'):
         lentry['power'] = glm_to_list(getattr(L, 'power'))
+      if hasattr(L, 'samples_u'):
+        lentry['samples_u'] = int(getattr(L, 'samples_u'))
+      if hasattr(L, 'samples_v'):
+        lentry['samples_v'] = int(getattr(L, 'samples_v'))
+      if hasattr(L, 'sampling_mode'):
+        light_sampling_mode = getattr(L, 'sampling_mode')
+        lentry['light_sampling_mode'] = light_sampling_mode.value if hasattr(light_sampling_mode, 'value') else str(light_sampling_mode)
       lights_list.append(lentry)
 
     render_settings: dict[str, Any] = {

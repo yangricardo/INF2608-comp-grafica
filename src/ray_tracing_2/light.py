@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pyglm import glm
 import random
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,6 +38,12 @@ class AmbientLight:
 
   def __iter__(self):
     return iter((self.color.x, self.color.y, self.color.z))
+
+
+class AreaLightSamplingMode(Enum):
+  REGULAR = 'regular'
+  UNIFORM = 'uniform'
+  STRATIFIED = 'stratified'
 
 
 class PointLight(Light):
@@ -77,6 +84,7 @@ class AreaLight(Light):
     power: glm.vec3,
     samples_u: int = 4,
     samples_v: int = 4,
+    sampling_mode: str | AreaLightSamplingMode = AreaLightSamplingMode.STRATIFIED,
     seed: int | None = None,
   ):
     super().__init__(p, power)
@@ -85,13 +93,41 @@ class AreaLight(Light):
     self.e_v = glm.vec3(e_v)
     self.samples_u = max(1, int(samples_u))
     self.samples_v = max(1, int(samples_v))
+    if isinstance(sampling_mode, AreaLightSamplingMode):
+      self.sampling_mode = sampling_mode
+    else:
+      mode_str = str(sampling_mode).lower()
+      if mode_str == AreaLightSamplingMode.REGULAR.value:
+        self.sampling_mode = AreaLightSamplingMode.REGULAR
+      elif mode_str == AreaLightSamplingMode.UNIFORM.value:
+        self.sampling_mode = AreaLightSamplingMode.UNIFORM
+      else:
+        self.sampling_mode = AreaLightSamplingMode.STRATIFIED
     self.rng = random.Random(seed)
     self.area = glm.length(glm.cross(self.e_u, self.e_v))
 
-  def _sample_position(self, iu: int, iv: int) -> glm.vec3:
-    u = (iu + self.rng.random()) / self.samples_u
-    v = (iv + self.rng.random()) / self.samples_v
+  def _sample_position(self, u: float, v: float) -> glm.vec3:
     return self.p + u * self.e_u + v * self.e_v
+
+  def _iter_sample_uvs(self) -> list[tuple[float, float]]:
+    sample_count = self.samples_u * self.samples_v
+    if sample_count <= 0:
+      return []
+
+    if self.sampling_mode == AreaLightSamplingMode.UNIFORM:
+      return [(self.rng.random(), self.rng.random()) for _ in range(sample_count)]
+
+    uvs: list[tuple[float, float]] = []
+    for iu in range(self.samples_u):
+      for iv in range(self.samples_v):
+        if self.sampling_mode == AreaLightSamplingMode.REGULAR:
+          u = (iu + 0.5) / self.samples_u
+          v = (iv + 0.5) / self.samples_v
+        else:
+          u = (iu + self.rng.random()) / self.samples_u
+          v = (iv + self.rng.random()) / self.samples_v
+        uvs.append((u, v))
+    return uvs
 
   def sample_radiance(self, scene: "Scene", hit: "Hit") -> list[tuple[glm.vec3, glm.vec3]]:
     """Amostra múltiplos pontos na superfície da luz para produzir penumbra."""
@@ -99,33 +135,34 @@ class AreaLight(Light):
     # Slide 5, pp. 14-23: a luz de área aproxima a integral sobre uma fonte
     # extensa por soma discreta de amostras. Cada subamostra enxerga uma
     # visibilidade ligeiramente diferente, produzindo penumbra nas regiões
-    # parcialmente ocluídas.
+    # parcialmente ocluídas. Esta base agora expõe três padrões explícitos:
+    # regular (centro de cada célula), uniform (aleatório puro na área toda)
+    # e stratified (jitter por célula, padrão anterior e padrão default).
     sample_count = self.samples_u * self.samples_v
     if sample_count <= 0:
       return samples
 
-    for iu in range(self.samples_u):
-      for iv in range(self.samples_v):
-        pos = self._sample_position(iu, iv)
-        l_vec = pos - hit.pos
-        dist = glm.length(l_vec)
-        if dist <= 0.0:
-          continue
-        l = glm.normalize(l_vec)
+    for u, v in self._iter_sample_uvs():
+      pos = self._sample_position(u, v)
+      l_vec = pos - hit.pos
+      dist = glm.length(l_vec)
+      if dist <= 0.0:
+        continue
+      l = glm.normalize(l_vec)
 
-        transmittance = scene.transmittance(hit.pos, hit.geo_normal, l, dist)
-        if _is_black(transmittance):
-          samples.append((glm.vec3(0.0), l))
-          continue
+      transmittance = scene.transmittance(hit.pos, hit.geo_normal, l, dist)
+      if _is_black(transmittance):
+        samples.append((glm.vec3(0.0), l))
+        continue
 
-        # Ao contrário da PointLight do enunciado, aqui a contribuição é
-        # distribuída entre amostras de uma área emissiva e decai com 1/r^2,
-        # aproximando a síntese física dos slides para fonte extensa.
-        li = ((self.power / float(sample_count)) / (dist ** 2)) * transmittance
-        samples.append((li, l))
+      # Ao contrário da PointLight do enunciado, aqui a contribuição é
+      # distribuída entre amostras de uma área emissiva e decai com 1/r^2,
+      # aproximando a síntese física dos slides para fonte extensa.
+      li = ((self.power / float(sample_count)) / (dist ** 2)) * transmittance
+      samples.append((li, l))
 
-      # TODO(light): incorporar fator angular do emissor (coseno da emissão) se
-      # a fonte de área deixar de ser usada apenas como aproximador didático.
+    # TODO(light): incorporar fator angular do emissor (coseno da emissão) se
+    # a fonte de área deixar de ser usada apenas como aproximador didático.
 
     return samples
 

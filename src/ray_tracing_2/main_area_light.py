@@ -13,14 +13,18 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.film import SamplingMode
-from ray_tracing_2.light import AreaLight
+from ray_tracing_2.light import AreaLight, AreaLightSamplingMode
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Plane, Sphere
 
 
-def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
+def render(spp: int = 1,
+           sampling_mode: str = 'jittered',
+           light_sampling_mode: str = AreaLightSamplingMode.STRATIFIED.value,
+           seed: int | None = None,
+           gamma_fix: bool = False):
   """Renderiza a cena com uma luz de área sobre a esfera e o plano."""
   W, H = 400, 300
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
@@ -44,6 +48,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
 
   # Luz de área retangular: origem + dois vetores de aresta.
   # A região cobre um retângulo acima e à frente da esfera para criar penumbra.
+  # `light_sampling_mode` permite comparar regular, uniform e stratified.
   scene.lights.append(
     AreaLight(
       p=glm.vec3(-1.0, 5.0, 4.0),
@@ -52,6 +57,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
       power=glm.vec3(150.0),
       samples_u=4,
       samples_v=4,
+      sampling_mode=light_sampling_mode,
       seed=seed,
     )
   )
@@ -74,7 +80,8 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
+  parser.add_argument('--light_sampling_mode', choices=[m.value for m in AreaLightSamplingMode], default=AreaLightSamplingMode.STRATIFIED.value, help='Sampling mode for the area light')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   args = parser.parse_args()
-  render(spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(spp=args.spp, sampling_mode=args.sampling_mode, light_sampling_mode=args.light_sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)

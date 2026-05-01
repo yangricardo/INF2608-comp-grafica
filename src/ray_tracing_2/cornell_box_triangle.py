@@ -17,7 +17,7 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.film import SamplingMode
-from ray_tracing_2.light import AmbientLight, AreaLight, PointLight
+from ray_tracing_2.light import AmbientLight, AreaLight, AreaLightSamplingMode, PointLight
 from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
@@ -51,6 +51,7 @@ def render(width: int = 800,
            height: int = 600,
            spp: int = 1,
            sampling_mode: str = 'jittered',
+           light_sampling_mode: str = AreaLightSamplingMode.STRATIFIED.value,
            seed: int | None = None,
            gamma_fix: bool = False,
            max_depth: int = 10,
@@ -160,6 +161,7 @@ def render(width: int = 800,
     power=glm.vec3(80.0, 80.0, 80.0),
     samples_u=2,
     samples_v=2,
+    sampling_mode=light_sampling_mode,
     seed=seed,
   )
   scene.lights.append(camera_fill_light)
@@ -195,6 +197,7 @@ if __name__ == "__main__":
   parser.add_argument('--height', type=int, default=600, help='Image height in pixels')
   parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
   parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
+  parser.add_argument('--light_sampling_mode', choices=[m.value for m in AreaLightSamplingMode], default=AreaLightSamplingMode.STRATIFIED.value, help='Sampling mode for area lights in the scene')
   parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
   parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
@@ -206,6 +209,7 @@ if __name__ == "__main__":
     height=args.height,
     spp=args.spp,
     sampling_mode=args.sampling_mode,
+    light_sampling_mode=args.light_sampling_mode,
     seed=args.seed,
     gamma_fix=args.gamma_fix,
     max_depth=args.max_depth,
