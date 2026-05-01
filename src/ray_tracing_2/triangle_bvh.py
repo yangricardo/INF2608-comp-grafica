@@ -145,7 +145,7 @@ class TriangleBVHNode:
 
 class TriangleBVH:
   def __init__(self, triangles: Sequence[Any], leaf_size: int = 4):
-    # Leaf size controla o compromisso entre profundidade de árvore e custo
+    # O tamanho da folha controla o compromisso entre profundidade de árvore e custo
     # por folha. A estrutura é construída uma única vez para a malha e fica no
     # espaço local do `TriangleMesh`; cenas com múltiplos objetos ainda usam o
     # loop linear de `Scene.compute_intersection()` no nível superior.
