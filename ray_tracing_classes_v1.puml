@@ -1,0 +1,146 @@
+@startuml ray_tracing_classes_v1
+title Arquitetura Principal do ray_tracing_2
+
+skinparam classAttributeIconSize 0
+
+enum SamplingMode {
+  JITTERED
+  STRATIFIED
+}
+
+enum AreaLightSamplingMode {
+  UNIFORM
+  REGULAR
+  STRATIFIED
+}
+
+class Camera {
+  +generate_ray(xn, yn): Ray
+}
+
+class Ray {
+  +o: vec3
+  +d: vec3
+}
+
+class Hit {
+  +found: bool
+  +t: float
+  +pos: vec3
+  +normal: vec3
+  +material: Material
+  +set_face_normal(ray, outward_normal)
+}
+
+class Scene {
+  +objects: list[Shape]
+  +lights: list[Light]
+  +compute_intersection(ray): Hit
+  +trace_ray(ray, depth): vec3
+  +transmittance(...): vec3
+}
+
+class Film {
+  +samples_per_pixel: int
+  +sampling_mode: SamplingMode
+  +get_sample(i, j)
+  +get_samples_for_pixel(i, j)
+  +render(scene, camera, ...)
+}
+
+class Render {
+  +render(scene, cam, width, height, ...)
+}
+
+abstract class Shape {
+  +intersect(ray, hit): Hit
+}
+
+class Sphere
+class Plane
+class Box
+class Triangle
+class TriangleMesh
+class Instance
+class Translate
+class Rotate
+
+abstract class Light {
+  +sample_radiance(scene, hit)
+}
+
+class AmbientLight
+class PointLight
+class AreaLight {
+  +sampling_mode: AreaLightSamplingMode
+  +_iter_sample_uvs()
+  +sample_radiance(scene, hit)
+}
+
+abstract class Material {
+  +eval(scene, hit, ray, depth): vec3
+  +shadow_transmittance(...): vec3
+}
+
+class PhongMaterial
+class ReflectiveMaterial
+class TransparentMaterial
+
+class AABB
+class TriangleBVHNode
+class TriangleBVH
+class CLIHelpFormatter
+
+class "cli.py" as CLI <<module>> {
+  +build_parser()
+  +add_image_size_arguments()
+  +add_sampling_arguments()
+  +add_light_sampling_argument()
+  +add_seed_argument()
+  +add_gamma_fix_argument()
+}
+
+class "sampling.py" as Sampling2D <<module>> {
+  +uniform_samples_2d()
+  +regular_grid_samples_2d()
+  +stratified_grid_samples_2d()
+}
+
+Shape <|-- Sphere
+Shape <|-- Plane
+Shape <|-- Box
+Shape <|-- Triangle
+Shape <|-- TriangleMesh
+Shape <|-- Instance
+Instance <|-- Translate
+Instance <|-- Rotate
+
+Light <|-- PointLight
+Light <|-- AreaLight
+
+Material <|-- PhongMaterial
+PhongMaterial <|-- ReflectiveMaterial
+PhongMaterial <|-- TransparentMaterial
+
+Scene "1" o-- "*" Shape
+Scene "1" o-- "*" Light
+Render --> Scene
+Render --> Camera
+Render --> Film
+Camera --> Ray
+Scene --> Hit
+Hit --> Material
+Film --> SamplingMode
+AreaLight --> AreaLightSamplingMode
+TriangleMesh *-- TriangleBVH
+TriangleBVH *-- TriangleBVHNode
+TriangleBVHNode *-- AABB
+TriangleMesh o-- "*" Triangle
+Instance o-- "1" Shape : wraps
+Film ..> Sampling2D : usa padrões 2D
+AreaLight ..> Sampling2D : usa padrões 2D
+CLI --> CLIHelpFormatter
+CLI ..> Film : sampling_mode
+CLI ..> AreaLight : light_sampling_mode
+
+@enduml
