@@ -1,8 +1,10 @@
-"""BVH estática para a malha triangulada.
+"""BVH estática local a `TriangleMesh`.
 
 A hierarquia não altera a matemática de interseção dos slides 4, p. 35 e
 p. 47-48; ela só usa AABB por slabs (slides 4, p. 11-12) para podar subárvores
-antes do teste Möller-Trumbore.
+antes do teste Möller-Trumbore. Nesta base, a BVH é construída uma vez por
+malha, usa median split no eixo dominante e não implementa SAH, compactação
+linear ou uma estrutura de aceleração global para toda a cena.
 """
 
 from __future__ import annotations
@@ -138,7 +140,9 @@ class TriangleBVHNode:
 class TriangleBVH:
   def __init__(self, triangles: Sequence[Any], leaf_size: int = 4):
     # Leaf size controla o compromisso entre profundidade de árvore e custo
-    # por folha. A estrutura é construída uma única vez para a malha.
+    # por folha. A estrutura é construída uma única vez para a malha e fica no
+    # espaço local do `TriangleMesh`; cenas com múltiplos objetos ainda usam o
+    # loop linear de `Scene.compute_intersection()` no nível superior.
     self.leaf_size = max(1, int(leaf_size))
     triangle_list = list(triangles)
     self.root = self._build(triangle_list, depth=1)
