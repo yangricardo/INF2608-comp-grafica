@@ -22,7 +22,8 @@ class Film:
     self.width = width
     self.height = height
     self.resolution = (width, height)
-    # Slide 4, p. 24-28: buffer 2D de pixels que armazena a imagem final da renderização.
+    # Slide 4, p. 24-29: buffer 2D do filme onde a radiância estimada por pixel
+    # é acumulada antes da conversão final para imagem exibível.
     self.image = np.zeros((height, width, 3))
     # Parâmetros de amostragem para Anti-aliasing
     # `samples_per_pixel`: número de amostras por pixel (Monte Carlo)
@@ -52,7 +53,8 @@ class Film:
 
   def get_sample(self, i, j):
     """Retorna as coordenadas normalizadas (0 a 1) para o pixel (i, j)"""
-    # Slide 4, p. 25-29: amostragem no centro do pixel para disparar um raio primário.
+    # Slide 4, p. 25-29: amostragem determinística no centro do pixel, isto é,
+    # a versão sem supersampling da câmera pinhole apresentada no núcleo básico.
     return (i + 0.5) / self.width, (j + 0.5) / self.height
 
   def get_samples_for_pixel(self, i: int, j: int) -> list[tuple[float, float]]:
@@ -60,16 +62,17 @@ class Film:
     Gera uma lista de amostras normalizadas (xn, yn) para o pixel (i, j).
     Suporta dois modos: 'jittered' (Monte Carlo jittered) e 'stratified'.
 
-    Comentário (PT): Implementação de amostragem por pixel baseada nos slides
-    de amostragem/anti-aliasing (Slide 4, p. 25-29). As amostras aproximam a
-    integral da radiância sobre a área do pixel; mudar o padrão de amostragem
-    altera principalmente a variância, não a câmera nem a cena em si.
+    Comentário (PT): `get_sample()` preserva a fórmula central do Slide 4,
+    enquanto este método implementa a extensão de anti-aliasing do Slide 5
+    (pp. 4-9). Em ambos os casos, a meta é aproximar a integral da radiância
+    sobre a área do pixel; o padrão de amostragem afeta principalmente a
+    variância do estimador, não a geometria da câmera nem da cena.
     """
     spp = max(1, int(self.samples_per_pixel))
     samples: list[tuple[float, float]] = []
 
     if self.sampling_mode == SamplingMode.JITTERED:
-      # Slide 4, p. 25-29: jittered Monte Carlo dentro do pixel. As amostras são
+      # Slide 5, p. 4-8: jittered Monte Carlo dentro do pixel. As amostras são
       # independentes e simples de gerar, mas podem concentrar mais ruído local.
       for _ in range(spp):
         rx = self.rng.random()
@@ -103,10 +106,10 @@ class Film:
     return samples
   
   def render(self, scene: Scene, camera: Camera, filename: str, gamma_fix: bool = False) -> None:
-    # Slide 4, p. 24-29: percorre todos os pixels e pede um raio para cada amostra.
-    # Comentário (PT): início do render com múltiplas amostras por pixel conforme
-    # Slide 4, p. 25-29. Aqui usamos `self.samples_per_pixel` e `self.sampling_mode`
-    # para aproximar numericamente a cor média do pixel pela média Monte Carlo.
+    # Slides 4-5: percorre todos os pixels, gera um raio por amostra subpixel e
+    # estima a cor média do pixel por média aritmética. Quando há uma única
+    # amostra central, o comportamento recai no pipeline básico; com múltiplas
+    # amostras, entra a aproximação Monte Carlo do anti-aliasing.
     print("Renderizando a cena com AA (spp=", self.samples_per_pixel, ", mode=", self.sampling_mode.name, ")...")
     for j in range(self.height):
       for i in range(self.width):
