@@ -11,6 +11,12 @@ from ray_tracing_2.film import effective_samples_per_pixel_for_mode
 from ray_tracing_2.render_snapshot import RenderSnapshot
 
 
+def _ensure_parent_dir(path: str) -> None:
+  parent = os.path.dirname(path)
+  if parent:
+    os.makedirs(parent, exist_ok=True)
+
+
 class Render:
   def __init__(self, out_root: str = 'outputs'):
     self.out_root = out_root
@@ -76,6 +82,7 @@ class Render:
       render_time_seconds=render_time_seconds,
     )
 
+    _ensure_parent_dir(properties_json_path)
     with open(properties_json_path, 'w', encoding='utf-8') as f:
       f.write(snapshot.to_json(indent=2, ensure_ascii=False))
 
@@ -84,6 +91,7 @@ class Render:
       properties_json_name=os.path.basename(properties_json_path),
     )
     md_path = os.path.join(sim_dir, 'properties.md')
+    _ensure_parent_dir(md_path)
     with open(md_path, 'w', encoding='utf-8') as f:
       f.write(md_text)
 

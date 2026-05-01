@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from PIL import Image
 from pyglm import glm
 import numpy as np
@@ -180,5 +181,8 @@ class Film:
     # Converte para uint8 e salva a imagem usando PIL.
     img_data = np.clip(img_data * 255, 0, 255).astype(np.uint8)
     img = Image.fromarray(img_data)
+    output_dir = os.path.dirname(filename)
+    if output_dir:
+      os.makedirs(output_dir, exist_ok=True)
     img.save(filename)
     print(f"Imagem salva em {filename}")
