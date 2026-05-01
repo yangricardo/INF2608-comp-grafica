@@ -9,8 +9,10 @@ class Camera:
     self.center = glm.vec3(center)
     self.up = glm.vec3(up)
     self.angle = fov
-    # Neste projeto, focal_distance controla apenas a distância do plano de
-    # projeção do modelo pinhole; não há lente fina nem profundidade de campo.
+    # Neste projeto, focal_distance controla apenas a distância geométrica do
+    # plano de projeção no modelo pinhole. Ele altera a abertura angular
+    # efetiva junto com o FOV, mas não modela foco físico, lente fina nem
+    # profundidade de campo como em câmeras baseadas em abertura.
     self.focal_distance = float(focal_distance)
     # Slide 4, p. 14: a câmera pinhole é definida por olho, alvo e vetor up.
     self.inv_view = glm.inverse(glm.lookAt(self.eye, glm.vec3(center), glm.vec3(up)))
