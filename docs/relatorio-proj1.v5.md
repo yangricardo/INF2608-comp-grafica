@@ -26,7 +26,19 @@ Como fonte externa, foi usado somente o conteúdo de PBRT 4e permitido pelo enun
 
 ## 3. Slide 4: Núcleo Geométrico e Fotométrico do Traçador
 
-### 3.1. Raio paramétrico, visibilidade e registro de interseção
+### 3.1. Conceitos Estruturantes do Slide 4
+
+O Slide 4 organiza-se em torno de um conjunto pequeno de conceitos que estrutura todo o traçador de raios.
+
+1. **Raio paramétrico e visibilidade (pp. 7-9).** A formulação $\mathbf{r}(t)=\mathbf{o}+t\,\hat{\mathbf{d}}$ reduz a linha de visada a uma reta orientada; $t$ funciona como distância assinada/paramétrica ao longo do feixe, e a visibilidade do ponto observado é determinada pelo menor $t>0$ compatível com uma superfície.
+2. **Interseções analíticas e controle numérico (pp. 10-18).** O plano é descrito por $(\mathbf{x}-\mathbf{p}_0)\cdot\hat{\mathbf{n}}=0$, enquanto a esfera leva à quadrática $at^2+bt+c=0$, cujo discriminante $\Delta$ classifica ausência, tangência ou dupla interseção; do ponto de vista computacional, essa geometria analítica só é robusta quando acompanhada por um critério de tolerância $\varepsilon$ para rejeitar paralelismos numéricos e auto-interseções.
+3. **Câmera pinhole, filme e mudança de base (pp. 19-39).** A câmera é construída por uma base ortonormal $(\hat{\mathbf{u}},\hat{\mathbf{v}},\hat{\mathbf{w}})$ e pela geometria do filme, com $\Delta v = f\tan(\theta/2)$ e $\Delta u = \Delta v\,(w/h)$; em síntese, esse bloco combina geometria projetiva com mudança de base entre espaço da câmera e espaço global.
+4. **Iluminação local e fotometria simplificada (pp. 40-43).** O modelo local de Phong combina a componente difusa lambertiana $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$ com a componente especular $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; fisicamente, trata-se de um modelo local e fenomenológico, útil para capturar dependência angular sem resolver transporte global de luz.
+5. **Organização algorítmica da cena, sombras e luz ambiente (pp. 44-55).** O pipeline de _closest hit_ seleciona a primeira interseção visível, o raio de sombra transforma a iluminação direta em um teste de visibilidade até a fonte, e o termo ambiente $m_{amb}\,l_{amb}$ fecha o modelo como aproximação empírica da iluminação indireta ausente.
+
+Esses conceitos explicam por que as subseções 3.2-3.5 a seguir podem ser lidas como desdobramentos detalhados do mesmo núcleo conceitual.
+
+### 3.2. Raio paramétrico, visibilidade e registro de interseção
 
 O ponto de partida do Slide 4 é a modelagem do raio por
 
@@ -42,7 +54,7 @@ Rastreabilidade no código: `src/ray_tracing_2/hit.py` (`Hit`, l. 11; `set_face_
 
 PBRT 4e de apoio: §§1.2 e 3.5.
 
-### 3.2. Interseções básicas: plano, esfera e controle numérico de $\varepsilon$
+### 3.3. Interseções básicas: plano, esfera e controle numérico de $\varepsilon$
 
 Nos slides, o plano é descrito pela equação implícita
 
@@ -70,7 +82,7 @@ Rastreabilidade no código: `src/ray_tracing_2/shape.py` (`Sphere`, l. 17; `Sphe
 
 PBRT 4e de apoio: §1.2.
 
-### 3.3. Câmera pinhole, filme e espaços de coordenadas
+### 3.4. Câmera pinhole, filme e espaços de coordenadas
 
 O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando `eye`, `center` e `up` para montar os eixos locais (pp. 19-23), e em seguida projeta amostras do pixel sobre o plano de imagem (pp. 24-29), antes de explicitar a mudança entre espaço de câmera e espaço global (pp. 31-39) (`4.tracado_de_raios.pdf`). A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
 
@@ -90,7 +102,7 @@ Rastreabilidade no código: `src/ray_tracing_2/camera.py` (`Camera`, l. 6; `__in
 
 PBRT 4e de apoio: §5.2.
 
-### 3.4. Phong, luz pontual, termo ambiente e sombra dura
+### 3.5. Phong, luz pontual, termo ambiente e sombra dura
 
 O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, uma soma de termo ambiente, componente difusa lambertiana e componente especular dependente do vetor refletido (`4.tracado_de_raios.pdf`, pp. 40-43 e 54-55). Em termos físicos, esse modelo não é um BRDF rigoroso, mas é uma aproximação útil: o termo difuso usa o fator $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$; o termo especular usa um pico angular em função de $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; a sombra dura decorre de um teste binário de visibilidade entre o ponto sombreado e a fonte (`4.tracado_de_raios.pdf`, pp. 51-53). Em particular, as páginas 40-43 articulam a síntese física mínima do projeto: incidência luminosa, orientação local de normal e dependência angular da resposta da superfície.
 
@@ -101,6 +113,23 @@ Há, contudo, uma nuance importante entre a física dos slides e a convenção d
 Rastreabilidade no código: `src/ray_tracing_2/light.py` (`PointLight`, l. 42; `PointLight.radiance()`, l. 46), `src/ray_tracing_2/material.py` (`PhongMaterial`, l. 37; `direct_lighting()`, l. 45; `eval()`, l. 72), `src/ray_tracing_2/scene.py` (`transmittance()`, l. 48), `src/ray_tracing_2/main.py` (`Sphere`, l. 54; `Plane`, l. 55; `PointLight`, l. 59).
 
 PBRT 4e de apoio: §1.2.
+
+### 3.6. Quadro de aderência entre Slide 4 e implementação
+
+| Conceito do Slide 4                                    | Situação no repositório        | Evidência                                                                                         |
+| ------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Raio paramétrico e registro de hit                     | Implementado                   | `Ray`; `Hit`; `Scene.compute_intersection()`                                                      |
+| Interseção raio-plano                                  | Implementado                   | `Plane.intersect()`                                                                               |
+| Interseção raio-esfera                                 | Implementado                   | `Sphere.intersect()`                                                                              |
+| Tolerância numérica para evitar auto-interseção        | Implementado                   | `Scene.offset_point()`; limiar positivo nas interseções                                           |
+| Câmera pinhole e geração de raios primários            | Implementado                   | `Camera.__init__()`; `Camera.generate_ray()`                                                      |
+| Mudança de base entre espaço da câmera e espaço global | Implementado                   | `glm.lookAt()` + `inv_view` em `Camera`                                                           |
+| Modelo local de Phong com ambiente, difusa e especular | Implementado                   | `PhongMaterial.direct_lighting()`; `PhongMaterial.eval()`                                         |
+| Sombra dura por teste de visibilidade                  | Implementado com generalização | `Scene.transmittance()` reduz-se ao caso binário para opacos e estende o slide para transparentes |
+| Luz pontual com síntese radiométrica do slide          | Implementado com simplificação | `PointLight.radiance()` usa a convenção do enunciado sem queda explícita por $1/r^2$              |
+| Estrutura algorítmica básica câmera-hit-sombreamento   | Implementado                   | `Film.render()`; `Camera.generate_ray()`; `Scene.trace_ray()`                                     |
+
+O quadro mostra que o núcleo conceitual do Slide 4 está efetivamente materializado no repositório, mas com duas qualificações importantes: a luz pontual segue a convenção simplificada do enunciado, e o teste de sombra já aparece no código em forma mais geral do que a apresentada no bloco introdutório dos slides.
 
 ## 4. Slide 5: Extensões Ópticas, Amostrais e de Transformação
 
