@@ -6,7 +6,8 @@ from time import perf_counter
 from typing import Optional
 
 from ray_tracing_2.film import Film
-from ray_tracing_2.film import SamplingMode
+from ray_tracing_2.film import describe_sampling_configuration
+from ray_tracing_2.film import effective_samples_per_pixel_for_mode
 from ray_tracing_2.render_snapshot import RenderSnapshot
 
 
@@ -34,7 +35,21 @@ class Render:
 
     img_path = os.path.join(sim_dir, 'render.png')
     properties_json_path = os.path.join(sim_dir, 'properties.json')
-    effective_samples_per_pixel = 1 if sampling_mode == SamplingMode.CENTER.value else samples_per_pixel
+    requested_samples_per_pixel = max(1, int(samples_per_pixel))
+    effective_samples_per_pixel = effective_samples_per_pixel_for_mode(
+      requested_samples_per_pixel,
+      sampling_mode,
+    )
+    seed_text = 'aleatória' if seed is None else str(seed)
+    gamma_text = 'ligada' if gamma_fix else 'desligada'
+
+    print(
+      f"Iniciando render '{name}'\n"
+      f"  resolução: {width}x{height}\n"
+      f"  filme: {describe_sampling_configuration(requested_samples_per_pixel, sampling_mode)}\n"
+      f"  seed: {seed_text}\n"
+      f"  correção gama: {gamma_text}"
+    )
 
     # Cria o Film com parâmetros de AA e renderiza para o arquivo de saída
     film = Film(
@@ -75,7 +90,10 @@ class Render:
     render_time_minutes = render_time_seconds / 60.0
     print(
       f'Render finalizado em {render_time_seconds:.3f}s '
-      f'({render_time_minutes:.3f} min). Artefatos em {sim_dir}'
+      f'({render_time_minutes:.3f} min)\n'
+      f'  imagem: {img_path}\n'
+      f'  resumo: {md_path}\n'
+      f'  propriedades: {properties_json_path}'
     )
 
     return sim_dir
