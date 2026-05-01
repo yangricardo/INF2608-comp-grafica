@@ -1,0 +1,69 @@
+@startuml ray_tracing_2_v2
+title Traçado de Raios — CLI Padronizada e Padrões 2D Compartilhados
+
+actor User
+participant "Entry point\n(main_area_light.py / cornell_box.py)" as Entry
+participant "cli.py" as CLI
+participant Render
+participant Film
+participant "sampling.py" as Pattern2D
+participant Camera
+participant Scene
+participant Material
+participant "PointLight" as PLight
+participant "AreaLight" as ALight
+
+User -> Entry : python -m ... --width 800 --height 600\n--spp 1 --sampling_mode ...\n[--light_sampling_mode ...]
+Entry -> CLI : build_cli_parser()
+CLI --> Entry : argparse parser padronizado
+Entry -> Entry : parse_args()
+note right of Entry
+  Controles públicos separados:
+  - sampling_mode -> Film
+  - light_sampling_mode -> AreaLight
+end note
+
+Entry -> Render : render(scene, cam, width, height,\n  spp, sampling_mode, light_sampling_mode, ...)
+Render -> Film : render(scene, camera, output, gamma_fix)
+
+loop para cada pixel
+  Film -> Film : get_samples_for_pixel(i, j)
+  alt sampling_mode = jittered
+    Film -> Pattern2D : uniform_samples_2d(spp, rng)
+  else sampling_mode = stratified
+    Film -> Pattern2D : stratified_grid_samples_2d(G, G, rng)
+  end
+  Pattern2D --> Film : offsets subpixel normalizados
+
+  loop para cada amostra subpixel
+    Film -> Camera : generate_ray(xn, yn)
+    Camera --> Film : Ray
+    Film -> Scene : trace_ray(ray)
+    Scene -> Material : eval(scene, hit, ray, depth)
+
+    alt luz pontual
+      Material -> PLight : sample_radiance(scene, hit)
+      PLight --> Material : (Li, wi)
+    else luz de área
+      Material -> ALight : sample_radiance(scene, hit)
+      alt light_sampling_mode = uniform
+        ALight -> Pattern2D : uniform_samples_2d(samples_u * samples_v, rng)
+      else light_sampling_mode = regular
+        ALight -> Pattern2D : regular_grid_samples_2d(samples_u, samples_v)
+      else light_sampling_mode = stratified
+        ALight -> Pattern2D : stratified_grid_samples_2d(samples_u, samples_v, rng)
+      end
+      Pattern2D --> ALight : coordenadas (u, v)
+      ALight --> Material : [(Li_k, wi_k)]
+    end
+
+    Material --> Scene : radiância local/recursiva
+    Scene --> Film : cor da amostra
+  end
+
+  Film -> Film : média Monte Carlo do pixel
+end
+
+Render -> User : salva render.png + properties.md
+
+@enduml
