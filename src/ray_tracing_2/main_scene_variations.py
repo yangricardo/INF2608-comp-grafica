@@ -20,10 +20,8 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
-  add_sampling_arguments,
-  add_seed_argument,
+  CommonRenderOptions,
+  add_common_render_arguments,
   build_parser,
 )
 from ray_tracing_2.film import Film
@@ -33,7 +31,7 @@ from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Sphere, Plane
 
 
-def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: Optional[int] = None, gamma_fix: bool = False):
+def render_scene_with_film(scene: Scene, cam: Camera, out_name: str, render_options: CommonRenderOptions):
   """Renderiza a cena usando a classe `Film` e salva como PNG.
 
   Comentário (PT): expõe parâmetros de amostragem por pixel (AA) conforme
@@ -45,7 +43,7 @@ def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: 
   r = Render()
   base = os.path.splitext(os.path.basename(out_name))[0]
   # Render infere automaticamente os props a partir da `Scene`.
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name=base))
 
 
 def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene:
@@ -86,10 +84,7 @@ def build_cli_parser() -> argparse.ArgumentParser:
       'python -m ray_tracing_2.main_scene_variations --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42',
     ],
   )
-  add_image_size_arguments(parser, width_default=400, height_default=300)
-  add_sampling_arguments(parser, spp_default=16)
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
+  add_common_render_arguments(parser, width_default=400, height_default=300, spp_default=16)
   return parser
 
 
@@ -97,7 +92,8 @@ def main():
   parser = build_cli_parser()
   args = parser.parse_args()
 
-  W, H = args.width, args.height
+  render_options = CommonRenderOptions.from_namespace(args)
+  W, H = render_options.width, render_options.height
   # Slide 4, p. 14 e p. 29: câmera fixa para comparar as variações de geometria.
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45, width=W, height=H)
 
@@ -113,7 +109,7 @@ def main():
         # Monta a cena com os parâmetros atuais e renderiza uma nova imagem.
         scene = build_scene(sx=x, sy=y, sr=r, plane_y=-1.0)
         out_name = f"render_var_{idx:02d}_x{x}_y{y}_r{r}.png"
-        render_scene_with_film(scene=scene, cam=cam, W=W, H=H, out_name=out_name, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+        render_scene_with_film(scene=scene, cam=cam, out_name=out_name, render_options=render_options)
         idx += 1
 
   print("All renders complete.")

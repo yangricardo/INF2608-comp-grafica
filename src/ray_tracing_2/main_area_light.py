@@ -13,11 +13,9 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
+  CommonRenderOptions,
+  add_common_render_arguments,
   add_light_sampling_argument,
-  add_sampling_arguments,
-  add_seed_argument,
   build_parser,
 )
 from ray_tracing_2.film import SamplingMode
@@ -36,7 +34,15 @@ def render(width: int = 400,
            seed: int | None = None,
            gamma_fix: bool = False):
   """Renderiza a cena com uma luz de área sobre a esfera e o plano."""
-  W, H = int(width), int(height)
+  render_options = CommonRenderOptions(
+    width=width,
+    height=height,
+    spp=spp,
+    sampling_mode=sampling_mode,
+    seed=seed,
+    gamma_fix=gamma_fix,
+  )
+  W, H = render_options.width, render_options.height
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
   mat_red = PhongMaterial(
@@ -73,17 +79,7 @@ def render(width: int = 400,
   )
 
   r = Render()
-  r.render(
-    scene=scene,
-    cam=cam,
-    width=W,
-    height=H,
-    name='main_area_light',
-    samples_per_pixel=spp,
-    sampling_mode=sampling_mode,
-    seed=seed,
-    gamma_fix=gamma_fix,
-  )
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name='main_area_light'))
 
 
 def build_cli_parser() -> argparse.ArgumentParser:
@@ -94,15 +90,13 @@ def build_cli_parser() -> argparse.ArgumentParser:
       'python -m ray_tracing_2.main_area_light --width 800 --height 600 --spp 1 --sampling_mode stratified --light_sampling_mode regular --seed 42',
     ],
   )
-  add_image_size_arguments(parser, width_default=400, height_default=300)
-  add_sampling_arguments(parser, spp_default=1)
+  add_common_render_arguments(parser, width_default=400, height_default=300, spp_default=1)
   add_light_sampling_argument(parser, help_text='Sampling mode for the area light')
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
   return parser
 
 
 if __name__ == '__main__':
   parser = build_cli_parser()
   args = parser.parse_args()
-  render(width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, light_sampling_mode=args.light_sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  common_options = CommonRenderOptions.from_namespace(args)
+  render(**common_options.to_entrypoint_kwargs(), light_sampling_mode=args.light_sampling_mode)

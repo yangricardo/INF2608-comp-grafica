@@ -14,10 +14,8 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
-  add_sampling_arguments,
-  add_seed_argument,
+  CommonRenderOptions,
+  add_common_render_arguments,
   build_parser,
 )
 from ray_tracing_2.film import SamplingMode
@@ -118,8 +116,16 @@ def render(
   spec_path = Path(scene_path) if scene_path is not None else default_scene
   spec = json.loads(spec_path.read_text(encoding='utf-8'))
 
-  W = int(width if width is not None else spec.get('width', 800))
-  H = int(height if height is not None else spec.get('height', 600))
+  render_options = CommonRenderOptions(
+    width=width if width is not None else spec.get('width', 800),
+    height=height if height is not None else spec.get('height', 600),
+    spp=spp,
+    sampling_mode=sampling_mode,
+    seed=seed,
+    gamma_fix=gamma_fix,
+  )
+  W = render_options.width
+  H = render_options.height
 
   # Slide 4, p. 24-29: câmera pinhole e enquadramento da cena de teste.
   camera_spec = spec.get('camera') or {}
@@ -186,17 +192,7 @@ def render(
     scene.lights.append(PointLight(pos=_vec3(light_spec.get('pos', [2.4, 4.9, 3.4])), power=_vec3(light_spec.get('power', [110.0, 110.0, 110.0]))))
 
   r = Render()
-  r.render(
-    scene=scene,
-    cam=cam,
-    width=W,
-    height=H,
-    name='main_triangles',
-    samples_per_pixel=spp,
-    sampling_mode=sampling_mode,
-    seed=seed,
-    gamma_fix=gamma_fix,
-  )
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name='main_triangles'))
 
 
 def build_cli_parser() -> argparse.ArgumentParser:
@@ -207,16 +203,14 @@ def build_cli_parser() -> argparse.ArgumentParser:
       'python -m ray_tracing_2.main_triangles --width 800 --height 600 --spp 1 --scene inputs/triangle_pyramid.json --accelerator bvh --seed 42',
     ],
   )
-  add_image_size_arguments(
+  add_common_render_arguments(
     parser,
     width_default=None,
     height_default=None,
+    spp_default=16,
     width_help='Image width in pixels (defaults to JSON value)',
     height_help='Image height in pixels (defaults to JSON value)',
   )
-  add_sampling_arguments(parser, spp_default=16)
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
   parser.add_argument('--scene', '--json', type=str, default=None, help='Path to JSON scene specification')
   parser.add_argument('--accelerator', choices=['linear', 'bvh'], default=None, help='Override the triangle mesh accelerator')
   return parser

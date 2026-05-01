@@ -29,10 +29,8 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
-  add_sampling_arguments,
-  add_seed_argument,
+  CommonRenderOptions,
+  add_common_render_arguments,
   build_parser,
 )
 from ray_tracing_2.film import SamplingMode
@@ -43,7 +41,7 @@ from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Sphere, Plane
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = SamplingMode.JITTERED.value, seed: int | None = None, gamma_fix: bool = False):
+def render_scene(scene: Scene, cam: Camera, out_path: str, render_options: CommonRenderOptions):
   # Usa a classe Render para organizar saída e gerar markdown
   r = Render()
   # out_path aqui é esperado ser o caminho completo do arquivo de imagem; a
@@ -51,7 +49,7 @@ def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, sampl
   # como base nome da cena quando chamamos Render.render.
   # Para compatibilidade com chamada anterior, extraímos um nome simples.
   base = os.path.splitext(os.path.basename(out_path))[0]
-  r.render(scene=scene, cam=cam, width=W, height=H, name=base, samples_per_pixel=samples_per_pixel, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name=base))
 
 
 def _material_from_spec(spec: dict) -> PhongMaterial:
@@ -135,16 +133,14 @@ def build_cli_parser() -> argparse.ArgumentParser:
   parser.add_argument('--input', '-i', required=True, help='Path to JSON scene specification')
   parser.add_argument('--outdir', '-o', default='outputs', help='Root outputs directory')
   parser.add_argument('--name', '-n', default='scene', help='Base name for the simulation folder')
-  add_image_size_arguments(parser, width_default=400, height_default=300)
-  add_sampling_arguments(parser, spp_default=16)
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
+  add_common_render_arguments(parser, width_default=400, height_default=300, spp_default=16)
   return parser
 
 
 def main():
   parser = build_cli_parser()
   args = parser.parse_args()
+  render_options = CommonRenderOptions.from_namespace(args)
 
   with open(args.input, 'r', encoding='utf-8') as f:
     spec = json.load(f)
@@ -160,13 +156,13 @@ def main():
   center = cam_spec.get('center', [0,0,0])
   up = cam_spec.get('up', [0,1,0])
   fov = cam_spec.get('fov', 45)
-  cam = Camera(eye=glm.vec3(*eye), center=glm.vec3(*center), up=glm.vec3(*up), fov=fov, width=args.width, height=args.height)
+  cam = Camera(eye=glm.vec3(*eye), center=glm.vec3(*center), up=glm.vec3(*up), fov=fov, width=render_options.width, height=render_options.height)
 
   img_path = os.path.join(sim_dir, 'render.png')
   md_path = os.path.join(sim_dir, 'properties.md')
 
   # Passa `props` para que Render gere o markdown detalhado
-  render_scene(scene, cam, args.width, args.height, img_path, samples_per_pixel=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render_scene(scene, cam, img_path, render_options)
 
   print(f'Wrote scene -> {sim_dir}')
 

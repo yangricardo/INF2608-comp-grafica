@@ -13,10 +13,10 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
-  add_sampling_arguments,
-  add_seed_argument,
+  CommonRenderOptions,
+  add_block_material_arguments,
+  add_common_render_arguments,
+  add_max_depth_argument,
   build_parser,
 )
 from ray_tracing_2.film import SamplingMode
@@ -81,7 +81,15 @@ def render(
   large_block_material: str = 'opaque',
 ):
   """Renderiza uma cena tipo Cornell Box com caixas instanciadas."""
-  W, H = width, height
+  render_options = CommonRenderOptions(
+    width=width,
+    height=height,
+    spp=spp,
+    sampling_mode=sampling_mode,
+    seed=seed,
+    gamma_fix=gamma_fix,
+  )
+  W, H = render_options.width, render_options.height
   cam = Camera(
     eye=glm.vec3(2.775, 3.200, 12.775),
     center=glm.vec3(2.775, 2.775, 2.775),
@@ -153,17 +161,7 @@ def render(
   scene.lights.append(PointLight(pos=glm.vec3(2.775, light_y, 2.775), power=glm.vec3(light_power, light_power, light_power)))
 
   r = Render()
-  r.render(
-    scene=scene,
-    cam=cam,
-    width=W,
-    height=H,
-    name='main_box',
-    samples_per_pixel=spp,
-    sampling_mode=sampling_mode,
-    seed=seed,
-    gamma_fix=gamma_fix,
-  )
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name='main_box'))
 
 
 def build_cli_parser() -> argparse.ArgumentParser:
@@ -174,28 +172,20 @@ def build_cli_parser() -> argparse.ArgumentParser:
       'python -m ray_tracing_2.main_box --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42 --max_depth 4',
     ],
   )
-  add_image_size_arguments(parser, width_default=800, height_default=600)
-  add_sampling_arguments(parser, spp_default=25)
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
+  add_common_render_arguments(parser, width_default=800, height_default=600, spp_default=25)
   parser.add_argument('--light_power', type=float, default=0.7, help='Point light power (proj1-exemplo.pdf: 0.7)')
   parser.add_argument('--light_y', type=float, default=5.55, help='Y position of the point light (proj1-exemplo.pdf: 5.55)')
-  parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
-  parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the small block')
-  parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the large block')
+  add_max_depth_argument(parser, default=4)
+  add_block_material_arguments(parser, small_default='opaque', large_default='opaque')
   return parser
 
 
 if __name__ == '__main__':
   parser = build_cli_parser()
   args = parser.parse_args()
+  common_options = CommonRenderOptions.from_namespace(args)
   render(
-    width=args.width,
-    height=args.height,
-    spp=args.spp,
-    sampling_mode=args.sampling_mode,
-    seed=args.seed,
-    gamma_fix=args.gamma_fix,
+    **common_options.to_entrypoint_kwargs(),
     light_power=args.light_power,
     light_y=args.light_y,
     max_depth=args.max_depth,

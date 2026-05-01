@@ -16,13 +16,11 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
-  add_sampling_arguments,
-  add_seed_argument,
+  CommonRenderOptions,
+  add_common_render_arguments,
   build_parser,
 )
-from ray_tracing_2.film import Film, SamplingMode
+from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.render import Render
@@ -45,8 +43,16 @@ def render(width: int = 800,
   3. Para cada pixel, gera um raio primário e avalia a cor com
      `Scene.trace_ray`.
   """
+  render_options = CommonRenderOptions(
+    width=width,
+    height=height,
+    spp=spp,
+    sampling_mode=sampling_mode,
+    seed=seed,
+    gamma_fix=gamma_fix,
+  )
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
-  W, H = int(width), int(height)
+  W, H = render_options.width, render_options.height
   # Cria a câmera
   cam = Camera(eye=glm.vec3(2.7750, 2.775, 2.775), center=glm.vec3(2.775, 3.200, 12.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
   scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
@@ -73,7 +79,7 @@ def render(width: int = 800,
   scene.lights.append(PointLight(pos=glm.vec3(2.775,5.55,2.775), power=glm.vec3(150.0)))
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
-  r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name='main_scene'))
 
 
 def build_cli_parser() -> argparse.ArgumentParser:
@@ -84,14 +90,12 @@ def build_cli_parser() -> argparse.ArgumentParser:
       'python -m ray_tracing_2.main --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42',
     ],
   )
-  add_image_size_arguments(parser, width_default=800, height_default=600)
-  add_sampling_arguments(parser, spp_default=1)
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
+  add_common_render_arguments(parser, width_default=800, height_default=600, spp_default=1)
   return parser
 
 
 if __name__ == "__main__":
   parser = build_cli_parser()
   args = parser.parse_args()
-  render(width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  common_options = CommonRenderOptions.from_namespace(args)
+  render(**common_options.to_entrypoint_kwargs())

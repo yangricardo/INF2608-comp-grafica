@@ -17,11 +17,11 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.cli import (
-  add_gamma_fix_argument,
-  add_image_size_arguments,
+  CommonRenderOptions,
+  add_block_material_arguments,
+  add_common_render_arguments,
   add_light_sampling_argument,
-  add_sampling_arguments,
-  add_seed_argument,
+  add_max_depth_argument,
   build_parser,
 )
 from ray_tracing_2.film import SamplingMode
@@ -66,8 +66,16 @@ def render(width: int = 800,
            small_block_material: str = 'reflective',
            large_block_material: str = 'transparent'):
   """Renderiza a cena Cornell com uma pirâmide reflexiva e salva `render_final.png`."""
+  render_options = CommonRenderOptions(
+    width=width,
+    height=height,
+    spp=spp,
+    sampling_mode=sampling_mode,
+    seed=seed,
+    gamma_fix=gamma_fix,
+  )
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
-  W, H = width, height
+  W, H = render_options.width, render_options.height
   # Cria a câmera (proj1-exemplo.pdf)
   cam = Camera(eye=glm.vec3(2.775, 3.200, 12.775), center=glm.vec3(2.775, 2.775, 2.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H, focal_distance=1.0)
 
@@ -196,7 +204,7 @@ def render(width: int = 800,
 
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
-  r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box_pyramid', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
+  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name='cornell_box_pyramid'))
 
 
 
@@ -208,28 +216,20 @@ def build_cli_parser() -> argparse.ArgumentParser:
       'python -m ray_tracing_2.cornell_box_triangle --width 800 --height 600 --spp 1 --sampling_mode stratified --light_sampling_mode regular --seed 42',
     ],
   )
-  add_image_size_arguments(parser, width_default=800, height_default=600)
-  add_sampling_arguments(parser, spp_default=1)
+  add_common_render_arguments(parser, width_default=800, height_default=600, spp_default=1)
   add_light_sampling_argument(parser, help_text='Sampling mode for area lights in the scene')
-  add_seed_argument(parser)
-  add_gamma_fix_argument(parser)
-  parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
-  parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='reflective', help='Material model used by the small block')
-  parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='transparent', help='Material model used by the large block')
+  add_max_depth_argument(parser, default=4)
+  add_block_material_arguments(parser, small_default='reflective', large_default='transparent')
   return parser
 
 
 if __name__ == "__main__":
   parser = build_cli_parser()
   args = parser.parse_args()
+  common_options = CommonRenderOptions.from_namespace(args)
   render(
-    width=args.width,
-    height=args.height,
-    spp=args.spp,
-    sampling_mode=args.sampling_mode,
+    **common_options.to_entrypoint_kwargs(),
     light_sampling_mode=args.light_sampling_mode,
-    seed=args.seed,
-    gamma_fix=args.gamma_fix,
     max_depth=args.max_depth,
     small_block_material=args.small_block_material,
     large_block_material=args.large_block_material,
