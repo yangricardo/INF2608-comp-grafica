@@ -22,6 +22,7 @@ Como fonte externa, foi usado somente o conteúdo de PBRT 4e permitido pelo enun
 6. Distinguir com precisão o que o repositório implementa do que o Slide 6 descreve apenas teoricamente.
 7. Ancorar cada bloco com referências de páginas dos slides e linhas do código atual.
 8. Fechar com uma validação experimental breve, usando renderizações já existentes no repositório.
+9. Consolidar, ao fim, as limitações atuais da implementação frente aos materiais da disciplina e ao escopo do enunciado principal.
 
 ## 3. Slide 4: Núcleo Geométrico e Fotométrico do Traçador
 
@@ -68,6 +69,8 @@ PBRT 4e de apoio: §1.2.
 O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando `eye`, `center` e `up` para montar os eixos locais, e em seguida projeta amostras do pixel sobre o plano de imagem (`4.tracado_de_raios.pdf`, pp. 19-39). A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
 
 No código, a ideia é a mesma, mas a implementação é condensada: `Camera.__init__()` usa `glm.lookAt()` para obter a transformação de visualização e armazena sua inversa em `inv_view`. A geração do raio em `generate_ray()` monta o ponto do pixel em espaço de câmera a partir de coordenadas normalizadas e do fator `tan(fov/2)`, depois transforma esse ponto para o espaço global. O comentário recém-ajustado em `camera.py` deixa explícita uma nuance importante: `focal_distance` aqui é distância geométrica ao plano de projeção no modelo pinhole, não distância focal de lente fina nem parâmetro de profundidade de campo. Esse detalhe é essencial para não projetar sobre o código uma física que ele não implementa.
+
+Essa distinção também define uma limitação importante do projeto: todos os raios primários partem de um único centro ótico, sem abertura finita, círculo de confusão ou profundidade de campo. Portanto, o antialiasing implementado depois no Slide 5 altera a estratégia de amostragem do pixel, mas não muda o modelo óptico de formação de imagem.
 
 Em `film.py`, `get_sample()` e `render()` deixam claro que a imagem final é construída como média de amostras por pixel. Mesmo quando o caso básico usa apenas uma amostra central, a interface já está preparada para supersampling estocástico.
 
@@ -153,6 +156,8 @@ como aproximação de baixo custo das equações de Fresnel para interfaces suav
 
 `ReflectiveMaterial.eval()` implementa exatamente esse rateio: a componente local de Phong é ponderada por $(1-R)$ e a contribuição do raio refletido é ponderada por $R$. É importante, contudo, qualificar a frase "conservação de energia" que aparece nos slides-resumo. No repositório, essa mistura é fisicamente plausível, mas não é um BRDF estrito nem um balanço energético formal no sentido de PBRT. O termo local de Phong permanece empírico, e o uso de Schlick aqui deve ser entendido como melhora angular do modelo, não como substituição integral por um material fisicamente baseado.
 
+Há ainda uma nuance angular importante. O cosseno usado na aproximação de Schlick vem da inclinação entre a direção de observação e a normal local, isto é, de um termo do tipo `dot(v, n)`, e não de um "ângulo crítico" pré-computado da interface. Essa escolha é consistente com a forma clássica de Schlick para refletância direcional, mas reforça o caráter aproximado do material: a implementação melhora a dependência angular da reflexão sem migrar para um modelo microfacet completo.
+
 Rastreabilidade no código: `src/ray_tracing_2/material.py` (`ReflectiveMaterial`, l. 84; `eval()`, l. 101).
 
 PBRT 4e de apoio: §9.3.
@@ -174,6 +179,8 @@ I(\lambda,s)=I_0(\lambda)\,a(\lambda)^s.
 $$
 
 O uso de `front_face` e `backfacing`, calculado em `Hit.set_face_normal()`, é crucial: ele traduz a orientação geométrica da interface em semântica ótica de entrada/saída do meio. Isso é um caso exemplar de acoplamento correto entre álgebra linear local da superfície e física de propagação.
+
+No caso da iluminação direta através de transparentes, `TransparentMaterial.shadow_transmittance()` aplica Beer-Lambert apenas quando o raio de sombra deixa o meio, isto é, no caso `backfacing = True`. Essa escolha é coerente com a hipótese de meio homogêneo adotada pelo projeto: o comprimento óptico relevante já foi acumulado em `hit.t` no segmento interno do material, de modo que atenuar também na entrada equivaleria a dupla contagem. Trata-se, ainda assim, de uma simplificação relevante: o modelo opera por canal RGB, sem dispersão espectral contínua e sem heterogeneidade volumétrica interna.
 
 Rastreabilidade no código: `src/ray_tracing_2/hit.py` (`set_face_normal()`, l. 25), `src/ray_tracing_2/material.py` (`TransparentMaterial`, l. 137; `shadow_transmittance()`, l. 167; `eval()`, l. 186).
 
@@ -227,7 +234,7 @@ Essa grade regular não está implementada no repositório atual. Não há estru
 
 O Slide 6 fecha com volumes envolventes hierárquicos, subdivisão por centróides, escolha de eixo, SAH e percurso com poda de subárvores (`6.estrutura_aceleracao.pdf`, pp. 22-36). PBRT 4e §7.3 aprofunda esse quadro: construção por primitivas, escolha de eixo por extensão dos centróides, SAH, ordenação contígua de primitivas nas folhas, representação compacta linear e travessia com pilha explícita.
 
-O repositório implementa uma versão claramente mais simples e local dessa ideia. `TriangleBVH` constrói uma árvore estática apenas para os triângulos de uma única malha. `AABB.from_triangles()` cria caixas alinhadas aos eixos via mínimos e máximos por componente; `_build()` escolhe o eixo dominante da caixa corrente e separa pela mediana dos centróides; `TriangleBVHNode.intersect()` primeiro testa a AABB, depois ordena filhos pela distância de entrada no raio e só então visita folhas. Em outras palavras, há poda por caixa, hierarquia binária, escolha de eixo por extensão e travessia aproximadamente frontal, mas não há SAH, não há compactação linear e não há acelerador global para toda a cena.
+O repositório implementa uma versão claramente mais simples e local dessa ideia. `TriangleBVH` constrói uma árvore estática apenas para os triângulos de uma única malha. `AABB.from_triangles()` cria caixas alinhadas aos eixos via mínimos e máximos por componente; `_build()` escolhe o eixo dominante da caixa corrente e separa pela mediana dos centróides; `TriangleBVHNode.intersect()` primeiro testa a AABB, depois ordena filhos pela distância de entrada no raio e só então visita folhas. Em outras palavras, há poda por caixa, hierarquia binária, escolha de eixo por extensão e travessia aproximadamente frontal, mas não há SAH, não há compactação linear e não há acelerador global para toda a cena. Também não há a forma compacta em vetor linear enfatizada por PBRT: os nós permanecem como objetos recursivos ligados por referências `left` e `right`, o que simplifica a implementação, mas sacrifica localidade de cache.
 
 O ponto crítico para avaliação é este: `Scene.compute_intersection()` continua iterando linearmente sobre `self.objects`. A BVH existe apenas dentro de `TriangleMesh`. Logo, se a cena tiver muitas malhas, caixas, esferas e instâncias, o nível superior ainda é $O(n)$ em número de objetos da cena. A aceleração reduz o custo interno da malha triangulada, não o custo total do ray tracer como um agregado de cena completo.
 
@@ -294,10 +301,50 @@ Esta cena combina os dois eixos mais avançados do projeto: materiais recursivos
 
 ![Cornell Box com duas pirâmides trianguladas](../outputs/cornell_box_pyramid_20260425_003203/render.png)
 
-## 7. Conclusão
+## 7. Limitações Atuais e Delimitação de Escopo
+
+### 7.1. Estruturas de aceleração ausentes ou apenas parciais
+
+À luz de `6.estrutura_aceleracao.pdf`, a implementação atual cobre apenas uma fração do espaço de técnicas apresentado nos slides. O repositório não implementa grade regular, refinamento por SAT nem percorrimento incremental célula a célula (`6.estrutura_aceleracao.pdf`, pp. 15-21); tampouco implementa SAH, compactação linear da BVH ou um agregador global de cena (`6.estrutura_aceleracao.pdf`, pp. 22-36). O que existe de fato é uma BVH estática local a cada `TriangleMesh`, suficiente para reduzir o custo interno da malha, mas insuficiente para substituir uma estrutura de aceleração global do ray tracer.
+
+Essa distinção é importante porque o custo no topo da cena continua linear. `Scene.compute_intersection()` percorre `self.objects` de forma sequencial, de modo que a aceleração atua apenas dentro da malha triangulada, não entre esferas, caixas, instâncias e múltiplas malhas coexistindo na mesma cena. Portanto, a formulação correta no relatório não é "o Slide 6 foi implementado", mas sim "parte do Slide 6 foi materializada por uma BVH local simplificada".
+
+Rastreabilidade no código: `src/ray_tracing_2/scene.py` (`compute_intersection()`, l. 24), `src/ray_tracing_2/triangle_bvh.py` (`TriangleBVH`, l. 140; `_build()`, l. 154; `TriangleBVHNode.intersect()`, l. 109).
+
+### 7.2. Câmera e formação de imagem
+
+O projeto permanece estritamente no modelo pinhole apresentado no Slide 4. Isso significa que `Camera.generate_ray()` sempre emite raios a partir de um único centro ótico, sem abertura finita, sem lente fina e sem profundidade de campo. A variável `focal_distance` controla apenas a escala geométrica do plano de projeção, e não um mecanismo de focalização seletiva.
+
+Essa limitação não invalida o modelo adotado; ela apenas delimita seu alcance. O supersampling do Slide 5 melhora a aproximação da média radiância por pixel, mas não altera a física óptica da câmera. Logo, qualquer leitura do resultado visual deve ser feita como imagem de câmera pinhole com amostragem estocástica, e não como imagem com desfoque óptico de lente.
+
+Rastreabilidade no código: `src/ray_tracing_2/camera.py` (`Camera.__init__()`, l. 7; `generate_ray()`, l. 23), `src/ray_tracing_2/film.py` (`get_samples_for_pixel()`, l. 60).
+
+### 7.3. Convenções radiométricas e simplificações de iluminação
+
+Há uma simplificação deliberada e potencialmente enganosa se não for declarada: `PointLight` e `AreaLight` não seguem a mesma convenção radiométrica nesta base. Os slides de iluminação pontual apresentam o decaimento geométrico clássico por $1/r^2$ (`4.tracado_de_raios.pdf`, pp. 40-41), mas `PointLight.radiance()` preserva a convenção do enunciado principal e trata `power` como radiância incidente constante modulada apenas por visibilidade/transmitância. Já `AreaLight.sample_radiance()` distribui energia por amostras do emissor e introduz explicitamente o termo geométrico de distância.
+
+O resultado prático é um subsistema de luzes internamente heterogêneo, embora coerente com os objetivos pedagógicos do projeto. Essa decisão é defensável para o Projeto 1, mas precisa ser descrita como simplificação de modelagem, e não como equivalência física entre fonte pontual ideal, emissor extenso e formulação radiométrica completa.
+
+Rastreabilidade no código: `src/ray_tracing_2/light.py` (`PointLight.radiance()`, l. 46; `AreaLight.sample_radiance()`, l. 92).
+
+### 7.4. Materiais recursivos e truncamento computacional
+
+Os materiais reflexivo e transparente representam uma extensão substancial do núcleo local de Phong, mas permanecem aproximativos sob o ponto de vista da física de materiais. `ReflectiveMaterial.eval()` mistura Phong local e reflexão recursiva com Fresnel-Schlick de maneira plausível, porém não equivalente a um BRDF fisicamente baseado. `TransparentMaterial.eval()` usa Snell, TIR e Beer-Lambert, mas assume meio homogêneo, atenuação por canal RGB e ausência de dispersão espectral contínua.
+
+Além disso, toda a recursão é truncada por `max_depth`. Isso é necessário para conter custo computacional e evitar crescimento exponencial do número de raios, mas significa que o traçador resolve apenas uma aproximação finita de cadeias longas de reflexão e transmissão. A leitura correta, portanto, é a de um ray tracer recursivo de profundidade limitada, não a de um solucionador completo de transporte de luz.
+
+Rastreabilidade no código: `src/ray_tracing_2/material.py` (`ReflectiveMaterial.eval()`, l. 101; `TransparentMaterial.eval()`, l. 186; `TransparentMaterial.shadow_transmittance()`, l. 167), `src/ray_tracing_2/scene.py` (`can_spawn_ray()`, l. 41).
+
+### 7.5. Leitura correta frente ao enunciado principal
+
+Frente a `materiais/proj1.pdf`, a interpretação tecnicamente correta é que o repositório cobre com segurança o núcleo exigido pelo projeto e ainda incorpora várias extensões relevantes da disciplina: supersampling, instanciação, luz de área, materiais recursivos, malha triangular e BVH local. Por outro lado, ele não esgota o espaço teórico apresentado nas aulas, sobretudo na parte de aceleração e na parte de modelagem física mais rigorosa da câmera, das fontes e dos materiais.
+
+Essa delimitação é importante para o valor científico do relatório. O mérito do trabalho não está em inflar o escopo entregue, mas em mostrar com precisão onde a implementação coincide com a teoria ensinada, onde a simplifica e onde conscientemente para.
+
+## 8. Conclusão
 
 O Projeto 1 implementa de forma sólida o núcleo do Slide 4 e a maior parte das extensões do Slide 5. O traçador resultante possui câmera pinhole, interseções analíticas, Phong local, sombras duras, supersampling, instanciação, luz de área, reflexão com Fresnel-Schlick, refração dielétrica com Snell e TIR, além de atenuação Beer-Lambert em raios refratados e de sombra.
 
-O principal cuidado técnico deste v5 é deixar claro o estatuto do Slide 6. O repositório entrega triangulação, `TriangleMesh` e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
+O principal cuidado técnico deste v5 é deixar claro o estatuto do Slide 6 e, mais amplamente, das limitações consolidadas na Seção 7. O repositório entrega triangulação, `TriangleMesh` e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
 
 Em outras palavras: a aderência entre teoria e código é alta nos Slides 4 e 5, e parcial, porém tecnicamente legítima, no Slide 6. A contribuição científica mais importante do trabalho é justamente essa rastreabilidade: cada efeito visual principal pode ser ligado a uma hipótese física ou geométrica explícita e a uma região identificável do código atual.

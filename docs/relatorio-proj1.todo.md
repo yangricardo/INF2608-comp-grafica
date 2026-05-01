@@ -9,6 +9,10 @@ Status atual: `relatorio-proj1.v5.md` redigido, validado sem erros no workspace 
 com citacoes de codigo consolidadas. Documentacao secundaria principal tambem
 alinhada ao estado real de `ray_tracing_2`.
 
+Complemento recente: secao de limitacoes atuais e delimitacao de escopo em
+sincronizacao com `materiais/proj1.pdf`, com reforco explicito de camera pinhole,
+convencoes de iluminacao, truncamento recursivo e lacunas do Slide 6.
+
 Ordem de confianca obrigatoria durante a redacao:
 
 1. `4.tracado_de_raios.pdf`, `5.tracado_de_raios2.pdf`, `6.estrutura_aceleracao.pdf`
@@ -77,6 +81,14 @@ Legenda de status:
 - [x] `main_ellipse.py` ou `main_box.py`: instanciação, transformacoes e normais
 - [x] `main_triangles.py`: malha triangular e BVH local
 - [x] `cornell_box_pyramid.py`: reflexao/refracao em uma cena fechada com malhas triangulares
+
+## Complementos recentes de limitacoes e escopo
+
+- [x] Explicitar no v5 que a camera permanece no modelo pinhole, sem lente fina e sem profundidade de campo
+- [x] Explicitar no v5 a assimetria radiometrica entre `PointLight` e `AreaLight`
+- [x] Explicitar no v5 que a recursao e truncada por `max_depth` como compromisso computacional
+- [x] Explicitar no v5 que Beer-Lambert em raios de sombra assume meio homogeneo e acumulacao no trecho de saida
+- [x] Consolidar em secao propria as ausencias de grade regular, SAT, SAH, BVH linear e acelerador global de cena
 
 ## Congelamento futuro das citacoes de codigo
 
