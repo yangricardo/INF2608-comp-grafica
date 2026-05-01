@@ -35,7 +35,8 @@ class Material:
 
 
 class PhongMaterial(Material):
-  # 5.tracado_de_raios2.pdf - p.27: PhongMaterial.Eval
+  # 5.tracado_de_raios2.pdf - p.27: PhongMaterial.Eval.
+  # Sintese fisica: c = c_amb + k_d L_i max(0, n·l) + k_s L_i max(0, r·v)^s.
   def __init__(self, ambient: glm.vec3, diffuse: glm.vec3, specular: glm.vec3, shininess: float):
     self.m_amb = glm.vec3(ambient)
     self.m_dif = glm.vec3(diffuse)
@@ -87,6 +88,7 @@ class ReflectiveMaterial(PhongMaterial):
   # R0(λ): reflectância à incidência normal (p.26). O material não substitui
   # Phong; ele redistribui energia entre a resposta local (1 - R) e o raio
   # refletido recursivo R, preservando a narrativa incremental do Slide 5.
+  # Em álgebra vetorial, cos θ = v·n com vetores normalizados.
 
   def __init__(self,
                ambient: glm.vec3,
@@ -130,6 +132,10 @@ class ReflectiveMaterial(PhongMaterial):
       reflected_origin = scene.offset_point(p, hit.geo_normal, reflected_dir)
       reflected_color = scene.trace_ray(Ray(reflected_origin, reflected_dir), depth=depth + 1, max_depth=max_depth)
       c += R * reflected_color
+
+    # TODO(material): investigar compensação energética explícita entre Phong
+    # local e reflexão recursiva, ou migrar para um modelo microfacet quando o
+    # escopo deixar de ser estritamente didático.
 
     return c
 
@@ -181,6 +187,8 @@ class TransparentMaterial(PhongMaterial):
         self.attenuation.z ** s,
       )
     # Entrando no material (front_face): sem atenuação ainda — será computada na saída
+    # TODO(material): se houver meios heterogêneos, trocar este modelo por uma
+    # integração explícita de profundidade óptica ao longo do segmento interno.
     return glm.vec3(1.0)
 
   def eval(self,
@@ -241,6 +249,9 @@ class TransparentMaterial(PhongMaterial):
         # p.34: ray = Ray(p, r̂); c += (1 − R) * scene.TraceRay(ray)
         refracted_origin = scene.offset_point(p, hit.geo_normal, glm.vec3(refracted))
         c += (glm.vec3(1.0) - R) * scene.trace_ray(Ray(refracted_origin, glm.vec3(refracted)), depth=depth + 1, max_depth=max_depth)
+
+      # TODO(material): substituir o limiar heurístico `dot(refracted, refracted) > 0.5`
+      # por um teste explícito de TIR baseado no radicando da fórmula vetorial de Snell.
 
     # p.34: return I * c
     return I * c
