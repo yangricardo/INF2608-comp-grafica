@@ -9,6 +9,7 @@ from typing import Optional
 from enum import Enum
 
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.sampling import stratified_grid_samples_2d, uniform_samples_2d
 from ray_tracing_2.scene import Scene
 
 
@@ -78,9 +79,10 @@ class Film:
     if self.sampling_mode == SamplingMode.JITTERED:
       # Slide 5, p. 4-8: jittered Monte Carlo dentro do pixel. As amostras são
       # independentes e simples de gerar, mas podem concentrar mais ruído local.
-      for _ in range(spp):
-        rx = self.rng.random()
-        ry = self.rng.random()
+      # O nome público continua `JITTERED`, mas a implementação concreta agora
+      # delega para `sampling.uniform_samples_2d()`, que materializa os pares
+      # aleatórios xi in [0,1) do domínio bidimensional normalizado do pixel.
+      for rx, ry in uniform_samples_2d(spp, self.rng):
         xn = (i + rx) / self.width
         yn = (j + ry) / self.height
         samples.append((xn, yn))
@@ -89,25 +91,16 @@ class Film:
     # stratified
     # A amostragem estratificada impõe cobertura espacial mínima ao subdividir o
     # pixel em GxG subcélulas, reduzindo variância em comparação ao jitter puro.
+    # A implementação do padrão 2D fica em `sampling.stratified_grid_samples_2d()`;
+    # este método apenas transforma as coordenadas locais [0,1]^2 em coordenadas
+    # normalizadas do pixel corrente.
     # TODO(sampling): experimentar sequências de baixa discrepância para reduzir
     # ruído sem aumentar `samples_per_pixel` de forma puramente bruta.
     G = math.ceil(math.sqrt(spp))
-    count = 0
-    for a in range(G):
-      for b in range(G):
-        if count >= spp:
-          break
-        # ponto aleatório dentro da subcélula (a,b)
-        ux = self.rng.random()
-        uy = self.rng.random()
-        sub_x = (a + ux) / G
-        sub_y = (b + uy) / G
+    for sub_x, sub_y in stratified_grid_samples_2d(G, G, self.rng)[:spp]:
         xn = (i + sub_x) / self.width
         yn = (j + sub_y) / self.height
         samples.append((xn, yn))
-        count += 1
-      if count >= spp:
-        break
 
     return samples
   
