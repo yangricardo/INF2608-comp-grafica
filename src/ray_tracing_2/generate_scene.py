@@ -1,16 +1,21 @@
-"""Generate a scene from a JSON specification and write outputs similar to
-`random_scene.py` (renders image + properties.md in an output folder).
+"""Gera uma cena a partir de uma especificação JSON e grava saídas no padrão
+de `random_scene.py`.
 
-Usage:
+O arquivo condensa o pipeline básico descrito no Slide 4: primitivas analíticas
+(`4.tracado_de_raios.pdf`, pp. 10-18), câmera pinhole (`4.tracado_de_raios.pdf`,
+pp. 19-29) e iluminação local com luz pontual (`4.tracado_de_raios.pdf`,
+pp. 40-49).
+
+Uso:
   python src/generate_scene.py --input inputs/example_scene.json
 
-The JSON schema (flexible) supports:
+Esquema JSON aceito:
   - "spheres": [ {"center": [x,y,z], "radius": r, "material": {..}} ]
   - "plane": {"y": number, "material": {...} }
   - "lights": [ {"pos": [x,y,z], "power": [r,g,b]} ]
-  - optional: "camera": {"eye": [x,y,z], "center": [x,y,z], "up": [x,y,z], "fov": number}
+  - opcional: "camera": {"eye": [x,y,z], "center": [x,y,z], "up": [x,y,z], "fov": number}
 
-If a field is missing reasonable defaults are used.
+Quando um campo não aparece, o script usa defaults conservadores.
 """
 from __future__ import annotations
 
@@ -19,16 +24,26 @@ import os
 import json
 import argparse
 from datetime import datetime
-from ray_tracing_2.render import Render
+
 from pyglm import glm
+
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
+from ray_tracing_2.film import SamplingMode
+from ray_tracing_2.light import PointLight
+from ray_tracing_2.material import PhongMaterial
+from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Sphere, Plane
-from ray_tracing_2.material import PhongMaterial
-from ray_tracing_2.light import PointLight
 
 
-def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
+def render_scene(scene: Scene, cam: Camera, W: int, H: int, out_path: str, samples_per_pixel: int = 16, sampling_mode: str = SamplingMode.JITTERED.value, seed: int | None = None, gamma_fix: bool = False):
   # Usa a classe Render para organizar saída e gerar markdown
   r = Render()
   # out_path aqui é esperado ser o caminho completo do arquivo de imagem; a
@@ -109,17 +124,26 @@ def explain_properties_md(props: dict) -> str:
   return '\n'.join(lines)
 
 
-def main():
-  parser = argparse.ArgumentParser()
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Generate and render a scene from a JSON specification.',
+    examples=[
+      'python -m ray_tracing_2.generate_scene --input inputs/example_scene.json --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.generate_scene --input inputs/example_scene.json --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42',
+    ],
+  )
   parser.add_argument('--input', '-i', required=True, help='Path to JSON scene specification')
   parser.add_argument('--outdir', '-o', default='outputs', help='Root outputs directory')
   parser.add_argument('--name', '-n', default='scene', help='Base name for the simulation folder')
-  parser.add_argument('--width', type=int, default=400)
-  parser.add_argument('--height', type=int, default=300)
-  parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
-  parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered', help='Sampling mode for AA')
-  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  add_image_size_arguments(parser, width_default=400, height_default=300)
+  add_sampling_arguments(parser, spp_default=16)
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
+  return parser
+
+
+def main():
+  parser = build_cli_parser()
   args = parser.parse_args()
 
   with open(args.input, 'r', encoding='utf-8') as f:

@@ -13,6 +13,13 @@ import argparse
 from pyglm import glm
 
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
 from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import PointLight
 from ray_tracing_2.material import PhongMaterial
@@ -21,9 +28,14 @@ from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Instance, Plane, Sphere
 
 
-def render(spp: int = 1, sampling_mode: str = "jittered", seed: int | None = None, gamma_fix: bool = False):
+def render(width: int = 400,
+           height: int = 300,
+           spp: int = 1,
+           sampling_mode: str = SamplingMode.JITTERED.value,
+           seed: int | None = None,
+           gamma_fix: bool = False):
   """Renderiza um elipsoide instanciado a partir de uma esfera unitária."""
-  W, H = 400, 300
+  W, H = int(width), int(height)
   cam = Camera(eye=glm.vec3(0, 0, 5), center=glm.vec3(0, 0, 0), up=glm.vec3(0, 1, 0), fov=45.0, width=W, height=H)
 
   mat_red = PhongMaterial(
@@ -62,11 +74,22 @@ def render(spp: int = 1, sampling_mode: str = "jittered", seed: int | None = Non
   )
 
 
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Render the instanced ellipsoid demo scene.',
+    examples=[
+      'python -m ray_tracing_2.main_ellipse --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.main_ellipse --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42',
+    ],
+  )
+  add_image_size_arguments(parser, width_default=400, height_default=300)
+  add_sampling_arguments(parser, spp_default=1)
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
+  return parser
+
+
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  parser.add_argument("--spp", type=int, default=1, help="Samples per pixel (anti-aliasing)")
-  parser.add_argument("--sampling_mode", choices=[m.value for m in SamplingMode], default="jittered", help="Sampling mode for AA")
-  parser.add_argument("--seed", type=int, default=None, help="RNG seed for reproducibility")
-  parser.add_argument("--gamma_fix", action="store_true", default=False, help="Apply gamma correction to final image (gamma_fix)")
+  parser = build_cli_parser()
   args = parser.parse_args()
-  render(spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)

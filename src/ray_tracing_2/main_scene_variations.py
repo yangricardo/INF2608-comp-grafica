@@ -11,17 +11,26 @@ Contribui com o que está documentado no README: mostra como construir cenas
 com `Scene`, `Shape`, `Material` e `Light`, e como gerar imagens via `Camera`.
 """
 from __future__ import annotations
+
+import argparse
 import os
+from typing import Optional
 
 from pyglm import glm
+
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
+from ray_tracing_2.film import Film
+from ray_tracing_2.light import PointLight
+from ray_tracing_2.material import PhongMaterial
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Sphere, Plane
-from ray_tracing_2.material import PhongMaterial
-from ray_tracing_2.light import PointLight
-from ray_tracing_2.film import Film
-import argparse
-from typing import Optional
 
 
 def render_scene_with_film(scene: Scene, cam: Camera, W: int, H: int, out_name: str, samples_per_pixel: int = 16, sampling_mode: str = 'jittered', seed: Optional[int] = None, gamma_fix: bool = False):
@@ -69,14 +78,23 @@ def build_scene(sx: float, sy: float, sr: float, plane_y: float = -1.0) -> Scene
   return scene
 
 
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Render a small grid of scene variations using a shared camera setup.',
+    examples=[
+      'python -m ray_tracing_2.main_scene_variations --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.main_scene_variations --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42',
+    ],
+  )
+  add_image_size_arguments(parser, width_default=400, height_default=300)
+  add_sampling_arguments(parser, spp_default=16)
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
+  return parser
+
+
 def main():
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--width', type=int, default=400)
-  parser.add_argument('--height', type=int, default=300)
-  parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (AA)')
-  parser.add_argument('--sampling_mode', choices=['jittered', 'stratified'], default='jittered')
-  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser = build_cli_parser()
   args = parser.parse_args()
 
   W, H = args.width, args.height

@@ -13,6 +13,13 @@ from pathlib import Path
 from pyglm import glm
 
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
 from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.material import PhongMaterial
@@ -102,7 +109,7 @@ def render(
   width: int | None = None,
   height: int | None = None,
   spp: int = 16,
-  sampling_mode: str = 'jittered',
+  sampling_mode: str = SamplingMode.JITTERED.value,
   seed: int | None = None,
   gamma_fix: bool = False,
   accelerator: str | None = None,
@@ -192,16 +199,31 @@ def render(
   )
 
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Render a triangle-mesh scene from JSON with an optional local BVH override.',
+    examples=[
+      'python -m ray_tracing_2.main_triangles --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.main_triangles --width 800 --height 600 --spp 1 --scene inputs/triangle_pyramid.json --accelerator bvh --seed 42',
+    ],
+  )
+  add_image_size_arguments(
+    parser,
+    width_default=None,
+    height_default=None,
+    width_help='Image width in pixels (defaults to JSON value)',
+    height_help='Image height in pixels (defaults to JSON value)',
+  )
+  add_sampling_arguments(parser, spp_default=16)
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
   parser.add_argument('--scene', '--json', type=str, default=None, help='Path to JSON scene specification')
-  parser.add_argument('--width', type=int, default=None, help='Image width in pixels (defaults to JSON value)')
-  parser.add_argument('--height', type=int, default=None, help='Image height in pixels (defaults to JSON value)')
-  parser.add_argument('--spp', type=int, default=16, help='Samples per pixel (anti-aliasing)')
-  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
-  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
   parser.add_argument('--accelerator', choices=['linear', 'bvh'], default=None, help='Override the triangle mesh accelerator')
+  return parser
+
+
+if __name__ == '__main__':
+  parser = build_cli_parser()
   args = parser.parse_args()
   render(
     scene_path=args.scene,

@@ -9,15 +9,25 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 
 from __future__ import annotations
 
+import argparse
+
 from pyglm import glm
+
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_light_sampling_argument,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
+from ray_tracing_2.film import SamplingMode
+from ray_tracing_2.light import AmbientLight, AreaLight, AreaLightSamplingMode, PointLight
+from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
+from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Rotate, Sphere, Translate, TriangleMesh
-from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
-from ray_tracing_2.light import AmbientLight, AreaLight, AreaLightSamplingMode, PointLight
-from ray_tracing_2.film import SamplingMode
-from ray_tracing_2.render import Render
-import argparse
 
 
 
@@ -48,7 +58,7 @@ def _build_block_material(kind: str):
 def render(width: int = 800,
            height: int = 600,
            spp: int = 1,
-           sampling_mode: str = 'jittered',
+           sampling_mode: str = SamplingMode.JITTERED.value,
            light_sampling_mode: str = AreaLightSamplingMode.STRATIFIED.value,
            seed: int | None = None,
            gamma_fix: bool = False,
@@ -226,18 +236,28 @@ def render(width: int = 800,
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='cornell_box_pyramid', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
-if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--width', type=int, default=800, help='Image width in pixels')
-  parser.add_argument('--height', type=int, default=600, help='Image height in pixels')
-  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
-  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
-  parser.add_argument('--light_sampling_mode', choices=[m.value for m in AreaLightSamplingMode], default=AreaLightSamplingMode.STRATIFIED.value, help='Sampling mode for area lights in the scene')
-  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Render the Cornell box scene with two triangular pyramids.',
+    examples=[
+      'python -m ray_tracing_2.cornell_box_pyramid --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.cornell_box_pyramid --width 800 --height 600 --spp 1 --sampling_mode stratified --light_sampling_mode stratified --seed 42',
+    ],
+  )
+  add_image_size_arguments(parser, width_default=800, height_default=600)
+  add_sampling_arguments(parser, spp_default=1)
+  add_light_sampling_argument(parser, help_text='Sampling mode for area lights in the scene')
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
   parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
   parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the small block')
   parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the large block')
+  return parser
+
+
+if __name__ == "__main__":
+  parser = build_cli_parser()
   args = parser.parse_args()
   render(
     width=args.width,

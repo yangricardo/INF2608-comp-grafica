@@ -12,6 +12,13 @@ import argparse
 from pyglm import glm
 
 from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
 from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import AmbientLight, PointLight
 from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
@@ -64,7 +71,7 @@ def render(
   width: int = 800,
   height: int = 600,
   spp: int = 25,
-  sampling_mode: str = 'jittered',
+  sampling_mode: str = SamplingMode.JITTERED.value,
   seed: int | None = None,
   gamma_fix: bool = False,
   light_power: float = 0.7,   # proj1-exemplo.pdf: PointLight(vec3(0.7,0.7,0.7), ...)
@@ -107,7 +114,8 @@ def render(
 
   scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3), max_depth=max_depth)
 
-  # Cornell Box literal: front wall, left wall, right wall, ceiling and floor.
+  # Slide 4, pp. 11-12, e proj1-exemplo.pdf: a sala é montada por cinco caixas
+  # alinhadas aos eixos, reutilizando a mesma primitiva analítica do método de slabs.
   front_wall = Box(p_min=glm.vec3(-0.10, -0.10, -0.10), p_max=glm.vec3(5.65, 5.65, 0.0), material=white)
   left_wall = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(0.0, 5.55, 5.55), material=green)
   right_wall = Box(p_min=glm.vec3(5.55, -0.10, 0.0), p_max=glm.vec3(5.65, 5.55, 5.55), material=red)
@@ -115,14 +123,15 @@ def render(
   floor = Box(p_min=glm.vec3(-0.10, -0.10, 0.0), p_max=glm.vec3(5.65, 0.0, 5.55), material=white)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor])
 
-  # Luminária: proj1-exemplo.pdf — Sphere(vec3(2.775,5.55,2.775), 0.1)
-  # Centro lowered to y=5.45 so the sphere fits entirely inside the room
-  # (y=5.35 to y=5.55) without overlapping the ceiling face at y=5.55.
+  # Slide 4, pp. 15-18, e proj1-exemplo.pdf: a luminária é representada por uma
+  # esfera pequena. O centro foi rebaixado para y=5.45 para caber por completo
+  # no interior da sala sem interceptar numericamente o teto em y=5.55.
   lamp_mat = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1.0))
   lamp_sphere = Sphere(center=glm.vec3(2.775, 5.45, 2.775), radius=0.1, material=lamp_mat)
   scene.objects.append(lamp_sphere)
 
-  # Base boxes from the statement, then instanced with translate + rotate.
+  # Slide 5, pp. 9-13: os blocos base são instanciados por transformações afins
+  # em vez de redefinir a interseção de cada caixa já posicionada no mundo.
   small_block_base = Box(
     p_min=glm.vec3(0.0, 0.0, 0.0),
     p_max=glm.vec3(1.65, 1.65, 0.30),
@@ -139,7 +148,8 @@ def render(
 
   scene.objects.extend([small_block, large_block])
 
-  # Point light on the ceiling, matching the statement.
+  # Slide 4, pp. 40-41, e proj1-exemplo.pdf: luz pontual no teto para manter a
+  # convenção de iluminação direta usada no enunciado base.
   scene.lights.append(PointLight(pos=glm.vec3(2.775, light_y, 2.775), power=glm.vec3(light_power, light_power, light_power)))
 
   r = Render()
@@ -156,19 +166,28 @@ def render(
   )
 
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--width', type=int, default=800, help='Image width in pixels')
-  parser.add_argument('--height', type=int, default=600, help='Image height in pixels')
-  parser.add_argument('--spp', type=int, default=25, help='Samples per pixel (anti-aliasing)')
-  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
-  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', '--gama_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Render the Cornell box statement scene with instanced blocks.',
+    examples=[
+      'python -m ray_tracing_2.main_box --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.main_box --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42 --max_depth 4',
+    ],
+  )
+  add_image_size_arguments(parser, width_default=800, height_default=600)
+  add_sampling_arguments(parser, spp_default=25)
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
   parser.add_argument('--light_power', type=float, default=0.7, help='Point light power (proj1-exemplo.pdf: 0.7)')
   parser.add_argument('--light_y', type=float, default=5.55, help='Y position of the point light (proj1-exemplo.pdf: 5.55)')
   parser.add_argument('--max_depth', type=int, default=4, help='Maximum recursion depth for reflection/refraction')
   parser.add_argument('--small_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the small block')
   parser.add_argument('--large_block_material', choices=['opaque', 'reflective', 'transparent'], default='opaque', help='Material model used by the large block')
+  return parser
+
+
+if __name__ == '__main__':
+  parser = build_cli_parser()
   args = parser.parse_args()
   render(
     width=args.width,

@@ -10,19 +10,33 @@ pixels gerando raios com `Camera.generate_ray` para avaliar cor via
 
 from __future__ import annotations
 
-from pyglm import glm
-from ray_tracing_2.camera import Camera
-from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate
-from ray_tracing_2.material import PhongMaterial
-from ray_tracing_2.light import AmbientLight, PointLight
-from ray_tracing_2.film import Film, SamplingMode
-from ray_tracing_2.render import Render
 import argparse
 
+from pyglm import glm
+
+from ray_tracing_2.camera import Camera
+from ray_tracing_2.cli import (
+  add_gamma_fix_argument,
+  add_image_size_arguments,
+  add_sampling_arguments,
+  add_seed_argument,
+  build_parser,
+)
+from ray_tracing_2.film import Film, SamplingMode
+from ray_tracing_2.light import AmbientLight, PointLight
+from ray_tracing_2.material import PhongMaterial
+from ray_tracing_2.render import Render
+from ray_tracing_2.scene import Scene
+from ray_tracing_2.shape import Box, Plane, Rotate, Sphere, Translate
 
 
-def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = None, gamma_fix: bool = False):
+
+def render(width: int = 800,
+           height: int = 600,
+           spp: int = 1,
+           sampling_mode: str = SamplingMode.JITTERED.value,
+           seed: int | None = None,
+           gamma_fix: bool = False):
   """Renderiza a cena de exemplo e salva `render_final.png`.
 
   O procedimento segue o pipeline principal:
@@ -32,7 +46,7 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
      `Scene.trace_ray`.
   """
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
-  W, H = 800, 600
+  W, H = int(width), int(height)
   # Cria a câmera
   cam = Camera(eye=glm.vec3(2.7750, 2.775, 2.775), center=glm.vec3(2.775, 3.200, 12.775), up=glm.vec3(0, 1, 0), fov=50, width=W, height=H)
   scene = Scene(ambient_light=AmbientLight(0.3, 0.3, 0.3))
@@ -61,11 +75,23 @@ def render(spp: int = 1, sampling_mode: str = 'jittered', seed: int | None = Non
   r = Render()
   r.render(scene=scene, cam=cam, width=W, height=H, name='main_scene', samples_per_pixel=spp, sampling_mode=sampling_mode, seed=seed, gamma_fix=gamma_fix)
 
+
+def build_cli_parser() -> argparse.ArgumentParser:
+  parser = build_parser(
+    'Render the baseline Slide 4 scene.',
+    examples=[
+      'python -m ray_tracing_2.main --width 800 --height 600 --spp 1',
+      'python -m ray_tracing_2.main --width 800 --height 600 --spp 1 --sampling_mode stratified --seed 42',
+    ],
+  )
+  add_image_size_arguments(parser, width_default=800, height_default=600)
+  add_sampling_arguments(parser, spp_default=1)
+  add_seed_argument(parser)
+  add_gamma_fix_argument(parser)
+  return parser
+
+
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (anti-aliasing)')
-  parser.add_argument('--sampling_mode', choices=[m.value for m in SamplingMode], default='jittered', help='Sampling mode for AA')
-  parser.add_argument('--seed', type=int, default=None, help='RNG seed for reproducibility')
-  parser.add_argument('--gamma_fix', action='store_true', default=False, help='Apply gamma correction to final image (gamma_fix)')
+  parser = build_cli_parser()
   args = parser.parse_args()
-  render(spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
+  render(width=args.width, height=args.height, spp=args.spp, sampling_mode=args.sampling_mode, seed=args.seed, gamma_fix=args.gamma_fix)
