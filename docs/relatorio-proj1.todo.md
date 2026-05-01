@@ -6,7 +6,8 @@ Este arquivo gerencia o que ja foi avaliado, o que ainda precisa ser confirmado
 e o que deve entrar no `relatorio-proj1.v5.md`.
 
 Status atual: `relatorio-proj1.v5.md` redigido, validado sem erros no workspace e
-com citacoes de codigo consolidadas.
+com citacoes de codigo consolidadas. Documentacao secundaria principal tambem
+alinhada ao estado real de `ray_tracing_2`.
 
 Ordem de confianca obrigatoria durante a redacao:
 
@@ -65,9 +66,9 @@ Legenda de status:
 
 ### Markdown secundario
 
-- [ ] `README.md`: revisar afirmacoes desatualizadas sobre `ray_tracing_1` versus `ray_tracing_2`
-- [ ] `docs/AA_IMPLEMENTATION.md`: conferir consistencia terminologica com os slides e o codigo atual
-- [ ] `docs/UNDOCUMENTED_FEATURES.md`: revisar onde a descricao fisica conflitar com o comportamento real do renderer
+- [x] `README.md`: revisar afirmacoes desatualizadas sobre `ray_tracing_1` versus `ray_tracing_2`
+- [x] `docs/AA_IMPLEMENTATION.md`: conferir consistencia terminologica com os slides e o codigo atual
+- [x] `docs/UNDOCUMENTED_FEATURES.md`: revisar onde a descricao fisica conflitar com o comportamento real do renderer
 
 ## Casos curtos para validacao experimental no v5
 
