@@ -19,6 +19,57 @@ class SamplingMode(Enum):
   JITTERED = 'jittered'
   STRATIFIED = 'stratified'
 
+
+def normalize_sampling_mode(sampling_mode: str | SamplingMode | None) -> SamplingMode:
+  if isinstance(sampling_mode, SamplingMode):
+    return sampling_mode
+  if sampling_mode is None:
+    return SamplingMode.JITTERED
+
+  mode_str = str(sampling_mode).lower()
+  if mode_str == SamplingMode.CENTER.value:
+    return SamplingMode.CENTER
+  if mode_str == SamplingMode.STRATIFIED.value:
+    return SamplingMode.STRATIFIED
+  return SamplingMode.JITTERED
+
+
+def effective_samples_per_pixel_for_mode(
+  samples_per_pixel: int,
+  sampling_mode: str | SamplingMode | None,
+) -> int:
+  spp = max(1, int(samples_per_pixel))
+  return 1 if normalize_sampling_mode(sampling_mode) == SamplingMode.CENTER else spp
+
+
+def sampling_mode_help_text() -> str:
+  return (
+    'Film sampling mode: center = single central sample per pixel (no AA); '
+    'jittered = random subpixel sampling; '
+    'stratified = stratified subpixel sampling.'
+  )
+
+
+def describe_sampling_configuration(
+  samples_per_pixel: int,
+  sampling_mode: str | SamplingMode | None,
+) -> str:
+  requested_spp = max(1, int(samples_per_pixel))
+  mode = normalize_sampling_mode(sampling_mode)
+  effective_spp = effective_samples_per_pixel_for_mode(requested_spp, mode)
+
+  if mode == SamplingMode.CENTER:
+    return (
+      'modo=center (amostra central, sem AA) | '
+      f'spp efetivo=1 | spp solicitado={requested_spp}'
+    )
+  if mode == SamplingMode.JITTERED:
+    detail = 'AA jittered' if effective_spp > 1 else '1 amostra subpixel aleatória'
+    return f'modo=jittered ({detail}) | spp={effective_spp}'
+
+  detail = 'AA estratificado' if effective_spp > 1 else '1 estrato subpixel'
+  return f'modo=stratified ({detail}) | spp={effective_spp}'
+
 class Film:
   def __init__(self, width: int, height: int, samples_per_pixel: int = 16, sampling_mode: Optional[str] = None, seed: Optional[int] = None):
     self.width = width
@@ -31,19 +82,7 @@ class Film:
     # `samples_per_pixel`: número de amostras por pixel (Monte Carlo)
     self.samples_per_pixel: int = max(1, int(samples_per_pixel))
     # `sampling_mode`: usa o enum `SamplingMode` definido no módulo
-    if sampling_mode is None:
-      self.sampling_mode: SamplingMode = SamplingMode.JITTERED
-    elif isinstance(sampling_mode, SamplingMode):
-      self.sampling_mode = sampling_mode
-    else:
-      # aceita string 'center' / 'jittered' / 'stratified'
-      mode_str = str(sampling_mode).lower()
-      if mode_str == SamplingMode.CENTER.value:
-        self.sampling_mode = SamplingMode.CENTER
-      elif mode_str == SamplingMode.STRATIFIED.value:
-        self.sampling_mode = SamplingMode.STRATIFIED
-      else:
-        self.sampling_mode = SamplingMode.JITTERED
+    self.sampling_mode: SamplingMode = normalize_sampling_mode(sampling_mode)
 
     # Semente para reprodutibilidade; pode ser None para variabilidade
     self.seed: Optional[int] = seed
@@ -119,7 +158,6 @@ class Film:
     # amostra central, o comportamento recai no pipeline básico; com múltiplas
     # amostras, entra a aproximação Monte Carlo do anti-aliasing com
     # c(i,j) = (1/N) * sum_k trace_ray(ray_k).
-    print("Renderizando a cena com AA (spp=", self.samples_per_pixel, ", mode=", self.sampling_mode.name, ")...")
     for j in range(self.height):
       for i in range(self.width):
         # Para cada pixel, gera uma lista de amostras subpixel.
