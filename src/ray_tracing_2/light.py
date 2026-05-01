@@ -45,7 +45,8 @@ class PointLight(Light):
 
   def radiance(self, scene: "Scene", hit: "Hit") -> tuple[glm.vec3, glm.vec3]:
     """Calcula a radiância incidente e a direção da luz no ponto de impacto"""
-    # Slide 4, p. 40: a direção da luz vai do ponto atingido até a posição da fonte.
+    # Slide 4, pp. 40-41: a direção da luz vai do ponto atingido até a posição
+    # da fonte; geometricamente, isso é o vetor l = normalize(x_luz - x_hit).
     l_vec = self.pos - hit.pos
     dist = glm.length(l_vec)
     if dist <= 0.0:
@@ -56,10 +57,13 @@ class PointLight(Light):
     if _is_black(transmittance):
       return glm.vec3(0.0), l
 
-    # proj1-exemplo.pdf: PointLight(Intensity, Position) segue a convenção do
-    # enunciado, em que Intensity é a radiância constante da fonte. Por isso,
-    # esta implementação deliberadamente não divide por r^2; a única redução
-    # de energia aqui vem da transmitância geométrica/volumétrica até a luz.
+    # Slide 4, pp. 40-41, e proj1-exemplo.pdf: a base teórica usual teria
+    # decaimento geométrico ~ 1/r^2, mas o enunciado adota a convenção prática
+    # PointLight(Intensity, Position) com intensidade efetiva constante. Por
+    # isso, esta implementação deliberadamente não divide por r^2; a única
+    # redução de energia aqui vem da transmitância geométrica/volumétrica.
+    # TODO(light): alinhar a nomenclatura `power`/`intensity`/`radiance` para
+    # evitar ambiguidade entre a convenção do enunciado e a radiometria física.
     li = self.power * transmittance
     return li, l
 
@@ -92,9 +96,10 @@ class AreaLight(Light):
   def sample_radiance(self, scene: "Scene", hit: "Hit") -> list[tuple[glm.vec3, glm.vec3]]:
     """Amostra múltiplos pontos na superfície da luz para produzir penumbra."""
     samples: list[tuple[glm.vec3, glm.vec3]] = []
-    # Slide 5, p. 35: a luz de área aproxima a integral sobre uma fonte extensa
-    # por soma discreta de amostras. Cada subamostra enxerga uma visibilidade
-    # ligeiramente diferente, produzindo penumbra nas regiões parcialmente ocluídas.
+    # Slide 5, pp. 14-23: a luz de área aproxima a integral sobre uma fonte
+    # extensa por soma discreta de amostras. Cada subamostra enxerga uma
+    # visibilidade ligeiramente diferente, produzindo penumbra nas regiões
+    # parcialmente ocluídas.
     sample_count = self.samples_u * self.samples_v
     if sample_count <= 0:
       return samples
@@ -114,9 +119,13 @@ class AreaLight(Light):
           continue
 
         # Ao contrário da PointLight do enunciado, aqui a contribuição é
-        # distribuída entre amostras de uma área emissiva e decai com 1/r^2.
+        # distribuída entre amostras de uma área emissiva e decai com 1/r^2,
+        # aproximando a síntese física dos slides para fonte extensa.
         li = ((self.power / float(sample_count)) / (dist ** 2)) * transmittance
         samples.append((li, l))
+
+      # TODO(light): incorporar fator angular do emissor (coseno da emissão) se
+      # a fonte de área deixar de ser usada apenas como aproximador didático.
 
     return samples
 
