@@ -22,7 +22,10 @@ class Scene:
     self.ray_epsilon = float(ray_epsilon)
 
   def compute_intersection(self, ray: Ray):
-    # Slide 4, p. 35 e p. 47-48: percorre os objetos e guarda apenas o hit mais próximo.
+    # Slide 4, p. 35 e p. 47-48: percorre os objetos e guarda apenas o hit mais
+    # próximo, isto é, o menor t positivo compatível com a geometria visível.
+    # TODO(accel): substituir este loop linear por um agregador global de cena
+    # quando houver muitas primitivas heterogêneas e/ou múltiplas malhas BVH.
     closest_hit = Hit()
     found = False
     for obj in self.objects:
@@ -33,7 +36,8 @@ class Scene:
   def offset_point(self, pos: glm.vec3, normal: glm.vec3, direction: glm.vec3) -> glm.vec3:
     # O pequeno deslocamento ao longo da normal separa numericamente o novo raio
     # da superfície que o gerou, evitando auto-interseção em sombra, reflexão e
-    # refração. Sem isso surgem artefatos clássicos de shadow acne.
+    # refração. Sem isso surgem artefatos clássicos de shadow acne. Em termos
+    # geométricos, é uma perturbação controlada em torno da solução ideal t=0.
     reference_normal = glm.normalize(glm.vec3(normal))
     sign = 1.0 if glm.dot(direction, reference_normal) >= 0.0 else -1.0
     return glm.vec3(pos) + reference_normal * (self.ray_epsilon * sign)
@@ -51,11 +55,14 @@ class Scene:
                     direction: glm.vec3,
                     max_distance: float,
                     max_steps: int = 16) -> glm.vec3:
-    # Slide 5, p.35: este método generaliza o shadow ray binário do Slide 4.
+    # Slide 5, p. 35: este método generaliza o shadow ray binário do Slide 4.
     # Em vez de responder apenas "livre" ou "bloqueado", ele acumula o
     # throughput ao longo do segmento até a luz: materiais opacos zeram a
     # energia, enquanto interfaces transparentes delegam a Beer-Lambert para
-    # `shadow_transmittance()`.
+    # `shadow_transmittance()`. O resultado é um produto discreto de fatores de
+    # transmitância, análogo a T = Π_k a_k^{s_k} para um meio homogêneo por trecho.
+    # TODO(transmittance): expor um critério de parada baseado em profundidade
+    # óptica acumulada, além de `max_steps`, para cenas com muitos transparentes.
     if max_distance <= 0.0:
       return glm.vec3(0.0)
 
