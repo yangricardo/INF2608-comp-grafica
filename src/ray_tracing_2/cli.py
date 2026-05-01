@@ -4,7 +4,7 @@ import argparse
 from dataclasses import dataclass
 from typing import Any, Sequence
 
-from ray_tracing_2.film import SamplingMode
+from ray_tracing_2.film import SamplingMode, sampling_mode_help_text
 from ray_tracing_2.light import AreaLightSamplingMode
 
 
@@ -103,12 +103,17 @@ def add_sampling_arguments(
   spp_default: int = 1,
   sampling_mode_default: str = SamplingMode.JITTERED.value,
 ) -> None:
-  parser.add_argument('--spp', type=int, default=spp_default, help='Samples per pixel (anti-aliasing)')
+  parser.add_argument(
+    '--spp',
+    type=int,
+    default=spp_default,
+    help='Requested film samples per pixel. In center mode the effective value is always 1.',
+  )
   parser.add_argument(
     '--sampling_mode',
     choices=[mode.value for mode in SamplingMode],
     default=sampling_mode_default,
-    help='Sampling mode for film AA',
+    help=sampling_mode_help_text(),
   )
 
 
