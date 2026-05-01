@@ -51,19 +51,11 @@ class Scene:
                     direction: glm.vec3,
                     max_distance: float,
                     max_steps: int = 16) -> glm.vec3:
-    # 5.tracado_de_raios2.pdf - p.35: Light.SampleRadiance com suporte a materiais transparentes.
-            # Conceitualmente, este método é a evolução do teste binário de sombra do
-            # Slide 4: em vez de responder apenas "bloqueado" ou "livre", ele acumula
-            # throughput através de interfaces transparentes até atingir a luz.
-    # Implementa o loop:
-    #   while hits.material.IsTransparent() do
-    #     if hits.IsBackfacing() then I = I * hits.material.a^||p-hits.p||
-    #     ray = Ray(hits.p, l̂); hits = scene.ComputeIntersection(ray)
-    # A verificação de backfacing e a Lei de Beer (p.33) ficam em
-    # TransparentMaterial.shadow_transmittance(), que retorna:
-    #   • vec3(1.0) ao entrar (front_face) — sem atenuação ainda
-    #   • a^hit.t  ao sair  (backfacing) — Lei de Beer pela espessura percorrida
-    #   • vec3(0.0) para materiais opacos — bloqueia o raio
+    # Slide 5, p.35: este método generaliza o shadow ray binário do Slide 4.
+    # Em vez de responder apenas "livre" ou "bloqueado", ele acumula o
+    # throughput ao longo do segmento até a luz: materiais opacos zeram a
+    # energia, enquanto interfaces transparentes delegam a Beer-Lambert para
+    # `shadow_transmittance()`.
     if max_distance <= 0.0:
       return glm.vec3(0.0)
 
@@ -71,7 +63,7 @@ class Scene:
     dir_norm = glm.normalize(glm.vec3(direction))
     origin = self.offset_point(pos, normal, dir_norm)
     # Subtrai ray_epsilon para compensar o offset inicial da origem:
-    # sem isso, objetos que estão xatamente na posição da luz (como o teto na y=5.55
+    # sem isso, objetos que estão exatamente na posição da luz (como o teto na y=5.55
     # quando a luz também está em y=5.55) aparecem dentro do alcance máximo e
     # bloqueiam todos os raios de sombra.
     remaining = float(max_distance) - self.ray_epsilon
