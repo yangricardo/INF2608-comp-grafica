@@ -5,6 +5,8 @@ import random
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from ray_tracing_2.sampling import regular_grid_samples_2d, stratified_grid_samples_2d, uniform_samples_2d
+
 if TYPE_CHECKING:
   from ray_tracing_2.hit import Hit
   from ray_tracing_2.scene import Scene
@@ -110,27 +112,32 @@ class AreaLight(Light):
     return self.p + u * self.e_u + v * self.e_v
 
   def _iter_sample_uvs(self) -> list[tuple[float, float]]:
+    """Mapeia o modo público da luz para padrões compartilhados no quadrado unitário.
+
+    Os pares retornados vivem no domínio normalizado ``[0,1]^2`` da
+    parametrização do emissor, conforme a discussão de luz de área do Slide 5
+    (`5.tracado_de_raios2.pdf`, pp. 14-23). O mapeamento afim para o retângulo
+    físico acontece depois, em `_sample_position()`, por meio de
+    ``p + u e_u + v e_v``.
+    """
     sample_count = self.samples_u * self.samples_v
     if sample_count <= 0:
       return []
 
     if self.sampling_mode == AreaLightSamplingMode.UNIFORM:
-      return [(self.rng.random(), self.rng.random()) for _ in range(sample_count)]
+      return uniform_samples_2d(sample_count, self.rng)
 
-    uvs: list[tuple[float, float]] = []
-    for iu in range(self.samples_u):
-      for iv in range(self.samples_v):
-        if self.sampling_mode == AreaLightSamplingMode.REGULAR:
-          u = (iu + 0.5) / self.samples_u
-          v = (iv + 0.5) / self.samples_v
-        else:
-          u = (iu + self.rng.random()) / self.samples_u
-          v = (iv + self.rng.random()) / self.samples_v
-        uvs.append((u, v))
-    return uvs
+    if self.sampling_mode == AreaLightSamplingMode.REGULAR:
+      return regular_grid_samples_2d(self.samples_u, self.samples_v)
+
+    return stratified_grid_samples_2d(self.samples_u, self.samples_v, self.rng)
 
   def sample_radiance(self, scene: "Scene", hit: "Hit") -> list[tuple[glm.vec3, glm.vec3]]:
-    """Amostra múltiplos pontos na superfície da luz para produzir penumbra."""
+    """Amostra a superfície emissiva para aproximar a integral da luz de área.
+
+    Slide 5, pp. 14-23: a penumbra surge porque diferentes subamostras da fonte
+    extensa veem estados de oclusão diferentes a partir do mesmo ponto sombreado.
+    """
     samples: list[tuple[glm.vec3, glm.vec3]] = []
     # Slide 5, pp. 14-23: a luz de área aproxima a integral sobre uma fonte
     # extensa por soma discreta de amostras. Cada subamostra enxerga uma
@@ -138,6 +145,9 @@ class AreaLight(Light):
     # parcialmente ocluídas. Esta base agora expõe três padrões explícitos:
     # regular (centro de cada célula), uniform (aleatório puro na área toda)
     # e stratified (jitter por célula, padrão anterior e padrão default).
+    # A definição geométrica desses padrões foi extraída para `sampling.py`; aqui
+    # a classe só converte o par (u, v) do quadrado unitário para um ponto real
+    # na superfície emissiva antes de avaliar visibilidade e 1/r^2.
     sample_count = self.samples_u * self.samples_v
     if sample_count <= 0:
       return samples
