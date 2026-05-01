@@ -65,19 +65,25 @@ Depois de ativar o ambiente e instalar o pacote em modo editável, execute como 
 python -m ray_tracing_2
 ```
 
-Ou escolha explicitamente uma cena:
+Ou escolha explicitamente uma cena. Para uma validação rápida e reprodutível, os exemplos abaixo usam `800x600` e `--spp 1`:
 
 ```bash
-python -m ray_tracing_2.main
-python -m ray_tracing_2.main_area_light --spp 16 --sampling_mode stratified
-python -m ray_tracing_2.main_box --spp 25 --sampling_mode jittered
-python -m ray_tracing_2.main_triangles
+python -m ray_tracing_2.main --width 800 --height 600 --spp 1
+python -m ray_tracing_2.main_area_light --width 800 --height 600 --spp 1 --sampling_mode stratified --light_sampling_mode regular
+python -m ray_tracing_2.cornell_box --width 800 --height 600 --spp 1 --sampling_mode jittered --light_sampling_mode uniform
+python -m ray_tracing_2.main_triangles --width 800 --height 600 --spp 1 --scene inputs/triangle_pyramid.json --accelerator bvh
+python -m ray_tracing_2.generate_scene --input inputs/example_scene.json --width 800 --height 600 --spp 1
 ```
+
+Nos entrypoints com `AreaLight`, os controles públicos de amostragem permanecem separados:
+
+- `--sampling_mode` controla apenas o anti-aliasing do filme
+- `--light_sampling_mode` controla apenas o padrão 2D usado na integração sobre a fonte de área
 
 Se preferir não instalar o pacote, use `PYTHONPATH=src` na raiz do repositório:
 
 ```bash
-PYTHONPATH=src python -m ray_tracing_2.main
+PYTHONPATH=src python -m ray_tracing_2.main_area_light --width 800 --height 600 --spp 1 --sampling_mode jittered --light_sampling_mode stratified
 ```
 
 Cada execução produz uma nova pasta em `outputs/` contendo pelo menos:
