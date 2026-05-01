@@ -34,7 +34,7 @@ $$
 \mathbf{r}(t)=\mathbf{o}+t\,\hat{\mathbf{d}},\qquad t\ge 0,
 $$
 
-em que $\mathbf{o}$ é a origem, $\hat{\mathbf{d}}$ é a direção normalizada e $t$ parametriza a posição ao longo do feixe. Em ótica geométrica, essa formulação abstrai a propagação retilínea da luz em meios homogêneos; em computação gráfica, ela converte o problema de visibilidade em um problema de encontrar o menor $t$ positivo compatível com uma superfície. Nos slides, isso aparece como o elo entre câmera, interseção e sombreamento local (`4.tracado_de_raios.pdf`, pp. 7-9).
+em que $\mathbf{o}$ é a origem, $\hat{\mathbf{d}}$ é a direção normalizada e $t$ parametriza a posição ao longo do feixe. Em ótica geométrica, essa formulação abstrai a propagação retilínea da luz em meios homogêneos; em computação gráfica, ela converte o problema de visibilidade em um problema de encontrar o menor $t$ positivo compatível com uma superfície. Nos slides, isso aparece como o elo entre câmera, interseção e sombreamento local, particularmente na dedução do raio paramétrico e na interpretação física de $t$ como distância assinada ao longo da trajetória (`4.tracado_de_raios.pdf`, pp. 7-9).
 
 O repositório segue exatamente essa organização. O raio é carregado por `Ray`, enquanto `Hit` armazena a melhor interseção conhecida até o momento e também codifica `front_face` e `backfacing`. Essa distinção, que no Slide 4 serve para consistência geométrica da normal, torna-se decisiva no Slide 5 para distinguir entrada e saída de meios refrativos. A rotina `Scene.compute_intersection()` preserva o padrão clássico de _closest hit_: percorre os objetos, atualiza um único registro acumulador e retorna apenas a interseção frontal mais próxima.
 
@@ -50,13 +50,19 @@ $$
 (\mathbf{x}-\mathbf{p}_0)\cdot\hat{\mathbf{n}}=0,
 $$
 
-e a substituição de $\mathbf{r}(t)$ produz uma solução linear em $t$ (`4.tracado_de_raios.pdf`, pp. 10-13). A esfera, por sua vez, impõe
+e a substituição de $\mathbf{r}(t)$ produz a solução linear
+
+$$
+t=\frac{(\mathbf{p}_0-\mathbf{o})\cdot\hat{\mathbf{n}}}{\hat{\mathbf{d}}\cdot\hat{\mathbf{n}}},
+$$
+
+exatamente como discutido nas páginas de interseção raio-plano (`4.tracado_de_raios.pdf`, pp. 10-13). A esfera, por sua vez, impõe
 
 $$
 \|\mathbf{x}-\mathbf{c}\|^2-r^2=0,
 $$
 
-que, após substituição do raio, gera uma quadrática cujo discriminante decide ausência, tangência ou dupla interseção (`4.tracado_de_raios.pdf`, pp. 14-18). Em ambos os casos, o aspecto fisicamente relevante é o mesmo: o que interessa para a câmera é a menor raiz positiva. O aspecto numericamente relevante também é comum: deve-se rejeitar soluções com $t$ demasiado pequeno para evitar reinterseção artificial da própria superfície.
+que, após substituição do raio, gera uma quadrática $at^2+bt+c=0$ cujo discriminante $\Delta=b^2-4ac$ decide ausência, tangência ou dupla interseção (`4.tracado_de_raios.pdf`, pp. 14-18). Em ambos os casos, o aspecto fisicamente relevante é o mesmo: o que interessa para a câmera é a menor raiz positiva. O aspecto numericamente relevante também é comum: deve-se rejeitar soluções com $t$ demasiado pequeno para evitar reinterseção artificial da própria superfície.
 
 O código espelha esse raciocínio. `Plane.intersect()` resolve o plano por produto escalar; `Sphere.intersect()` resolve a quadrática e guarda a menor raiz positiva; `Scene.offset_point()` empurra a origem dos raios secundários ao longo da normal geométrica com `ray_epsilon = 0.001`, evitando _shadow acne_ em sombra, reflexão e refração. O Slide 4 apresenta essa ideia como tolerância numérica; o repositório a aplica de forma centralizada, o que é arquiteturalmente melhor do que espalhar pequenos limiares por todos os materiais.
 
@@ -66,9 +72,15 @@ PBRT 4e de apoio: §1.2.
 
 ### 3.3. Câmera pinhole, filme e espaços de coordenadas
 
-O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando `eye`, `center` e `up` para montar os eixos locais, e em seguida projeta amostras do pixel sobre o plano de imagem (`4.tracado_de_raios.pdf`, pp. 19-39). A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
+O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando `eye`, `center` e `up` para montar os eixos locais (pp. 19-23), e em seguida projeta amostras do pixel sobre o plano de imagem (pp. 24-29), antes de explicitar a mudança entre espaço de câmera e espaço global (pp. 31-39) (`4.tracado_de_raios.pdf`). A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
 
-No código, a ideia é a mesma, mas a implementação é condensada: `Camera.__init__()` usa `glm.lookAt()` para obter a transformação de visualização e armazena sua inversa em `inv_view`. A geração do raio em `generate_ray()` monta o ponto do pixel em espaço de câmera a partir de coordenadas normalizadas e do fator `tan(fov/2)`, depois transforma esse ponto para o espaço global. O comentário recém-ajustado em `camera.py` deixa explícita uma nuance importante: `focal_distance` aqui é distância geométrica ao plano de projeção no modelo pinhole, não distância focal de lente fina nem parâmetro de profundidade de campo. Esse detalhe é essencial para não projetar sobre o código uma física que ele não implementa.
+No código, a ideia é a mesma, mas a implementação é condensada: `Camera.__init__()` usa `glm.lookAt()` para obter a transformação de visualização e armazena sua inversa em `inv_view`. A geração do raio em `generate_ray()` monta o ponto do pixel em espaço de câmera a partir de coordenadas normalizadas e da relação trigonométrica
+
+$$
+\Delta v = f\tan\left(\frac{\theta}{2}\right),\qquad \Delta u = \Delta v\,\frac{w}{h},
+$$
+
+que é precisamente a síntese entre geometria projetiva e semelhança de triângulos apresentada nos slides (pp. 24-29), e depois transforma esse ponto para o espaço global (pp. 31-39). O comentário recém-ajustado em `camera.py` deixa explícita uma nuance importante: `focal_distance` aqui é distância geométrica ao plano de projeção no modelo pinhole, não distância focal de lente fina nem parâmetro de profundidade de campo. Esse detalhe é essencial para não projetar sobre o código uma física que ele não implementa.
 
 Essa distinção também define uma limitação importante do projeto: todos os raios primários partem de um único centro ótico, sem abertura finita, círculo de confusão ou profundidade de campo. Portanto, o antialiasing implementado depois no Slide 5 altera a estratégia de amostragem do pixel, mas não muda o modelo óptico de formação de imagem.
 
@@ -80,7 +92,7 @@ PBRT 4e de apoio: §5.2.
 
 ### 3.4. Phong, luz pontual, termo ambiente e sombra dura
 
-O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, uma soma de termo ambiente, componente difusa lambertiana e componente especular dependente do vetor refletido (`4.tracado_de_raios.pdf`, pp. 40-43 e 54-55). Em termos físicos, esse modelo não é um BRDF rigoroso, mas é uma aproximação útil: o termo difuso usa o fator $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$; o termo especular usa um pico angular em função de $\hat{\mathbf{r}}\cdot\hat{\mathbf{v}}$; a sombra dura decorre de um teste binário de visibilidade entre o ponto sombreado e a fonte (`4.tracado_de_raios.pdf`, pp. 51-53).
+O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, uma soma de termo ambiente, componente difusa lambertiana e componente especular dependente do vetor refletido (`4.tracado_de_raios.pdf`, pp. 40-43 e 54-55). Em termos físicos, esse modelo não é um BRDF rigoroso, mas é uma aproximação útil: o termo difuso usa o fator $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$; o termo especular usa um pico angular em função de $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; a sombra dura decorre de um teste binário de visibilidade entre o ponto sombreado e a fonte (`4.tracado_de_raios.pdf`, pp. 51-53). Em particular, as páginas 40-43 articulam a síntese física mínima do projeto: incidência luminosa, orientação local de normal e dependência angular da resposta da superfície.
 
 `PhongMaterial.direct_lighting()` implementa exatamente esse cálculo. Para cada luz, o código obtém radiância incidente e direção via `sample_radiance()`, soma o termo difuso e depois o termo especular. `Scene.transmittance()` faz o papel do raio de sombra, mas já em uma forma mais geral: para meios opacos, ele reduz-se ao teste binário do Slide 4; para meios transparentes, ele vira um produto acumulado de transmitâncias, o que antecipa o Slide 5.
 
@@ -94,7 +106,13 @@ PBRT 4e de apoio: §1.2.
 
 ### 4.1. Antialiasing como integração estocástica sobre o pixel
 
-O Slide 5 reinterpreta o pixel não como uma posição única, mas como um domínio de amostragem no qual múltiplos raios podem ser gerados (`5.tracado_de_raios2.pdf`, pp. 4-8). A leitura correta em termos numéricos é de integração de Monte Carlo: a cor do pixel passa a ser estimada pela média de amostras da radiância incidente, convertendo aliasing estruturado em ruído de alta frequência. Os slides enfatizam o caso aleatório uniforme.
+O Slide 5 reinterpreta o pixel não como uma posição única, mas como um domínio de amostragem no qual múltiplos raios podem ser gerados (`5.tracado_de_raios2.pdf`, pp. 4-8). A leitura correta em termos numéricos é de integração de Monte Carlo: a cor do pixel passa a ser estimada pela média de amostras da radiância incidente,
+
+$$
+\hat L = \frac{1}{N}\sum_{k=1}^{N} L(x_k),
+$$
+
+convertendo aliasing estruturado em ruído de alta frequência. Os slides enfatizam o caso aleatório uniforme e a fórmula de jitter subpixel nas páginas 4-9.
 
 O repositório implementa duas versões dessa ideia em `Film.get_samples_for_pixel()`: `jittered` e `stratified`. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com PBRT 4e §8.5: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Portanto, o código não apenas implementa o Slide 5; ele o especializa em uma forma estatisticamente mais robusta.
 
@@ -104,7 +122,13 @@ PBRT 4e de apoio: §§8.1 e 8.5.
 
 ### 4.2. Instanciação, coordenadas homogêneas e transformação correta de normais
 
-O Slide 5 também formaliza a ideia de instância geométrica: em vez de reescrever a interseção de um elipsoide, por exemplo, transforma-se o raio do espaço global para o espaço local de uma primitiva canônica (`5.tracado_de_raios2.pdf`, pp. 9-13). Em álgebra linear, isso significa representar translação, rotação e escala em coordenadas homogêneas e aplicar a inversa da transformação ao raio incidente.
+O Slide 5 também formaliza a ideia de instância geométrica: em vez de reescrever a interseção de um elipsoide, por exemplo, transforma-se o raio do espaço global para o espaço local de uma primitiva canônica (`5.tracado_de_raios2.pdf`, pp. 9-13). Em álgebra linear, isso significa representar translação, rotação e escala em coordenadas homogêneas e aplicar a inversa da transformação ao raio incidente. A síntese mais importante desse bloco aparece na dedução da transformação de normais por
+
+$$
+\mathbf{n}' = (M^{-1})^{T}\mathbf{n},
+$$
+
+preservando a ortogonalidade com o plano tangente após transformações afins gerais.
 
 `Instance.intersect()` implementa exatamente esse fluxo. O raio é mapeado com `m_inv`, a interseção é resolvida no espaço local da forma base e, se houver hit, a posição volta ao mundo pela matriz direta. A normal, porém, usa `m_inv_t`, isto é, a inversa transposta. Essa é a consequência algébrica correta da preservação da ortogonalidade entre normal e plano tangente. O relatório precisa explicitar esse ponto porque ele é um dos poucos trechos em que a implementação realmente depende de um fato sutil de álgebra linear, e não apenas de manipulação vetorial elementar.
 
@@ -114,7 +138,7 @@ PBRT 4e de apoio: §3.5.
 
 ### 4.3. Luz de área, integração sobre o emissor e penumbra
 
-Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor com extensão geométrica finita, o que exige integrar a contribuição luminosa sobre uma superfície (`5.tracado_de_raios2.pdf`, pp. 14-23). Essa mudança é fisicamente relevante: penumbra surge porque diferentes subregiões da fonte são visíveis ou ocluídas de maneira diferente a partir do ponto sombreado.
+Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor com extensão geométrica finita, o que exige integrar a contribuição luminosa sobre uma superfície (`5.tracado_de_raios2.pdf`, pp. 14-23). Essa mudança é fisicamente relevante: penumbra surge porque diferentes subregiões da fonte são visíveis ou ocluídas de maneira diferente a partir do ponto sombreado. As páginas 14-17 introduzem o emissor extenso; as páginas 18-23 traduzem isso em soma de amostras e variabilidade espacial da visibilidade.
 
 `AreaLight.sample_radiance()` aproxima essa integral por soma discreta sobre uma grade `samples_u × samples_v`, com jitter em cada célula. A construção é coerente com os slides e com PBRT 4e §12.4: a energia é distribuída entre as amostras e sofre decaimento geométrico explícito com $1/r^2$, diferentemente da `PointLight`. Em outras palavras, a implementação preserva a convenção simplificada para luz pontual, mas usa uma aproximação radiometricamente mais próxima do caso físico quando a fonte possui área.
 
@@ -136,7 +160,7 @@ PBRT 4e de apoio: §3.7.
 
 ### 4.5. De traçador local a traçador recursivo
 
-O salto conceitual mais importante do Slide 5 é que o pipeline do Slide 4 não é descartado; ele é recursivamente reusado (`5.tracado_de_raios2.pdf`, pp. 26-35). Em termos da equação de transporte, isso equivale a acrescentar alguns caminhos óticos privilegiados ao estimador: reflexão perfeita, transmissão perfeita e luzes explícitas. Em termos algorítmicos, significa que certos materiais deixam de devolver apenas uma cor local e passam a disparar novos raios.
+O salto conceitual mais importante do Slide 5 é que o pipeline do Slide 4 não é descartado; ele é recursivamente reusado (`5.tracado_de_raios2.pdf`, pp. 26-35). Em termos da equação de transporte, isso equivale a acrescentar alguns caminhos óticos privilegiados ao estimador: reflexão perfeita, transmissão perfeita e luzes explícitas. Em termos algorítmicos, significa que certos materiais deixam de devolver apenas uma cor local e passam a disparar novos raios. As páginas 26-28 cobrem a reflexão, as páginas 29-34 cobrem a transmissão, e a página 35 consolida a generalização do shadow ray em transmitância acumulada.
 
 O repositório codifica essa extensão com clareza. `Scene.trace_ray()` continua mínimo: encontra o `Hit` e delega ao material. A recursão é controlada por `Scene.can_spawn_ray()`, que impõe profundidade máxima finita. Isso é coerente tanto numericamente quanto fisicamente: cada salto adicional é ponderado por refletância ou transmitância menores que 1, de modo que a contribuição tende a decair. A limitação de profundidade, portanto, é ao mesmo tempo um controle de custo e uma aproximação de truncamento de série.
 
@@ -152,7 +176,7 @@ $$
 R(\theta)=R_0 + (1-R_0)(1-\cos\theta)^5,
 $$
 
-como aproximação de baixo custo das equações de Fresnel para interfaces suaves (`5.tracado_de_raios2.pdf`, pp. 26-28). O papel físico de $R_0$ é resumir a refletância em incidência normal; o papel geométrico de $\theta$ é medir a inclinação relativa entre direção de visão e normal.
+como aproximação de baixo custo das equações de Fresnel para interfaces suaves (`5.tracado_de_raios2.pdf`, pp. 26-28). O papel físico de $R_0$ é resumir a refletância em incidência normal; o papel geométrico de $\theta$ é medir a inclinação relativa entre direção de visão e normal. As páginas 26-27 são as mais importantes aqui: nelas os slides ligam a expressão de Schlick ao rateio entre resposta local e raio refletido recursivo.
 
 `ReflectiveMaterial.eval()` implementa exatamente esse rateio: a componente local de Phong é ponderada por $(1-R)$ e a contribuição do raio refletido é ponderada por $R$. É importante, contudo, qualificar a frase "conservação de energia" que aparece nos slides-resumo. No repositório, essa mistura é fisicamente plausível, mas não é um BRDF estrito nem um balanço energético formal no sentido de PBRT. O termo local de Phong permanece empírico, e o uso de Schlick aqui deve ser entendido como melhora angular do modelo, não como substituição integral por um material fisicamente baseado.
 
@@ -170,7 +194,7 @@ $$
 \eta_i \sin\theta_i = \eta_t \sin\theta_t,
 $$
 
-enquanto a fração refletida continua sendo modulada por Fresnel. Além disso, quando o radicando da solução vetorial de transmissão fica negativo, ocorre reflexão interna total. Finalmente, se o raio efetivamente penetra no material, a intensidade transmitida deve ser atenuada pela espessura percorrida, segundo Beer-Lambert.
+enquanto a fração refletida continua sendo modulada por Fresnel. As páginas 29-32 concentram a dedução geométrica da refração a partir da decomposição em componentes normal e tangencial; a página 33 introduz Beer-Lambert; a página 34 sintetiza o algoritmo completo do dielétrico. Além disso, quando o radicando da solução vetorial de transmissão fica negativo, ocorre reflexão interna total. Finalmente, se o raio efetivamente penetra no material, a intensidade transmitida deve ser atenuada pela espessura percorrida, segundo Beer-Lambert.
 
 `TransparentMaterial.eval()` implementa essa sequência de decisões. Primeiro calcula $R_0$ e $R$ por Schlick; depois escolhe a razão $\eta_i/\eta_t$ a partir de `front_face` e `backfacing`; em seguida chama `glm.refract()` e interpreta um vetor nulo como TIR; por fim, aplica a atenuação por canal
 
@@ -180,7 +204,7 @@ $$
 
 O uso de `front_face` e `backfacing`, calculado em `Hit.set_face_normal()`, é crucial: ele traduz a orientação geométrica da interface em semântica ótica de entrada/saída do meio. Isso é um caso exemplar de acoplamento correto entre álgebra linear local da superfície e física de propagação.
 
-No caso da iluminação direta através de transparentes, `TransparentMaterial.shadow_transmittance()` aplica Beer-Lambert apenas quando o raio de sombra deixa o meio, isto é, no caso `backfacing = True`. Essa escolha é coerente com a hipótese de meio homogêneo adotada pelo projeto: o comprimento óptico relevante já foi acumulado em `hit.t` no segmento interno do material, de modo que atenuar também na entrada equivaleria a dupla contagem. Trata-se, ainda assim, de uma simplificação relevante: o modelo opera por canal RGB, sem dispersão espectral contínua e sem heterogeneidade volumétrica interna.
+No caso da iluminação direta através de transparentes, `TransparentMaterial.shadow_transmittance()` aplica Beer-Lambert apenas quando o raio de sombra deixa o meio, isto é, no caso `backfacing = True`. Essa escolha é coerente com a hipótese de meio homogêneo adotada pelo projeto: o comprimento óptico relevante já foi acumulado em `hit.t` no segmento interno do material, de modo que atenuar também na entrada equivaleria a dupla contagem. Trata-se, ainda assim, de uma simplificação relevante: o modelo opera por canal RGB, sem dispersão espectral contínua e sem heterogeneidade volumétrica interna. Em termos de física computacional, isso equivale a resolver um meio homogêneo com profundidade óptica escalar por canal, e não um meio espectral completo.
 
 Rastreabilidade no código: `src/ray_tracing_2/hit.py` (`set_face_normal()`, l. 25), `src/ray_tracing_2/material.py` (`TransparentMaterial`, l. 137; `shadow_transmittance()`, l. 167; `eval()`, l. 186).
 
@@ -188,7 +212,13 @@ PBRT 4e de apoio: §§9.3, 9.5 e 11.2.
 
 ### 4.8. Da sombra binária à transmitância acumulada
 
-O Slide 5 culmina em uma generalização conceitualmente elegante: o antigo raio de sombra do Slide 4 deixa de responder apenas "visível" ou "ocluído" e passa a acumular atenuações ao atravessar materiais transparentes (`5.tracado_de_raios2.pdf`, pp. 33-35). Em termos físicos, esse é um primeiro passo em direção à ideia mais geral de transmitância ao longo de um segmento. Em termos computacionais, é uma iteração sobre hits sucessivos até a fonte.
+O Slide 5 culmina em uma generalização conceitualmente elegante: o antigo raio de sombra do Slide 4 deixa de responder apenas "visível" ou "ocluído" e passa a acumular atenuações ao atravessar materiais transparentes (`5.tracado_de_raios2.pdf`, pp. 33-35). Em termos físicos, esse é um primeiro passo em direção à ideia mais geral de transmitância ao longo de um segmento, isto é, à acumulação multiplicativa de fatores do tipo
+
+$$
+T = \prod_k a_k^{s_k}.
+$$
+
+Em termos computacionais, é uma iteração sobre hits sucessivos até a fonte.
 
 `Scene.transmittance()` implementa precisamente essa lógica. O segmento entre ponto sombreado e luz é percorrido em vários passos; objetos opacos zeram a energia; materiais transparentes delegam a `shadow_transmittance()`, que no caso dielétrico aplica Beer-Lambert apenas ao sair do meio. O algoritmo ainda adiciona dois cuidados numéricos: limiar inferior para throughput muito pequeno e limite `max_steps` para evitar laços indevidos em cenas mal condicionadas.
 
@@ -202,7 +232,19 @@ PBRT 4e de apoio: §11.2.
 
 ### 5.1. Triângulo, área orientada e coordenadas baricêntricas
 
-O Slide 6 começa corretamente pelo triângulo como primitiva elementar de malhas (`6.estrutura_aceleracao.pdf`, pp. 3-4). Os vetores de aresta $\mathbf{e}_1=\mathbf{b}-\mathbf{a}$ e $\mathbf{e}_2=\mathbf{c}-\mathbf{a}$ definem uma área orientada via produto vetorial, e qualquer ponto do triângulo pode ser expresso por coordenadas baricêntricas. A importância disso vai além da geometria elementar: coordenadas baricêntricas são a ponte entre interior do triângulo, teste de pertencimento e parametrização afim da superfície.
+O Slide 6 começa corretamente pelo triângulo como primitiva elementar de malhas (`6.estrutura_aceleracao.pdf`, pp. 3-4). Os vetores de aresta $\mathbf{e}_1=\mathbf{b}-\mathbf{a}$ e $\mathbf{e}_2=\mathbf{c}-\mathbf{a}$ definem uma área orientada via produto vetorial,
+
+$$
+A = \frac{\|\mathbf{e}_1 \times \mathbf{e}_2\|}{2},
+$$
+
+e qualquer ponto do triângulo pode ser expresso por coordenadas baricêntricas,
+
+$$
+\mathbf{p}=\mathbf{a}+u\mathbf{e}_1+v\mathbf{e}_2,\qquad u\ge 0,\ v\ge 0,\ u+v\le 1.
+$$
+
+A importância disso vai além da geometria elementar: coordenadas baricêntricas são a ponte entre interior do triângulo, teste de pertencimento e parametrização afim da superfície.
 
 No código, `Triangle` pré-computa `e1`, `e2` e a normal geométrica orientada a partir de `cross(e1, e2)`. A normal degenerada é rejeitada com exceção explícita, o que evita triângulos colineares ou nulos no carregamento da malha.
 
@@ -210,7 +252,13 @@ Rastreabilidade no código: `src/ray_tracing_2/shape.py` (`Triangle`, l. 144).
 
 ### 5.2. Interseção raio-triângulo por Möller-Trumbore
 
-O coração algébrico do Slide 6 é a dedução do teste de Möller-Trumbore a partir do sistema linear que iguala ponto do raio e combinação baricêntrica dos vértices (`6.estrutura_aceleracao.pdf`, pp. 5-12). O sistema é resolvido via determinantes e produtos mistos, e a solução só é válida se $u\ge 0$, $v\ge 0$, $u+v\le 1$ e $t>0$.
+O coração algébrico do Slide 6 é a dedução do teste de Möller-Trumbore a partir do sistema linear que iguala ponto do raio e combinação baricêntrica dos vértices (`6.estrutura_aceleracao.pdf`, pp. 5-12). Em notação compacta, os slides resolvem algo do tipo
+
+$$
+\mathbf{o}+t\hat{\mathbf{d}} = \mathbf{a}+u\mathbf{e}_1+v\mathbf{e}_2,
+$$
+
+via determinantes e produtos mistos, e a solução só é válida se $u\ge 0$, $v\ge 0$, $u+v\le 1$ e $t>0$.
 
 `Triangle.intersect()` implementa exatamente essa forma operacional: `pvec`, `det`, `inv_det`, `u`, `v`, `qvec` e `t_candidate`. Em termos geométricos, o algoritmo evita construir explicitamente o plano do triângulo; em termos computacionais, ele é compacto e numericamente robusto para o porte do projeto. O teste `abs(det) < eps` trata o caso de quase paralelismo entre raio e plano do triângulo.
 
@@ -226,13 +274,13 @@ Rastreabilidade no código: `src/ray_tracing_2/shape.py` (`TriangleMesh`, l. 188
 
 ### 5.4. Grade regular, SAT e percorrimento incremental: bloco teórico não implementado
 
-Uma observação importante para este v5 é que o Slide 6 não fala apenas de BVH. Ele constrói uma sequência didática mais ampla: malha triangular, grade regular, refinamento por SAT, percorrimento incremental célula a célula e só depois estruturas hierárquicas (`6.estrutura_aceleracao.pdf`, pp. 15-21). Essa parte aparece com clareza nos resumos de `materiais/traçado_de_raios/6.estrutura_aceleracaov1.md` e `6.estrutura_aceleracaov2.md`.
+Uma observação importante para este v5 é que o Slide 6 não fala apenas de BVH. Ele constrói uma sequência didática mais ampla: malha triangular, grade regular, refinamento por SAT, percorrimento incremental célula a célula e só depois estruturas hierárquicas (`6.estrutura_aceleracao.pdf`, pp. 15-21). As páginas 15-17 introduzem a discretização regular do espaço; as páginas 18-21 detalham a lógica incremental por tempos de cruzamento entre faces de células, isto é, o raciocínio com $t_x$, $t_y$ e $t_z$. Essa parte aparece com clareza nos resumos de `materiais/traçado_de_raios/6.estrutura_aceleracaov1.md` e `6.estrutura_aceleracaov2.md`.
 
 Essa grade regular não está implementada no repositório atual. Não há estrutura de voxels, não há hash espacial e não há percurso incremental por $(t_x,t_y,t_z)$ no código de produção. Portanto, esta seção do Slide 6 deve ser tratada no relatório como conteúdo teórico comparativo e não como funcionalidade entregue.
 
 ### 5.5. BVH: teoria dos slides, teoria do PBRT e o que o repositório faz de fato
 
-O Slide 6 fecha com volumes envolventes hierárquicos, subdivisão por centróides, escolha de eixo, SAH e percurso com poda de subárvores (`6.estrutura_aceleracao.pdf`, pp. 22-36). PBRT 4e §7.3 aprofunda esse quadro: construção por primitivas, escolha de eixo por extensão dos centróides, SAH, ordenação contígua de primitivas nas folhas, representação compacta linear e travessia com pilha explícita.
+O Slide 6 fecha com volumes envolventes hierárquicos, subdivisão por centróides, escolha de eixo, SAH e percurso com poda de subárvores (`6.estrutura_aceleracao.pdf`, pp. 22-36). As páginas 22-29 tratam da estrutura hierárquica e da poda por caixas; as páginas 30-36 discutem escolhas de partição e SAH. PBRT 4e §7.3 aprofunda esse quadro: construção por primitivas, escolha de eixo por extensão dos centróides, SAH, ordenação contígua de primitivas nas folhas, representação compacta linear e travessia com pilha explícita.
 
 O repositório implementa uma versão claramente mais simples e local dessa ideia. `TriangleBVH` constrói uma árvore estática apenas para os triângulos de uma única malha. `AABB.from_triangles()` cria caixas alinhadas aos eixos via mínimos e máximos por componente; `_build()` escolhe o eixo dominante da caixa corrente e separa pela mediana dos centróides; `TriangleBVHNode.intersect()` primeiro testa a AABB, depois ordena filhos pela distância de entrada no raio e só então visita folhas. Em outras palavras, há poda por caixa, hierarquia binária, escolha de eixo por extensão e travessia aproximadamente frontal, mas não há SAH, não há compactação linear e não há acelerador global para toda a cena. Também não há a forma compacta em vetor linear enfatizada por PBRT: os nós permanecem como objetos recursivos ligados por referências `left` e `right`, o que simplifica a implementação, mas sacrifica localidade de cache.
 
