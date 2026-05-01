@@ -75,7 +75,9 @@ class PhongMaterial(Material):
            ray: Ray,
            depth: int = 0,
            max_depth: int | None = None):
-    # 5.tracado_de_raios2.pdf - p.27: PhongMaterial.Eval retorna apenas iluminação direta.
+    # 5.tracado_de_raios2.pdf - p.27: esta é a avaliação local pura do modelo de
+    # Phong. Os materiais recursivos do Slide 5 a reutilizam como termo base
+    # não-recursivo antes de acrescentar reflexão e/ou refração.
     return self.direct_lighting(scene, hit, ray)
 
 
@@ -116,7 +118,10 @@ class ReflectiveMaterial(PhongMaterial):
 
     # p.27: c = (1 − R) PhongMaterial.Eval(scene, hit, o)
     # A iluminação direta continua existindo; apenas passa a ser ponderada pelo
-    # complemento da refletância angular calculada por Schlick.
+    # complemento da refletância angular calculada por Schlick. Esse rateio é
+    # uma aproximação útil para o projeto, mas não equivale a um modelo BRDF
+    # energeticamente rigoroso como os discutidos em um renderer fisicamente
+    # completo.
     c = (glm.vec3(1.0) - R) * self.direct_lighting(scene, hit, ray)
 
     if scene.can_spawn_ray(depth, max_depth):
