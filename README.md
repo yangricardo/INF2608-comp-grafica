@@ -2,221 +2,128 @@
 
 > **Aluno:** Yang Miranda
 
-## 📋 Visão Geral
+## Visão Geral
 
-Este repositório implementa um **renderizador de traçado de raios** utilizando raios geométricos para simular a propagação da luz em uma cena digital. A implementação segue os conceitos teóricos apresentados nas aulas do Prof. Waldemar Celes, com modelagem de câmera pinhole, geometria de esferas e planos, modelo de iluminação de Phong com sombras e suporte a transformações afins por instanciação.
+Este repositório concentra a implementação do projeto de traçado de raios em `src/ray_tracing_2`. O renderer segue a progressão dos slides de aula: começa com câmera pinhole, interseções geométricas e sombreamento local de Phong, e depois adiciona anti-aliasing, instanciação, luz de área, reflexão, refração, transmitância em raios de sombra, malhas triangulares e uma BVH local para `TriangleMesh`.
 
-O pipeline principal segue a sequência **pixel → câmera → raio → interseção → material → iluminação**, produzindo uma imagem 2D salva como [render_final.png](render_final.png).
+O pipeline principal é:
 
-## 🔗 Navegação Rápida
+1. gerar amostras no pixel;
+2. converter cada amostra em um raio primário pela câmera;
+3. encontrar o `closest hit` na cena;
+4. delegar a cor ao material atingido;
+5. salvar a imagem e um `properties.md` em uma pasta timestamped dentro de `outputs/`.
 
-- [Resultado Atual](#-resultado-atual)
-- [Setup e Execução](#-setup-e-execução)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Pipeline de Execução](#-pipeline-de-execução)
-- [Teoria e Implementação](#-teoria-e-implementação)
-- [Correções Técnicas Já Aplicadas](#-correções-técnicas-já-aplicadas)
-- [Materiais de Apoio](#-materiais-de-apoio)
-- [Próximos Passos](#-próximos-passos)
-- [Observações Finais](#-observações-finais)
+O material teórico principal do projeto está em `4.tracado_de_raios.pdf`, `5.tracado_de_raios2.pdf` e `6.estrutura_aceleracao.pdf`. O relatório técnico mais recente está em `docs/relatorio-proj1.v5.md`.
 
-## 🖼️ Resultado Atual
+## Funcionalidades Atuais
 
-![Render Final](render_final.png)
+- câmera pinhole com base derivada de `eye`, `center` e `up`
+- interseções com esfera, plano, caixa alinhada aos eixos e triângulo
+- materiais `PhongMaterial`, `ReflectiveMaterial` e `TransparentMaterial`
+- sombras duras e transmitância acumulada para materiais transparentes
+- anti-aliasing por `jittered` e `stratified`
+- luz pontual e luz de área retangular amostrada
+- instanciação por transformação afim com normal por inversa transposta
+- malhas triangulares com `TriangleMesh`
+- BVH estática local a `TriangleMesh`, com poda por AABB
+- geração automática de `render.png` e `properties.md` em `outputs/`
 
-A cena atual, definida em [src/main.py](src/main.py), contém uma esfera vermelha iluminada por uma luz pontual e renderizada sobre um fundo escuro.
+## Convenções Importantes
 
-## 🚀 Setup e Execução
+- `PointLight` **não** aplica queda explícita de $1/r^2$ no próprio modelo da fonte. Nesta base, `power` é tratado como radiância constante da luz, conforme a convenção adotada no projeto.
+- `AreaLight` já usa amostragem sobre um emissor retangular com decaimento geométrico explícito por distância.
+- A aceleração por BVH é **local à malha triangular**. O nível superior da cena ainda percorre `scene.objects` linearmente.
+- `focal_distance` em `Camera` controla apenas a distância geométrica do plano de projeção no modelo pinhole; não há lente fina nem profundidade de campo.
 
-### Opção 1: ambiente com asdf
+## Setup
 
-Se você já utiliza [asdf](https://asdf-vm.com/), este é o fluxo sugerido para reproduzir o ambiente do projeto:
+### Opção 1: script do projeto
 
 ```bash
-asdf plugin add python
-asdf install python 3.13.9
-asdf local python 3.13.9
-python -m venv .venv
+./scripts/setup_dev.sh
 source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
 ```
 
-### Opção 2: qualquer ambiente Python 3.13+
+O script cria `.venv`, instala `requirements.txt` e roda `pip install -e .`.
 
-Se preferir, qualquer instalação compatível de Python 3.13 ou superior também funciona:
+### Opção 2: setup manual
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+pip install -e .
 ```
 
-As dependências estão listadas em [requirements.txt](requirements.txt).
+## Execução
 
-### Executar a renderização
-
-Recomendado: instale o projeto em modo editável e execute como módulo (evita depender de hacks em `sys.path`).
-
-1. Usando o script de setup (cria venv, instala dependências e instala o pacote):
+Depois de ativar o ambiente e instalar o pacote em modo editável, execute como módulo:
 
 ```bash
-./scripts/setup_dev.sh
+python -m ray_tracing_2
 ```
 
-Depois ative o ambiente e execute:
+Ou escolha explicitamente uma cena:
 
 ```bash
-source .venv/bin/activate
-python -m src.ray_tracing_1       # usa __main__.py do pacote
-# ou
-python -m src.ray_tracing_1.main  # executa explicitamente a função de render
+python -m ray_tracing_2.main
+python -m ray_tracing_2.main_area_light --spp 16 --sampling_mode stratified
+python -m ray_tracing_2.main_box --spp 25 --sampling_mode jittered
+python -m ray_tracing_2.main_triangles
 ```
 
-Alternativa (sem instalar): execute como módulo diretamente (precisa estar na raiz do repositório):
+Se preferir não instalar o pacote, use `PYTHONPATH=src` na raiz do repositório:
 
 ```bash
-python -m src.ray_tracing_1.main
+PYTHONPATH=src python -m ray_tracing_2.main
 ```
 
-Observação: muitos arquivos no diretório `src/ray_tracing_1` ainda contêm um bloco que modifica `sys.path` para permitir execução direta do `.py`. Após instalar o pacote em modo editável ou executar com `-m`, esses blocos não são necessários e podem ser removidos para maior correção e portabilidade.
+Cada execução produz uma nova pasta em `outputs/` contendo pelo menos:
 
-O programa salva a imagem final em [render_final.png](render_final.png).
+- `render.png`
+- `properties.md`
 
-## 🧱 Estrutura do Projeto
+## Estrutura Relevante
 
-| Arquivo                            | Papel no renderizador                                                                                 |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [src/main.py](src/main.py)         | ponto de entrada; monta câmera, cena, material, esfera e luz; percorre os pixels; salva a imagem      |
-| [src/camera.py](src/camera.py)     | implementa a câmera pinhole e a geração de raios primários                                            |
-| [src/ray.py](src/ray.py)           | define a estrutura básica de um raio com origem e direção normalizada                                 |
-| [src/scene.py](src/scene.py)       | gerencia objetos, luzes e o traçado de um raio na cena                                                |
-| [src/shape.py](src/shape.py)       | implementa `Shape`, `Sphere`, `Plane` e `Instance`                                                    |
-| [src/hit.py](src/hit.py)           | armazena os dados de interseção mais próxima                                                          |
-| [src/material.py](src/material.py) | define `Material` e `PhongMaterial`                                                                   |
-| [src/light.py](src/light.py)       | define `Light` e `PointLight`                                                                         |
-| [src/film.py](src/film.py)         | encapsula um buffer de pixels em ponto flutuante; existe na base, mas ainda não é usado por `main.py` |
+| Caminho                             | Papel                                                          |
+| ----------------------------------- | -------------------------------------------------------------- |
+| `src/ray_tracing_2/camera.py`       | câmera pinhole e geração de raios primários                    |
+| `src/ray_tracing_2/film.py`         | amostragem por pixel, buffer e gravação da imagem              |
+| `src/ray_tracing_2/scene.py`        | interseção global, offset, transmitância e recursão            |
+| `src/ray_tracing_2/material.py`     | Phong local, reflexão e refração                               |
+| `src/ray_tracing_2/light.py`        | `PointLight`, `AreaLight` e `AmbientLight`                     |
+| `src/ray_tracing_2/shape.py`        | primitivas analíticas, triângulos, `TriangleMesh` e `Instance` |
+| `src/ray_tracing_2/triangle_bvh.py` | BVH local para malhas triangulares                             |
+| `src/ray_tracing_2/render.py`       | criação de pasta de saída e serialização de metadados          |
+| `docs/relatorio-proj1.v5.md`        | relatório técnico-científico consolidado                       |
+| `docs/AA_IMPLEMENTATION.md`         | nota específica sobre anti-aliasing                            |
+| `docs/UNDOCUMENTED_FEATURES.md`     | nuances e limitações não expandidas no README                  |
 
-## 🔄 Pipeline de Execução
+## Scripts de Cena
 
-1. [src/main.py](src/main.py) define resolução, câmera, objetos, material e luz.
-2. Para cada pixel, [src/camera.py](src/camera.py) calcula um raio primário com `generate_ray`.
-3. [src/scene.py](src/scene.py) procura a interseção visível mais próxima usando `compute_intersection`.
-4. [src/shape.py](src/shape.py) resolve a geometria do raio com esfera, plano ou instância transformada.
-5. [src/material.py](src/material.py) avalia a cor local com o modelo de Phong.
-6. [src/light.py](src/light.py) fornece posição e potência da fonte luminosa.
-7. [src/main.py](src/main.py) converte a cor para `uint8` e salva o resultado como PNG.
+| Módulo                              | Uso principal                                 |
+| ----------------------------------- | --------------------------------------------- |
+| `ray_tracing_2.main`                | cena mínima para o núcleo do Slide 4          |
+| `ray_tracing_2.main_area_light`     | penumbra com `AreaLight`                      |
+| `ray_tracing_2.main_ellipse`        | instanciação com escala não uniforme          |
+| `ray_tracing_2.main_box`            | cena tipo Cornell com blocos instanciados     |
+| `ray_tracing_2.main_triangles`      | malha triangular e BVH local                  |
+| `ray_tracing_2.cornell_box_pyramid` | integração de triângulos, reflexão e refração |
+| `ray_tracing_2.generate_scene`      | cena dirigida por JSON                        |
+| `ray_tracing_2.random_scene`        | geração de cenas aleatórias com documentação  |
 
-## 🧭 Matriz de Rastreabilidade
+## Referências do Curso
 
-| Conceito                      | Implementação principal                                          | Slides                                                                                                  |
-| ----------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Câmera pinhole                | [src/camera.py](src/camera.py)                                   | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=14), pág. 14            |
-| Geração de raios primários    | [src/camera.py](src/camera.py), [src/ray.py](src/ray.py)         | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=25), págs. 25–29        |
-| Interseção com esfera         | [src/shape.py](src/shape.py)                                     | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=15), págs. 15–18        |
-| Interseção com plano          | [src/shape.py](src/shape.py)                                     | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=11), págs. 11–12        |
-| Estrutura de hit              | [src/hit.py](src/hit.py)                                         | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=5), págs. 5–6           |
-| Traçado do raio na cena       | [src/scene.py](src/scene.py)                                     | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=35), págs. 35, 47–48    |
-| Phong local                   | [src/material.py](src/material.py)                               | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=42), págs. 42–43, 49    |
-| Sombras                       | [src/material.py](src/material.py), [src/scene.py](src/scene.py) | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=38), págs. 38–39, 51–52 |
-| Luz pontual e atenuação       | [src/light.py](src/light.py), [src/material.py](src/material.py) | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=40), pág. 40            |
-| Instanciação e transformações | [src/shape.py](src/shape.py)                                     | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=44), págs. 44–46        |
-| Buffer de imagem              | [src/film.py](src/film.py), [src/main.py](src/main.py)           | [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=24), págs. 24–28        |
+- `materiais/traçado_de_raios/4.tracado_de_raios.pdf`
+- `materiais/traçado_de_raios/5.tracado_de_raios2.pdf`
+- `materiais/traçado_de_raios/6.estrutura_aceleracao.pdf`
+- `docs/relatorio-proj1.v5.md`
 
-## 🎓 Teoria e Implementação
+## Limitações Atuais
 
-### Câmera pinhole
-
-A implementação em [src/camera.py](src/camera.py) segue o modelo de câmera pinhole descrito em [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=14), pág. 14. A câmera é definida por posição do olho, ponto de interesse, vetor `up`, campo de visão e proporção da imagem. O método `generate_ray` projeta o centro do pixel no plano da câmera e converte esse ponto para o espaço do mundo com a inversa de `lookAt`.
-
-Referências úteis:
-
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=14), pág. 14
-- [2.introducao.pdf](materiais/introdução/2.introducao.pdf)
-
-### Interseções com objetos
-
-A visibilidade é resolvida em [src/scene.py](src/scene.py) e [src/shape.py](src/shape.py), em linha com [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=15), págs. 15–18.
-
-Na esfera, a interseção é obtida pela solução da equação quadrática. A implementação atual trata corretamente as duas raízes e escolhe o menor `t` positivo acima de `0.001`, o que evita perder interseções quando o raio começa dentro da esfera ou quando a primeira raiz cai atrás da origem do raio.
-
-No plano, a interseção usa o produto escalar entre a normal e a direção do raio para determinar `t`, rejeitando casos paralelos e impactos atrás da origem.
-
-O objeto de retorno desse processo é [src/hit.py](src/hit.py), responsável por armazenar a menor distância válida, a posição do impacto, a normal local e a referência ao material associado ao objeto atingido.
-
-Referências úteis:
-
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=15), págs. 15–18
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=11), págs. 11–12
-
-### Instanciação e transformações afins
-
-A classe `Instance`, em [src/shape.py](src/shape.py), implementa o padrão descrito em [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=44), págs. 44–46: em vez de transformar a geometria, o código transforma o raio para o espaço local do objeto com a matriz inversa, executa a interseção e depois reconstrói ponto e normal no espaço do mundo.
-
-A normal é corretamente transformada com a transposta da inversa, o que preserva o comportamento geométrico mesmo com escalas não uniformes.
-
-Na implementação atual, a construção dos vetores homogêneos ainda é feita manualmente a partir dos componentes `x`, `y` e `z`, o que mantém o comportamento correto, embora exista espaço para simplificação futura com construtores mais diretos do PyGLM.
-
-Referências úteis:
-
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=44), págs. 44–46
-- [3.cpp_oo.pdf](materiais/introdução/3.cpp_oo.pdf)
-
-### Iluminação de Phong e sombras
-
-O material implementado em [src/material.py](src/material.py) segue o modelo de Phong apresentado em [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=42), págs. 42–43, 49 e 54–55.
-
-A cor final combina:
-
-- componente ambiente: $m_{amb} \cdot l_{amb}$
-- componente difusa: $m_{dif} \cdot L_i \cdot \max(0, \hat{n} \cdot \hat{l})$
-- componente especular: $m_{spe} \cdot L_i \cdot \max(0, \hat{r} \cdot \hat{v})^{shi}$
-
-Antes da iluminação direta, o código lança um raio de sombra com deslocamento de `0.001` para evitar auto-interseção, conforme o tratamento mostrado em [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=38), págs. 38–39 e 51–52.
-
-Referências úteis:
-
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=42), págs. 42–43
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=49), pág. 49
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=54), págs. 54–55
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=38), págs. 38–39, 51–52
-
-### Cena, luzes e imagem final
-
-A classe [src/scene.py](src/scene.py) organiza os objetos e uma lista de luzes do tipo `list[Light]`. Já [src/light.py](src/light.py) define uma luz base com posição e potência, além de `PointLight`, que é o tipo usado pela cena atual em [src/main.py](src/main.py).
-
-A atenuação por distância segue a relação $L_i = P / r^2$, alinhada com [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=40), pág. 40 e com as seções de iluminação direta do mesmo material.
-
-A classe [src/film.py](src/film.py) já existe e representa um buffer em ponto flutuante, mas a implementação atual ainda renderiza diretamente em um `numpy.ndarray` em [src/main.py](src/main.py). Essa distinção é importante para manter a documentação fiel ao código atual.
-
-Em termos de fluxo, [src/main.py](src/main.py) atualmente acumula o papel de coordenar a renderização e armazenar a imagem final, enquanto [src/film.py](src/film.py) permanece como uma abstração pronta para ser integrada em uma próxima refatoração.
-
-Referências úteis:
-
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=35), págs. 35, 47–48
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf#page=24), págs. 24–28
-
-## 📚 Materiais de Apoio
-
-### Introdução e base conceitual
-
-- [1.apresentacao.pdf](materiais/introdução/1.apresentacao.pdf)
-- [2.introducao.pdf](materiais/introdução/2.introducao.pdf)
-- [3.cpp_oo.pdf](materiais/introdução/3.cpp_oo.pdf)
-
-### Traçado de raios
-
-- [4.tracado_de_raios.pdf](materiais/traçado_de_raios/4.tracado_de_raios.pdf)
-- [5.tracado_de_raios2.pdf](materiais/traçado_de_raios/5.tracado_de_raios2.pdf)
-- [6.estrutura_aceleracao.pdf](materiais/traçado_de_raios/6.estrutura_aceleracao.pdf)
-
-## 🔭 Próximos Passos
-
-O projeto já está em um bom ponto para evoluir para recursos mais avançados estudados nos slides:
-
-1. Antialiasing por múltiplas amostras por pixel, conforme [5.tracado_de_raios2.pdf](materiais/traçado_de_raios/5.tracado_de_raios2.pdf#page=4), págs. 4–5.
-2. Reflexão recursiva, conforme [5.tracado_de_raios2.pdf](materiais/traçado_de_raios/5.tracado_de_raios2.pdf#page=51), pág. 51.
-3. Refração e materiais transparentes, também como continuação natural do módulo de materiais.
-4. Estruturas de aceleração para cenas maiores, conforme [6.estrutura_aceleracao.pdf](materiais/traçado_de_raios/6.estrutura_aceleracao.pdf).
-5. Integração efetiva de [src/film.py](src/film.py) ao pipeline principal para separar melhor armazenamento e exportação da imagem.
+- não há lente fina, profundidade de campo nem path tracing global
+- `PointLight` e `AreaLight` seguem convenções radiométricas diferentes nesta base
+- não há grade regular, SAH, BVH linearizada ou acelerador global da cena
+- algumas cenas auxiliares antigas ainda servem mais como laboratório do que como interface final do projeto
