@@ -45,7 +45,9 @@ def load_obj_mesh(path: str | Path, material: Material, name: str | None = None)
       if len(indices) < 3:
         continue
 
-      # Fan triangulation: converte polígonos do OBJ em tríngulos compatíveis com TriangleMesh.
+      # Slide 4, p. 35 e p. 47-48: a malha é avaliada por triângulos no fluxo de
+      # closest-hit; por isso, a triangulação em leque converte faces poligonais
+      # do OBJ em triângulos compatíveis com `TriangleMesh`.
       anchor = indices[0]
       for i in range(1, len(indices) - 1):
         faces.append((anchor, indices[i], indices[i + 1]))
