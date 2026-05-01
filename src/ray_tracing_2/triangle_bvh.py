@@ -5,6 +5,9 @@ p. 47-48; ela só usa AABB por slabs (slides 4, p. 11-12) para podar subárvores
 antes do teste Möller-Trumbore. Nesta base, a BVH é construída uma vez por
 malha, usa median split no eixo dominante e não implementa SAH, compactação
 linear ou uma estrutura de aceleração global para toda a cena.
+
+TODO(accel): avaliar uma versão com SAH + layout linear de nós se a malha
+passar a ser o gargalo dominante do renderizador.
 """
 
 from __future__ import annotations
@@ -50,7 +53,9 @@ class AABB:
 
   @classmethod
   def from_triangles(cls, triangles: Sequence[Any]) -> AABB:
-    # Slides 4, p. 11-12: a caixa é apenas a interseção de três pares de slabs.
+    # Slides 4, p. 11-12, reutilizados no Slide 6: a caixa é descrita pelos
+    # mínimos e máximos por componente, isto é, pelo produto cartesiano de três
+    # intervalos 1D que depois serão testados pelo método de slabs.
     bounds = [_triangle_bounds(triangle) for triangle in triangles]
     return cls(
       p_min=_component_min([bound[0] for bound in bounds]),
@@ -60,7 +65,8 @@ class AABB:
   def intersects(self, ray: Ray, t_min: float = 0.001, t_max: float = float('inf')) -> tuple[bool, float, float]:
     # Mantém o mesmo raciocínio geométrico do teste de caixa por slabs:
     # se o segmento [t_min, t_max] não entra na AABB, nenhuma primitiva da
-    # subárvore pode produzir um hit mais próximo.
+    # subárvore pode produzir um hit mais próximo. Em termos algébricos, isso
+    # equivale a intersectar intervalos [t_near, t_far] em x, y e z.
     t0 = t_min
     t1 = t_max
     eps = 1e-8
@@ -162,7 +168,8 @@ class TriangleBVH:
     extent = bounds.p_max - bounds.p_min
     axis = max(range(3), key=lambda idx: extent[idx])
     # Heurística conservadora: separa pela mediana no eixo dominante.
-    # É simples e estável, mas não substitui SAH nem split espacial.
+    # É simples e estável, mas não substitui SAH nem split espacial discutidos
+    # nas pp. 30-36 de 6.estrutura_aceleracao.pdf.
     sorted_triangles = sorted(triangles, key=lambda triangle: _triangle_centroid(triangle)[axis])
     middle = len(sorted_triangles) // 2
     left_triangles = sorted_triangles[:middle]
@@ -191,4 +198,6 @@ class TriangleBVH:
   def intersect(self, ray: Ray, hit: Hit):
     if self.root is None:
       return False
+    # TODO(accel): adicionar travessia iterativa com pilha explícita se a BVH
+    # deixar de ser apenas local à malha e passar a exigir menor overhead.
     return self.root.intersect(ray, hit)
