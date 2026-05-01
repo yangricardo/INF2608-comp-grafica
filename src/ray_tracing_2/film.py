@@ -65,8 +65,12 @@ class Film:
     Comentário (PT): `get_sample()` preserva a fórmula central do Slide 4,
     enquanto este método implementa a extensão de anti-aliasing do Slide 5
     (pp. 4-9). Em ambos os casos, a meta é aproximar a integral da radiância
-    sobre a área do pixel; o padrão de amostragem afeta principalmente a
-    variância do estimador, não a geometria da câmera nem da cena.
+    sobre a área do pixel pelo estimador Monte Carlo
+
+      L_hat = (1/N) * sum_k L(x_k),
+
+    de modo que o padrão de amostragem afeta principalmente a variância do
+    estimador, não a geometria da câmera nem da cena.
     """
     spp = max(1, int(self.samples_per_pixel))
     samples: list[tuple[float, float]] = []
@@ -85,6 +89,8 @@ class Film:
     # stratified
     # A amostragem estratificada impõe cobertura espacial mínima ao subdividir o
     # pixel em GxG subcélulas, reduzindo variância em comparação ao jitter puro.
+    # TODO(sampling): experimentar sequências de baixa discrepância para reduzir
+    # ruído sem aumentar `samples_per_pixel` de forma puramente bruta.
     G = math.ceil(math.sqrt(spp))
     count = 0
     for a in range(G):
@@ -109,7 +115,8 @@ class Film:
     # Slides 4-5: percorre todos os pixels, gera um raio por amostra subpixel e
     # estima a cor média do pixel por média aritmética. Quando há uma única
     # amostra central, o comportamento recai no pipeline básico; com múltiplas
-    # amostras, entra a aproximação Monte Carlo do anti-aliasing.
+    # amostras, entra a aproximação Monte Carlo do anti-aliasing com
+    # c(i,j) = (1/N) * sum_k trace_ray(ray_k).
     print("Renderizando a cena com AA (spp=", self.samples_per_pixel, ", mode=", self.sampling_mode.name, ")...")
     for j in range(self.height):
       for i in range(self.width):
