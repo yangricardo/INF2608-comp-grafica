@@ -143,9 +143,9 @@ $$
 
 convertendo aliasing estruturado em ruído de alta frequência. Os slides enfatizam o caso aleatório uniforme e a fórmula de jitter subpixel nas páginas 4-9.
 
-O repositório implementa duas versões dessa ideia em `Film.get_samples_for_pixel()`: `jittered` e `stratified`. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com PBRT 4e §8.5: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Portanto, o código não apenas implementa o Slide 5; ele o especializa em uma forma estatisticamente mais robusta.
+O repositório implementa duas versões dessa ideia em `Film.get_samples_for_pixel()`: `jittered` e `stratified`. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com PBRT 4e §8.5: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Após a refatoração recente, a definição concreta desses padrões 2D foi extraída para `src/ray_tracing_2/sampling.py`, de modo que `film.py` passou a atuar como camada de interpretação geométrica do domínio do pixel, e não mais como o único lugar onde os padrões são definidos. Isso fortalece a correspondência entre a teoria de amostragem do Slide 5 e a arquitetura do código: há um mesmo quadrado unitário amostral, mas cada domínio o reinterpreta de forma física distinta.
 
-Rastreabilidade no código: `src/ray_tracing_2/film.py` (`get_samples_for_pixel()`, l. 60; `render()`, l. 108).
+Rastreabilidade no código: `src/ray_tracing_2/sampling.py` (`uniform_samples_2d()`, l. 15; `stratified_grid_samples_2d()`, l. 42), `src/ray_tracing_2/film.py` (`get_samples_for_pixel()`, l. 61; `render()`, l. 112).
 
 PBRT 4e de apoio: §§8.1 e 8.5.
 
@@ -169,11 +169,11 @@ PBRT 4e de apoio: §3.5.
 
 Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor com extensão geométrica finita, o que exige integrar a contribuição luminosa sobre uma superfície (`5.tracado_de_raios2.pdf`, pp. 14-23). Essa mudança é fisicamente relevante: penumbra surge porque diferentes subregiões da fonte são visíveis ou ocluídas de maneira diferente a partir do ponto sombreado. As páginas 14-17 introduzem o emissor extenso; as páginas 18-23 traduzem isso em soma de amostras e variabilidade espacial da visibilidade.
 
-`AreaLight.sample_radiance()` aproxima essa integral por soma discreta sobre uma grade `samples_u × samples_v`, com jitter em cada célula. A construção é coerente com os slides e com PBRT 4e §12.4: a energia é distribuída entre as amostras e sofre decaimento geométrico explícito com $1/r^2$, diferentemente da `PointLight`. Em outras palavras, a implementação preserva a convenção simplificada para luz pontual, mas usa uma aproximação radiometricamente mais próxima do caso físico quando a fonte possui área.
+`AreaLight.sample_radiance()` aproxima essa integral por soma discreta sobre uma grade `samples_u × samples_v`, com jitter em cada célula. A construção é coerente com os slides e com PBRT 4e §12.4: a energia é distribuída entre as amostras e sofre decaimento geométrico explícito com $1/r^2$, diferentemente da `PointLight`. Depois da extração de `src/ray_tracing_2/sampling.py`, os padrões `uniform`, `regular` e `stratified` passaram a ser definidos em um único módulo interno e a `AreaLight` apenas os converte do quadrado unitário para a superfície emissiva por meio da parametrização afim $p + u\,e_u + v\,e_v$. Em outras palavras, a implementação preserva a convenção simplificada para luz pontual, mas usa uma aproximação radiometricamente mais próxima do caso físico quando a fonte possui área.
 
 Essa dualidade precisa ser registrada: o projeto não usa um único modelo coerente para todas as luzes. Ele usa, deliberadamente, a convenção do enunciado para `PointLight` e uma aproximação mais geométrica para `AreaLight`.
 
-Rastreabilidade no código: `src/ray_tracing_2/light.py` (`AreaLight`, l. 67; `sample_radiance()`, l. 92; `radiance()`, l. 123), `src/ray_tracing_2/main_area_light.py` (`render()`, l. 23; criação da `AreaLight`, l. 47-48).
+Rastreabilidade no código: `src/ray_tracing_2/sampling.py` (`uniform_samples_2d()`, l. 15; `regular_grid_samples_2d()`, l. 26; `stratified_grid_samples_2d()`, l. 42), `src/ray_tracing_2/light.py` (`AreaLight`, l. 80; `_iter_sample_uvs()`, l. 114; `sample_radiance()`, l. 133; `radiance()`, l. 173), `src/ray_tracing_2/main_area_light.py` (`render()`, l. 31; criação da `AreaLight`, l. 59-66).
 
 PBRT 4e de apoio: §12.4.
 
@@ -259,20 +259,20 @@ PBRT 4e de apoio: §11.2.
 
 ### 4.9. Quadro de aderência entre Slide 5 e implementação
 
-| Conceito do Slide 5                                             | Situação no repositório           | Evidência                                                                                        |
-| --------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Antialiasing por múltiplas amostras por pixel                   | Implementado com extensão         | `Film.get_samples_for_pixel()`; `Film.render()`                                                  |
-| Jitter subpixel aleatório                                       | Implementado                      | `SamplingMode.JITTERED`; `Film.get_samples_for_pixel()`                                          |
-| Amostragem estratificada                                        | Implementado como extensão        | `SamplingMode.STRATIFIED`; `Film.get_samples_for_pixel()`                                        |
-| Instanciação por transformações afins em coordenadas homogêneas | Implementado                      | `Instance.intersect()`; `main_ellipse.py`; `main_box.py`                                         |
-| Transformação correta de normais por inversa transposta         | Implementado                      | `m_inv_t` em `Instance.intersect()`                                                              |
-| Luz de área com integração discreta e penumbra                  | Implementado com aproximação      | `AreaLight.sample_radiance()`; `AreaLight.radiance()`; `main_area_light.py`                      |
-| Padrões regular e uniforme puros para amostragem da luz         | Implementado com modos explícitos | `AreaLightSamplingMode.REGULAR`; `AreaLightSamplingMode.UNIFORM`; `AreaLight._iter_sample_uvs()` |
-| Caixa/AABB e método de slabs                                    | Implementado                      | `Box.intersect()`; `AABB.intersects()`                                                           |
-| Traçador recursivo com profundidade finita                      | Implementado                      | `Scene.can_spawn_ray()`; `Scene.trace_ray()`                                                     |
-| Reflexão especular com Fresnel-Schlick                          | Implementado com aproximação      | `ReflectiveMaterial.eval()`                                                                      |
-| Refração dielétrica com Snell, TIR e Beer-Lambert               | Implementado com simplificação    | `TransparentMaterial.eval()`; `TransparentMaterial.shadow_transmittance()`                       |
-| Generalização do shadow ray para transmitância acumulada        | Implementado                      | `Scene.transmittance()`                                                                          |
+| Conceito do Slide 5                                             | Situação no repositório           | Evidência                                                                                                                                                               |
+| --------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Antialiasing por múltiplas amostras por pixel                   | Implementado com extensão         | `sampling.uniform_samples_2d()`; `sampling.stratified_grid_samples_2d()`; `Film.get_samples_for_pixel()`; `Film.render()`                                               |
+| Jitter subpixel aleatório                                       | Implementado                      | `SamplingMode.JITTERED`; `sampling.uniform_samples_2d()`; `Film.get_samples_for_pixel()`                                                                                |
+| Amostragem estratificada                                        | Implementado como extensão        | `SamplingMode.STRATIFIED`; `sampling.stratified_grid_samples_2d()`; `Film.get_samples_for_pixel()`                                                                      |
+| Instanciação por transformações afins em coordenadas homogêneas | Implementado                      | `Instance.intersect()`; `main_ellipse.py`; `main_box.py`                                                                                                                |
+| Transformação correta de normais por inversa transposta         | Implementado                      | `m_inv_t` em `Instance.intersect()`                                                                                                                                     |
+| Luz de área com integração discreta e penumbra                  | Implementado com aproximação      | `AreaLight.sample_radiance()`; `AreaLight.radiance()`; `main_area_light.py`                                                                                             |
+| Padrões regular e uniforme puros para amostragem da luz         | Implementado com modos explícitos | `AreaLightSamplingMode.REGULAR`; `AreaLightSamplingMode.UNIFORM`; `sampling.regular_grid_samples_2d()`; `sampling.uniform_samples_2d()`; `AreaLight._iter_sample_uvs()` |
+| Caixa/AABB e método de slabs                                    | Implementado                      | `Box.intersect()`; `AABB.intersects()`                                                                                                                                  |
+| Traçador recursivo com profundidade finita                      | Implementado                      | `Scene.can_spawn_ray()`; `Scene.trace_ray()`                                                                                                                            |
+| Reflexão especular com Fresnel-Schlick                          | Implementado com aproximação      | `ReflectiveMaterial.eval()`                                                                                                                                             |
+| Refração dielétrica com Snell, TIR e Beer-Lambert               | Implementado com simplificação    | `TransparentMaterial.eval()`; `TransparentMaterial.shadow_transmittance()`                                                                                              |
+| Generalização do shadow ray para transmitância acumulada        | Implementado                      | `Scene.transmittance()`                                                                                                                                                 |
 
 O quadro mostra que o Slide 5 é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com padrão configurável (`regular`, `uniform`, `stratified`), e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
 
@@ -396,6 +396,24 @@ Arquivo âncora: `src/ray_tracing_2/cornell_box_pyramid.py` (`render()`, l. 50; 
 Esta cena combina os dois eixos mais avançados do projeto: materiais recursivos do Slide 5 e geometria triangulada do Slide 6. O arquivo `outputs/cornell_box_pyramid_20260425_003203/properties.md` confirma a presença de duas malhas triangulares distintas, uma transparente e outra refletiva, embutidas em uma cena fechada com múltiplas luzes. Isso a torna a melhor demonstração integrada de que triângulos, reflexão e refração não são módulos isolados, mas participam do mesmo pipeline de visibilidade e transporte local/recursivo.
 
 ![Cornell Box com duas pirâmides trianguladas](../outputs/cornell_box_pyramid_20260425_003203/render.png)
+
+### 6.6. Reprodutibilidade experimental por CLI padronizada
+
+Embora a padronização do parser não altere a física do renderizador, ela melhora diretamente a rastreabilidade dos experimentos. Em particular, ela torna explícito um ponto conceitual importante do Slide 5: a amostragem bidimensional sobre o pixel (`5.tracado_de_raios2.pdf`, pp. 4-9) e a amostragem bidimensional sobre a fonte extensa (`5.tracado_de_raios2.pdf`, pp. 14-23) não são a mesma integral, ainda que ambas usem padrões 2D. Por isso, o repositório preserva dois controles públicos distintos, `sampling_mode` para o filme e `light_sampling_mode` para `AreaLight`, enquanto reutiliza apenas uma infraestrutura interna compartilhada de geração de padrões 2D.
+
+Do ponto de vista metodológico, essa separação é desejável: ela permite variar o estimador de anti-aliasing sem alterar a quadratura usada na integração da luz de área, e vice-versa. Isso reduz ambiguidade na interpretação dos resultados e melhora a comparabilidade entre execuções documentadas no próprio `properties.md`.
+
+Exemplos mínimos de reprodução, todos com `800x600` e `spp = 1`:
+
+```bash
+python -m ray_tracing_2.main --width 800 --height 600 --spp 1
+python -m ray_tracing_2.main_area_light --width 800 --height 600 --spp 1 --sampling_mode stratified --light_sampling_mode regular
+python -m ray_tracing_2.cornell_box --width 800 --height 600 --spp 1 --sampling_mode jittered --light_sampling_mode uniform
+python -m ray_tracing_2.main_triangles --width 800 --height 600 --spp 1 --scene inputs/triangle_pyramid.json --accelerator bvh
+python -m ray_tracing_2.generate_scene --input inputs/example_scene.json --width 800 --height 600 --spp 1
+```
+
+Rastreabilidade no código: `src/ray_tracing_2/cli.py` (`build_parser()`, l. 14; `add_sampling_arguments()`, l. 37; `add_light_sampling_argument()`, l. 52), `src/ray_tracing_2/sampling.py` (`uniform_samples_2d()`, l. 15; `regular_grid_samples_2d()`, l. 26; `stratified_grid_samples_2d()`, l. 42), `src/ray_tracing_2/film.py` (`SamplingMode`, l. 17; `get_samples_for_pixel()`, l. 61), `src/ray_tracing_2/light.py` (`AreaLightSamplingMode`, l. 45; `_iter_sample_uvs()`, l. 114; `sample_radiance()`, l. 133), `src/ray_tracing_2/main.py` (`build_cli_parser()`, l. 79), `src/ray_tracing_2/main_area_light.py` (`build_cli_parser()`, l. 89), `src/ray_tracing_2/main_triangles.py` (`build_cli_parser()`, l. 202) e `src/ray_tracing_2/generate_scene.py` (`build_cli_parser()`, l. 122).
 
 ## 7. Limitações Atuais e Delimitação de Escopo
 

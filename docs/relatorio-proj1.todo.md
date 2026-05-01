@@ -90,6 +90,17 @@ Legenda de status:
 - [x] Explicitar no v5 que Beer-Lambert em raios de sombra assume meio homogeneo e acumulacao no trecho de saida
 - [x] Consolidar em secao propria as ausencias de grade regular, SAT, SAH, BVH linear e acelerador global de cena
 
+## Padronizacao recente de CLI, amostragem e diagramas
+
+- [x] `src/ray_tracing_2/cli.py`: consolidar argumentos compartilhados de largura, altura, spp, seed, gamma e exemplos de uso
+- [x] `src/ray_tracing_2/sampling.py`: unificar apenas o mecanismo interno de padroes 2D, preservando `sampling_mode` e `light_sampling_mode` como controles publicos distintos
+- [x] Atualizar entrypoints principais e utilitarios para usar o parser padronizado e choices derivados dos enums do projeto
+- [x] `README.md`: adicionar exemplos de linha de comando em `800x600` com `--spp 1` e separar explicitamente filme versus luz de area
+- [x] `docs/AA_IMPLEMENTATION.md`: registrar a separacao entre AA por pixel e amostragem de `AreaLight`, com exemplos reproduziveis
+- [x] `docs/relatorio-proj1.v5.md`: incluir uma subsecao pratica de reprodutibilidade experimental via CLI padronizada
+- [x] Criar `ray_tracing_2_v2.puml` e `ray_tracing_classes_v1.puml` sem sobrescrever os diagramas historicos
+- [x] Smoke tests iniciais em `800x600` com `--spp 1`: `main`, `main_area_light` e `generate_scene`
+
 ## Congelamento futuro das citacoes de codigo
 
 Concluido apos o pass de comentarios e a redacao do v5.
