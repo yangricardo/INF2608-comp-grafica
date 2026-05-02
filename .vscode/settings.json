@@ -11,7 +11,7 @@
   "latex-workshop.latex.tools": [
     {
       "name": "latexmk",
-      "command": "latexmk",
+      "command": "/Library/TeX/texbin/latexmk",
       "args": [
         "-xelatex",
         "-synctex=1",
@@ -26,6 +26,10 @@
       "name": "latexmk (xelatex)",
       "tools": ["latexmk"]
     }
+  ],
+  "latex-workshop.latex.search.rootFiles.exclude": [
+    "**/sbcreviews-pt.tex",
+    "**/sbcreviews-en.tex"
   ],
   "latex-workshop.view.pdf.viewer": "tab",
   "latex-workshop.latex.autoBuild.run": "onFileChange"
