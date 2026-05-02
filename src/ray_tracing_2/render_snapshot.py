@@ -530,6 +530,8 @@ class RenderSettingsSnapshot:
   seed: int | None = None
   gamma_fix: bool = False
   render_time_seconds: float | None = None
+  ray_estimation: dict[str, Any] | None = None
+  estimation_quality: dict[str, Any] | None = None
 
   @classmethod
   def from_dict(cls, data: dict[str, Any]) -> RenderSettingsSnapshot:
@@ -542,6 +544,8 @@ class RenderSettingsSnapshot:
       seed=int(data['seed']) if data.get('seed') is not None else None,
       gamma_fix=bool(data.get('gamma_fix', False)),
       render_time_seconds=float(data['render_time_seconds']) if data.get('render_time_seconds') is not None else None,
+      ray_estimation=data.get('ray_estimation'),
+      estimation_quality=data.get('estimation_quality'),
     )
 
   def to_dict(self) -> dict[str, Any]:
@@ -556,6 +560,10 @@ class RenderSettingsSnapshot:
     }
     if self.render_time_seconds is not None:
       data['render_time_seconds'] = float(self.render_time_seconds)
+    if self.ray_estimation is not None:
+      data['ray_estimation'] = self.ray_estimation
+    if self.estimation_quality is not None:
+      data['estimation_quality'] = self.estimation_quality
     return data
 
 
@@ -667,7 +675,20 @@ class RenderSnapshot:
     seed: int | None,
     gamma_fix: bool,
     render_time_seconds: float | None = None,
+    ray_estimation_dict: dict[str, Any] | None = None,
+    render_estimator: Any | None = None,
   ) -> RenderSnapshot:
+    if ray_estimation_dict is None and render_estimator is not None:
+      try:
+        if hasattr(render_estimator, 'estimation_dict'):
+          ray_estimation_dict = render_estimator.estimation_dict()
+      except Exception:
+        ray_estimation_dict = None
+
+    estimation_quality = cls._build_estimation_quality(
+      ray_estimation=ray_estimation_dict,
+      render_time_seconds=render_time_seconds,
+    )
     return cls(
       render=RenderSettingsSnapshot(
         name=name,
@@ -678,12 +699,48 @@ class RenderSnapshot:
         seed=seed,
         gamma_fix=bool(gamma_fix),
         render_time_seconds=render_time_seconds,
+        ray_estimation=ray_estimation_dict,
+        estimation_quality=estimation_quality,
       ),
       scene=SceneSettingsSnapshot.from_runtime(scene),
       camera=CameraSnapshot.from_runtime(cam),
       objects=[ShapeSnapshot.from_runtime(obj) for obj in scene.objects],
       lights=[LightSnapshot.from_runtime(light) for light in scene.lights],
     )
+
+  @staticmethod
+  def _build_estimation_quality(
+    *,
+    ray_estimation: dict[str, Any] | None,
+    render_time_seconds: float | None,
+  ) -> dict[str, Any] | None:
+    if ray_estimation is None or render_time_seconds is None:
+      return None
+
+    quality: dict[str, Any] = {}
+
+    def _add_quality(prefix: str, estimated: Any) -> None:
+      if estimated is None:
+        return
+      try:
+        est = float(estimated)
+      except Exception:
+        return
+      actual = float(render_time_seconds)
+      if est <= 0.0 or actual <= 0.0:
+        return
+      abs_error = abs(actual - est)
+      rel_error = abs_error / actual
+      quality[f'{prefix}_estimated_seconds'] = est
+      quality[f'{prefix}_actual_seconds'] = actual
+      quality[f'{prefix}_absolute_error_seconds'] = abs_error
+      quality[f'{prefix}_relative_error'] = rel_error
+      quality[f'{prefix}_accuracy_percent'] = max(0.0, (1.0 - rel_error) * 100.0)
+      quality[f'{prefix}_actual_over_estimated'] = actual / est
+
+    _add_quality('rays_model', ray_estimation.get('estimated_time_seconds'))
+    _add_quality('intersection_model', ray_estimation.get('estimated_time_by_intersections_seconds'))
+    return quality or None
 
   @classmethod
   def from_dict(cls, data: dict[str, Any]) -> RenderSnapshot:
@@ -716,25 +773,88 @@ class RenderSnapshot:
   def to_markdown(
     self,
     *,
-    image_name: str = 'render.png',
+    image_name: str | None = 'render.png',
     properties_json_name: str = 'properties.json',
   ) -> str:
     props = self.to_dict()
     lines = []
     lines.append('# Propriedades da Simulação')
     lines.append('')
-    lines.append(f'![Imagem da Simulação]({image_name})')
-    lines.append('')
+    if image_name:
+      lines.append(f'![Imagem da Simulação]({image_name})')
+      lines.append('')
 
     render_settings: dict[str, Any] | None = props.get('render') if isinstance(props, dict) else None
     if render_settings:
       lines.append('## Render')
       lines.append('')
       for key, value in render_settings.items():
-        lines.append(f'- **{key}**: {value}')
+        if key not in {'ray_estimation', 'estimation_quality'}:  # Handle these in dedicated sections
+          lines.append(f'- **{key}**: {value}')
       if self.render.render_time_seconds is not None:
         lines.append(f'- **render_time_minutes**: {self.render.render_time_seconds / 60.0}')
+      
+      # Add ray estimation as a separate section
+      if self.render.ray_estimation:
+        lines.append('')
+        lines.append('## Estimativa de Raios')
+        lines.append('')
+        ray_est = self.render.ray_estimation
+        lines.append(f'- **Raios Primários**: {ray_est.get("primary_rays", "N/A"):,}')
+        lines.append(f'- **Raios Secundários**: {ray_est.get("secondary_rays", "N/A"):,}')
+        if ray_est.get('shadow_rays') is not None:
+          lines.append(f'- **Shadow Rays**: {ray_est.get("shadow_rays", "N/A"):,}')
+        lines.append(f'- **Total de Raios**: {ray_est.get("total_rays", "N/A"):,}')
+        lines.append(f'- **Throughput**: {ray_est.get("throughput_rays_per_second", "N/A"):,} raios/segundo')
+        lines.append(f'- **Tempo Estimado**: {ray_est.get("formatted_time", "N/A")}')
+        lines.append(f'- **Tempo Estimado (minutos)**: {ray_est.get("estimated_time_minutes", "N/A"):.3f}')
+        if ray_est.get('estimated_time_by_intersections_seconds') is not None:
+          lines.append(f'- **Tempo Estimado (interseções)**: {ray_est.get("estimated_time_by_intersections_seconds"):.3f}s')
+        if ray_est.get('primary_hit_ratio') is not None:
+          lines.append(f'- **Primary Hit Ratio**: {ray_est.get("primary_hit_ratio"):.3f}')
+        if ray_est.get('recursive_surface_ratio') is not None:
+          lines.append(f'- **Recursive Surface Ratio**: {ray_est.get("recursive_surface_ratio"):.3f}')
+        if ray_est.get('shadow_samples_per_hit') is not None:
+          lines.append(f'- **Shadow Samples/Hit**: {ray_est.get("shadow_samples_per_hit")}')
+        # If calibration info is present, include a short summary
+        cal = ray_est.get('calibration') if isinstance(ray_est, dict) else None
+        if cal:
+          lines.append('')
+          lines.append('### Calibração (rápida)')
+          if cal.get('calibration_elapsed_seconds') is not None:
+            lines.append(f'- **elapsed_seconds**: {cal.get("calibration_elapsed_seconds"):.3f}')
+          if cal.get('calibration_samples_tested') is not None:
+            lines.append(f'- **samples_tested**: {cal.get("calibration_samples_tested"):,}')
+          if cal.get('calibration_rays_traced') is not None:
+            lines.append(f'- **rays_traced**: {cal.get("calibration_rays_traced"):,}')
+          if cal.get('calibration_intersection_tests') is not None:
+            lines.append(f'- **intersection_tests**: {cal.get("calibration_intersection_tests"):,}')
+          if cal.get('calibration_shadow_rays') is not None:
+            lines.append(f'- **shadow_rays**: {cal.get("calibration_shadow_rays"):,}')
+          if cal.get('measured_throughput_rays_per_second') is not None:
+            lines.append(f'- **measured_throughput**: {cal.get("measured_throughput_rays_per_second"):.0f} raios/segundo')
+      
       lines.append('')
+
+      if self.render.estimation_quality:
+        quality = self.render.estimation_quality
+        lines.append('## Qualidade da Estimativa')
+        lines.append('')
+        if quality.get('rays_model_estimated_seconds') is not None:
+          lines.append(f'- **Rays Model (estimado)**: {quality.get("rays_model_estimated_seconds"):.3f}s')
+          lines.append(f'- **Rays Model (real)**: {quality.get("rays_model_actual_seconds"):.3f}s')
+          lines.append(f'- **Rays Model (erro abs)**: {quality.get("rays_model_absolute_error_seconds"):.3f}s')
+          lines.append(f'- **Rays Model (erro rel)**: {quality.get("rays_model_relative_error"):.3%}')
+          lines.append(f'- **Rays Model (fator real/estimado)**: {quality.get("rays_model_actual_over_estimated"):.2f}x')
+          lines.append(f'- **Rays Model (acurácia)**: {quality.get("rays_model_accuracy_percent"):.2f}%')
+        if quality.get('intersection_model_estimated_seconds') is not None:
+          lines.append(f'- **Intersection Model (estimado)**: {quality.get("intersection_model_estimated_seconds"):.3f}s')
+          lines.append(f'- **Intersection Model (real)**: {quality.get("intersection_model_actual_seconds"):.3f}s')
+          lines.append(f'- **Intersection Model (erro abs)**: {quality.get("intersection_model_absolute_error_seconds"):.3f}s')
+          lines.append(f'- **Intersection Model (erro rel)**: {quality.get("intersection_model_relative_error"):.3%}')
+          lines.append(f'- **Intersection Model (fator real/estimado)**: {quality.get("intersection_model_actual_over_estimated"):.2f}x')
+          lines.append(f'- **Intersection Model (acurácia)**: {quality.get("intersection_model_accuracy_percent"):.2f}%')
+        lines.append('')
 
     scene_settings: dict[str, Any] | None = props.get('scene') if isinstance(props, dict) else None
     if scene_settings:
