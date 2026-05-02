@@ -108,20 +108,162 @@ Proceedings, Template, SBC OpenLib, Indexing
 %\end{license}
 
 \end{frontmatter}
+\section{Escopo, método e critério de confiança}
+\label{sec:escopo}
 
-\section{Introdução}
-\label{sec:intro}
+Este relatório reconstrói, com prioridade epistemológica explícita, o conteúdo dos arquivos \texttt{4.tracado\_de\_raios.pdf}, \texttt{5.tracado\_de\_raios2.pdf} e \texttt{6.estrutura\_aceleracao.pdf}, usando os resumos em \path{materiais/traçado_de_raios/*.md} apenas como apoio de leitura e o código em \path{src/ray_tracing_2/} como evidência de implementação. A documentação em \path{docs/*.md} foi usada apenas como apoio secundário de estrutura e nunca como autoridade teórica principal.
 
-A classe \textsl{sbc-reviews-2025} tem com base a classe \textsl{sbc2025}, projetada para trabalhar com os \textit{engines} xetex e luatex. Dessa forma, deve-se compilar o documento com esses engines.
+O objetivo não é apenas resumir os slides, mas separar três camadas que frequentemente se confundem em relatórios de implementação:
+
 \begin{enumerate}
-    \item No Overleaf, ajustando no menu opção de compilação para \textbf{xelatex} ou \textbf{lualatex}.\footnote{Os engines são denominados xetex e luatex. Já os comandos de compilação são \textsl{xelatex} e \textsl{lualatex}.}
-    \item Se compilando localmente, na sua IDE faça o ajuste do compilador. Se usuário raiz, no terminal de comando, digite \textsl{xelatex filename} ou \textsl{lualatex filename}. Não é necessário digitar a extensão \textsl{tex}.
+    \item a formulação geométrica e física apresentada nos slides;
+    \item a tradução algorítmica que o repositório efetivamente materializa;
+    \item as lacunas entre o conteúdo didático e a implementação entregue.
 \end{enumerate}
 
-A classe \textsl{sbc-reviews-2025} inclui internamente os pacotes xcolor, graphicx, amsmath amssymb, hyperref, babel; 
-consequentemente, não há necessidade de incluí-los no preâmbulo.
+Como fonte externa, foi usado somente o conteúdo de PBRT 4e permitido pelo enunciado, principalmente os trechos sobre câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. Em particular, foram úteis: PBRT 4e \S\S 1.2, 3.5, 3.7, 5.2, 8.1, 8.5, 9.3, 9.5, 11.2, 12.4 e 7.3.
 
-A compilação com a opção \texttt{pdflatex} no Overleaf vai receber uma mensagem de erro solicitando o usuário a ajustar a opção de compilação para \textbf{xelatex} ou \textbf{lualatex}.
+\section{Plano Consolidado do Relatório}
+\label{sec:plano-relatorio}
+
+\begin{enumerate}
+    \item Reconstituir o núcleo do Slide 4: raio paramétrico, interseções básicas, câmera pinhole, Phong, luz pontual e sombra dura.
+    \item Explicitar a base de álgebra linear do projeto: mudança de base, espaços local/global, vetores normais e transformações homogêneas.
+    \item Descrever as extensões do Slide 5: supersampling, instanciação, luz de área, AABB/slabs, recursão, Fresnel-Schlick, Snell, reflexão interna total e Beer-Lambert.
+    \item Mostrar como a implementação transforma o teste de sombra binário do Slide 4 em transmitância acumulada no Slide 5.
+    \item Reconstituir o Slide 6 em três níveis: triângulo isolado, malha triangulada e estruturas de aceleração.
+    \item Distinguir com precisão o que o repositório implementa do que o Slide 6 descreve apenas teoricamente.
+    \item Ancorar cada bloco com referências de páginas dos slides e linhas do código atual.
+    \item Fechar com uma validação experimental breve, usando renderizações já existentes no repositório.
+    \item Consolidar, ao fim, as limitações atuais da implementação frente aos materiais da disciplina e ao escopo do enunciado principal.
+\end{enumerate}
+
+\section{Slide 4: Núcleo Geométrico e Fotométrico do Traçador}
+\label{sec:slide4}
+
+\subsection{Conceitos Estruturantes do Slide 4}
+\label{sec:slide4-conceitos}
+
+O Slide 4 organiza-se em torno de um conjunto pequeno de conceitos que estrutura todo o traçador de raios.
+
+\begin{enumerate}
+    \item \textbf{Raio paramétrico e visibilidade (pp. 7-9).} A formulação $\mathbf{r}(t)=\mathbf{o}+t\,\hat{\mathbf{d}}$ reduz a linha de visada a uma reta orientada; $t$ funciona como distância assinada ou paramétrica ao longo do feixe, e a visibilidade do ponto observado é determinada pelo menor $t>0$ compatível com uma superfície.
+    \item \textbf{Interseções analíticas e controle numérico (pp. 10-18).} O plano é descrito por $(\mathbf{x}-\mathbf{p}_0)\cdot\hat{\mathbf{n}}=0$, enquanto a esfera leva à quadrática $at^2+bt+c=0$, cujo discriminante $\Delta$ classifica ausência, tangência ou dupla interseção; do ponto de vista computacional, essa geometria analítica só é robusta quando acompanhada por um critério de tolerância $\varepsilon$ para rejeitar paralelismos numéricos e auto-interseções.
+    \item \textbf{Câmera pinhole, filme e mudança de base (pp. 19-39).} A câmera é construída por uma base ortonormal $(\hat{\mathbf{u}},\hat{\mathbf{v}},\hat{\mathbf{w}})$ e pela geometria do filme, com $\Delta v = f\tan(\theta/2)$ e $\Delta u = \Delta v\,(w/h)$; em síntese, esse bloco combina geometria projetiva com mudança de base entre espaço da câmera e espaço global.
+    \item \textbf{Iluminação local e fotometria simplificada (pp. 40-43).} O modelo local de Phong combina a componente difusa lambertiana $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$ com a componente especular $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; fisicamente, trata-se de um modelo local e fenomenológico, útil para capturar dependência angular sem resolver transporte global de luz.
+    \item \textbf{Organização algorítmica da cena, sombras e luz ambiente (pp. 44-55).} O pipeline de \emph{closest hit} seleciona a primeira interseção visível, o raio de sombra transforma a iluminação direta em um teste de visibilidade até a fonte, e o termo ambiente $m_{amb}\,l_{amb}$ fecha o modelo como aproximação empírica da iluminação indireta ausente.
+\end{enumerate}
+
+Esses conceitos explicam por que as subseções seguintes podem ser lidas como desdobramentos detalhados do mesmo núcleo conceitual.
+
+\subsection{Raio paramétrico, visibilidade e registro de interseção}
+\label{sec:slide4-raio}
+
+O ponto de partida do Slide 4 é a modelagem do raio por
+
+\[
+\mathbf{r}(t)=\mathbf{o}+t\,\hat{\mathbf{d}},\qquad t\ge 0,
+\]
+
+em que $\mathbf{o}$ é a origem, $\hat{\mathbf{d}}$ é a direção normalizada e $t$ parametriza a posição ao longo do feixe. Em ótica geométrica, essa formulação abstrai a propagação retilínea da luz em meios homogêneos; em computação gráfica, ela converte o problema de visibilidade em um problema de encontrar o menor $t$ positivo compatível com uma superfície. Nos slides, isso aparece como o elo entre câmera, interseção e sombreamento local, particularmente na dedução do raio paramétrico e na interpretação física de $t$ como distância assinada ao longo da trajetória (\texttt{4.tracado\_de\_raios.pdf}, pp. 7-9).
+
+O repositório segue exatamente essa organização. O raio é carregado por \texttt{Ray}, enquanto \texttt{Hit} armazena a melhor interseção conhecida até o momento e também codifica \texttt{front\_face} e \texttt{backfacing}. Essa distinção, que no Slide 4 serve para consistência geométrica da normal, torna-se decisiva no Slide 5 para distinguir entrada e saída de meios refrativos. A rotina \texttt{Scene.compute\_intersection()} preserva o padrão clássico de \emph{closest hit}: percorre os objetos, atualiza um único registro acumulador e retorna apenas a interseção frontal mais próxima.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/hit.py} (\texttt{Hit}, l. 11; \texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24; \texttt{trace\_ray()}, l. 102).
+
+PBRT 4e de apoio: \S\S 1.2 e 3.5.
+
+\subsection{Interseções básicas: plano, esfera e controle numérico de $\varepsilon$}
+\label{sec:slide4-intersecoes}
+
+Nos slides, o plano é descrito pela equação implícita
+
+\[
+(\mathbf{x}-\mathbf{p}_0)\cdot\hat{\mathbf{n}}=0,
+\]
+
+e a substituição de $\mathbf{r}(t)$ produz a solução linear
+
+\[
+t=\frac{(\mathbf{p}_0-\mathbf{o})\cdot\hat{\mathbf{n}}}{\hat{\mathbf{d}}\cdot\hat{\mathbf{n}}},
+\]
+
+exatamente como discutido nas páginas de interseção raio-plano (\texttt{4.tracado\_de\_raios.pdf}, pp. 10-13). A esfera, por sua vez, impõe
+
+\[
+\lVert\mathbf{x}-\mathbf{c}\rVert^2-r^2=0,
+\]
+
+que, após substituição do raio, gera uma quadrática $at^2+bt+c=0$ cujo discriminante $\Delta=b^2-4ac$ decide ausência, tangência ou dupla interseção (\texttt{4.tracado\_de\_raios.pdf}, pp. 14-18). Em ambos os casos, o aspecto fisicamente relevante é o mesmo: o que interessa para a câmera é a menor raiz positiva. O aspecto numericamente relevante também é comum: deve-se rejeitar soluções com $t$ demasiado pequeno para evitar reinterseção artificial da própria superfície.
+
+O código espelha esse raciocínio. \texttt{Plane.intersect()} resolve o plano por produto escalar; \texttt{Sphere.intersect()} resolve a quadrática e guarda a menor raiz positiva; \texttt{Scene.offset\_point()} empurra a origem dos raios secundários ao longo da normal geométrica com \texttt{ray\_epsilon = 0.001}, evitando \emph{shadow acne} em sombra, reflexão e refração. O Slide 4 apresenta essa ideia como tolerância numérica; o repositório a aplica de forma centralizada, o que é arquiteturalmente melhor do que espalhar pequenos limiares por todos os materiais.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Sphere}, l. 17; \texttt{Sphere.intersect()}, l. 23; \texttt{Plane}, l. 54; \texttt{Plane.intersect()}, l. 60), \path{src/ray_tracing_2/scene.py} (\texttt{offset\_point()}, l. 33).
+
+PBRT 4e de apoio: \S 1.2.
+
+\subsection{Câmera pinhole, filme e espaços de coordenadas}
+\label{sec:slide4-camera}
+
+O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando \texttt{eye}, \texttt{center} e \texttt{up} para montar os eixos locais (pp. 19-23), e em seguida projeta amostras do pixel sobre o plano de imagem (pp. 24-29), antes de explicitar a mudança entre espaço de câmera e espaço global (pp. 31-39) (\texttt{4.tracado\_de\_raios.pdf}). A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
+
+No código, a ideia é a mesma, mas a implementação é condensada: \texttt{Camera.\_\_init\_\_()} usa \texttt{glm.lookAt()} para obter a transformação de visualização e armazena sua inversa em \texttt{inv\_view}. A geração do raio em \texttt{generate\_ray()} monta o ponto do pixel em espaço de câmera a partir de coordenadas normalizadas e da relação trigonométrica
+
+\[
+\Delta v = f\tan\left(\frac{\theta}{2}\right),\qquad \Delta u = \Delta v\,\frac{w}{h},
+\]
+
+que é precisamente a síntese entre geometria projetiva e semelhança de triângulos apresentada nos slides (pp. 24-29), e depois transforma esse ponto para o espaço global (pp. 31-39). O comentário recém-ajustado em \texttt{camera.py} deixa explícita uma nuance importante: \texttt{focal\_distance} aqui é distância geométrica ao plano de projeção no modelo pinhole, não distância focal de lente fina nem parâmetro de profundidade de campo. Esse detalhe é essencial para não projetar sobre o código uma física que ele não implementa.
+
+Essa distinção também define uma limitação importante do projeto: todos os raios primários partem de um único centro ótico, sem abertura finita, círculo de confusão ou profundidade de campo. Portanto, o antialiasing implementado depois no Slide 5 altera a estratégia de amostragem do pixel, mas não muda o modelo óptico de formação de imagem.
+
+Em \texttt{film.py}, \texttt{get\_sample()} e \texttt{render()} deixam claro que a imagem final é construída como média de amostras por pixel. Mesmo quando o caso básico usa apenas uma amostra central, a interface já está preparada para supersampling estocástico.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/camera.py} (\texttt{Camera}, l. 6; \texttt{\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{Film}, l. 20; \texttt{get\_sample()}, l. 54; \texttt{render()}, l. 108), \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25).
+
+PBRT 4e de apoio: \S 5.2.
+
+\subsection{Phong, luz pontual, termo ambiente e sombra dura}
+\label{sec:slide4-phong}
+
+O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, uma soma de termo ambiente, componente difusa lambertiana e componente especular dependente do vetor refletido (\texttt{4.tracado\_de\_raios.pdf}, pp. 40-43 e 54-55). Em termos físicos, esse modelo não é um BRDF rigoroso, mas é uma aproximação útil: o termo difuso usa o fator $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$; o termo especular usa um pico angular em função de $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; a sombra dura decorre de um teste binário de visibilidade entre o ponto sombreado e a fonte (\texttt{4.tracado\_de\_raios.pdf}, pp. 51-53). Em particular, as páginas 40-43 articulam a síntese física mínima do projeto: incidência luminosa, orientação local de normal e dependência angular da resposta da superfície.
+
+\texttt{PhongMaterial.direct\_lighting()} implementa exatamente esse cálculo. Para cada luz, o código obtém radiância incidente e direção via \texttt{sample\_radiance()}, soma o termo difuso e depois o termo especular. \texttt{Scene.transmittance()} faz o papel do raio de sombra, mas já em uma forma mais geral: para meios opacos, ele reduz-se ao teste binário do Slide 4; para meios transparentes, ele vira um produto acumulado de transmitâncias, o que antecipa o Slide 5.
+
+Há, contudo, uma nuance importante entre a física dos slides e a convenção da implementação: os slides apresentam a lei usual de decaimento geométrico de uma fonte pontual, proporcional a $1/r^2$, mas \texttt{PointLight.radiance()} não aplica esse fator. O comentário do código explicita a razão: o projeto preserva a convenção do enunciado em que \texttt{power} é tratado como radiância constante da fonte. Isso não é um erro, mas uma simplificação de modelagem que precisa ser declarada no relatório para evitar falsa equivalência com uma formulação radiométrica completa.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/light.py} (\texttt{PointLight}, l. 42; \texttt{PointLight.radiance()}, l. 46), \path{src/ray_tracing_2/material.py} (\texttt{PhongMaterial}, l. 37; \texttt{direct\_lighting()}, l. 45; \texttt{eval()}, l. 72), \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/main.py} (\texttt{Sphere}, l. 54; \texttt{Plane}, l. 55; \texttt{PointLight}, l. 59).
+
+PBRT 4e de apoio: \S 1.2.
+
+\subsection{Quadro de aderência entre Slide 4 e implementação}
+\label{sec:slide4-quadro}
+
+\begin{table*}[!ht]
+\caption{Quadro de aderência entre o Slide 4 e a implementação atual.}
+\label{tab:slide4-aderencia}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.24\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t}
+}
+Conceito do Slide 4 & Situação no repositório & Evidência \\
+Raio paramétrico e registro de hit & Implementado & \texttt{Ray}; \texttt{Hit}; \texttt{Scene.compute\_intersection()} \\
+Interseção raio-plano & Implementado & \texttt{Plane.intersect()} \\
+Interseção raio-esfera & Implementado & \texttt{Sphere.intersect()} \\
+Tolerância numérica para evitar auto-interseção & Implementado & \texttt{Scene.offset\_point()}; limiar positivo nas interseções \\
+Câmera pinhole e geração de raios primários & Implementado & \texttt{Camera.\_\_init\_\_()}; \texttt{Camera.generate\_ray()} \\
+Mudança de base entre espaço da câmera e espaço global & Implementado & \texttt{glm.lookAt()} + \texttt{inv\_view} em \texttt{Camera} \\
+Modelo local de Phong com ambiente, difusa e especular & Implementado & \texttt{PhongMaterial.direct\_lighting()}; \texttt{PhongMaterial.eval()} \\
+Sombra dura por teste de visibilidade & Implementado com generalização & \texttt{Scene.transmittance()} reduz-se ao caso binário para opacos e estende o slide para transparentes \\
+Luz pontual com síntese radiométrica do slide & Implementado com simplificação & \texttt{PointLight.radiance()} usa a convenção do enunciado sem queda explícita por $1/r^2$ \\
+Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt{Film.render()}; \texttt{Camera.generate\_ray()}; \texttt{Scene.trace\_ray()} \\
+\end{tblr}
+\end{table*}
+
+O quadro mostra que o núcleo conceitual do Slide 4 está efetivamente materializado no repositório, mas com duas qualificações importantes: a luz pontual segue a convenção simplificada do enunciado, e o teste de sombra já aparece no código em forma mais geral do que a apresentada no bloco introdutório dos slides.
   
 \section{Sobre a SBC Reviews}
 
