@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from pyglm import glm
 
 from ray_tracing_2.camera import Camera
-from ray_tracing_2.light import AmbientLight, PointLight
+from ray_tracing_2.light import AmbientLight, AreaLight, AreaLightSamplingMode, PointLight
 from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.scene import Scene
-from ray_tracing_2.shape import Box, Instance, Sphere
+from ray_tracing_2.shape import Box, Instance, Sphere, TriangleMesh
 
 
 @dataclass(frozen=True)
@@ -250,4 +250,153 @@ def add_req4_sampling_lights(scene: Scene) -> None:
   scene.lights.extend([
     PointLight(pos=glm.vec3(2.75, 5.45, 2.75), power=glm.vec3(0.85, 0.85, 0.85)),
     PointLight(pos=glm.vec3(4.75, 4.35, 4.55), power=glm.vec3(0.20, 0.20, 0.20)),
+  ])
+
+
+# ---------------------------------------------------------------------------
+# Requisitos de extensão
+# ---------------------------------------------------------------------------
+
+def _make_pyramid_vertices_faces() -> tuple[list[glm.vec3], list[tuple[int, int, int]]]:
+  """Vértices e faces de uma pirâmide de base quadrada posicionada no fundo da sala."""
+  vertices = [
+    glm.vec3(0.75, 0.02, 4.55),
+    glm.vec3(1.65, 0.02, 4.55),
+    glm.vec3(1.65, 0.02, 5.45),
+    glm.vec3(0.75, 0.02, 5.45),
+    glm.vec3(1.20, 1.22, 5.00),
+  ]
+  faces = [
+    (0, 1, 2), (0, 2, 3),
+    (0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4),
+  ]
+  return vertices, faces
+
+
+def add_rext_triangle_objects(scene: Scene, *, use_bvh: bool = False) -> None:
+  """R_ext triangulos: duas pirâmides TriangleMesh (Phong + reflexiva), com ou sem BVH local."""
+  accelerator = 'bvh' if use_bvh else None
+  vertices, faces = _make_pyramid_vertices_faces()
+
+  phong_mat = PhongMaterial(
+    ambient=glm.vec3(0.05, 0.03, 0.0),
+    diffuse=glm.vec3(0.70, 0.50, 0.20),
+    specular=glm.vec3(0.20),
+    shininess=32.0,
+  )
+  reflective_mat = ReflectiveMaterial(
+    ambient=glm.vec3(0.04),
+    diffuse=glm.vec3(0.20),
+    specular=glm.vec3(0.30),
+    shininess=96.0,
+    reflectivity=glm.vec3(0.78),
+  )
+
+  left_pyramid = TriangleMesh.from_vertices_faces(
+    vertices, faces, phong_mat,
+    name='phong_pyramid', accelerator=accelerator,
+  )
+  right_vertices = [glm.vec3(v.x + 2.6, v.y, v.z) for v in vertices]
+  right_pyramid = TriangleMesh.from_vertices_faces(
+    right_vertices, faces, reflective_mat,
+    name='reflective_pyramid', accelerator=accelerator,
+  )
+  scene.objects.extend([left_pyramid, right_pyramid])
+
+
+def add_rext_triangle_lights(scene: Scene) -> None:
+  scene.lights.extend([
+    PointLight(pos=glm.vec3(1.50, 5.35, 4.95), power=glm.vec3(0.90, 0.90, 0.90)),
+    PointLight(pos=glm.vec3(4.10, 5.35, 4.95), power=glm.vec3(0.60, 0.65, 0.70)),
+  ])
+
+
+def add_rext_area_light_objects(scene: Scene) -> None:
+  """R_ext luz de area: esferas e caixa Phong para observar sombras suaves."""
+  neutral = PhongMaterial(
+    ambient=glm.vec3(0.03),
+    diffuse=glm.vec3(0.72),
+    specular=glm.vec3(0.10),
+    shininess=24.0,
+  )
+  scene.objects.extend([
+    Sphere(center=glm.vec3(1.45, 0.65, 4.10), radius=0.65, material=neutral),
+    Sphere(center=glm.vec3(3.95, 0.65, 3.95), radius=0.65, material=neutral),
+    Box(
+      p_min=glm.vec3(2.25, 0.0, 1.75),
+      p_max=glm.vec3(3.20, 1.65, 2.65),
+      material=neutral,
+    ),
+  ])
+
+
+def add_rext_area_light(
+  scene: Scene,
+  *,
+  sampling_mode: str = AreaLightSamplingMode.STRATIFIED.value,
+  seed: int | None = None,
+  samples_u: int = 4,
+  samples_v: int = 4,
+) -> None:
+  """R_ext luz de area: retângulo no teto centrado na sala Cornell."""
+  scene.lights.append(
+    AreaLight(
+      p=glm.vec3(0.555, 5.54, 0.555),
+      e_u=glm.vec3(4.44, 0.0, 0.0),
+      e_v=glm.vec3(0.0, 0.0, 4.44),
+      power=glm.vec3(0.70, 0.70, 0.70),
+      samples_u=samples_u,
+      samples_v=samples_v,
+      sampling_mode=sampling_mode,
+      seed=seed,
+    )
+  )
+
+
+def add_rext_reflective_objects(scene: Scene) -> None:
+  """R_ext reflexivo: caixa e esfera com ReflectiveMaterial."""
+  mirror_grey = ReflectiveMaterial(
+    ambient=glm.vec3(0.04),
+    diffuse=glm.vec3(0.35),
+    specular=glm.vec3(0.40),
+    shininess=64.0,
+    reflectivity=glm.vec3(0.65),
+  )
+  mirror_red = ReflectiveMaterial(
+    ambient=glm.vec3(0.06, 0.0, 0.0),
+    diffuse=glm.vec3(0.60, 0.08, 0.08),
+    specular=glm.vec3(0.30),
+    shininess=80.0,
+    reflectivity=glm.vec3(0.50),
+  )
+  tall_box = Box(
+    p_min=glm.vec3(0.0, 0.0, 0.0),
+    p_max=glm.vec3(1.65, 3.30, 1.65),
+    material=mirror_grey,
+  )
+  scene.objects.extend([
+    Instance(tall_box, _translate_rotate_y(0.65, 0.0, 1.30, ry_deg=22.5)),
+    Sphere(center=glm.vec3(3.95, 0.65, 4.10), radius=0.65, material=mirror_red),
+  ])
+
+
+def add_rext_refractive_objects(scene: Scene) -> None:
+  """R_ext refrativo: esfera e pirâmide com TransparentMaterial (Snell + Beer-Lambert)."""
+  transparent_sphere = TransparentMaterial(ior=1.5, attenuation=glm.vec3(1.0))
+  transparent_glass = TransparentMaterial(ior=1.5, attenuation=glm.vec3(0.88, 0.94, 0.98))
+  vertices, faces = _make_pyramid_vertices_faces()
+  pyramid = TriangleMesh.from_vertices_faces(
+    vertices, faces, transparent_glass,
+    name='transparent_pyramid',
+  )
+  scene.objects.extend([
+    Sphere(center=glm.vec3(3.95, 0.65, 4.10), radius=0.65, material=transparent_sphere),
+    pyramid,
+  ])
+
+
+def add_rext_reflective_refractive_lights(scene: Scene) -> None:
+  scene.lights.extend([
+    PointLight(pos=glm.vec3(2.775, 5.40, 2.775), power=glm.vec3(0.90, 0.90, 0.90)),
+    PointLight(pos=glm.vec3(4.55, 4.85, 4.55), power=glm.vec3(0.30, 0.32, 0.35)),
   ])
