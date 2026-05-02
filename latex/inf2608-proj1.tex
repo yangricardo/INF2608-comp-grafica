@@ -26,8 +26,29 @@
 
 \setcitestyle{square}
 \newcommand{\slidescite}[2]{\citep[pp.~#2]{#1}}
-\newcommand{\pbrtsec}[1]{PBRT 4e~\citep[Se\c{c}\~ao~#1]{pharr2023pbrt}}
-\newcommand{\pbrtsecs}[1]{PBRT 4e~\citep[Se\c{c}\~oes~#1]{pharr2023pbrt}}
+\newcommand{\pbrtcontentsurl}{https://pbr-book.org/4ed/contents.html}
+\newcommand{\DeclarePBRTSectionURL}[2]{\expandafter\def\csname pbrturl@#1\endcsname{#2}}
+\newcommand{\pbrtsectionurl}[1]{%
+    \ifcsdef{pbrturl@#1}{\csname pbrturl@#1\endcsname}{\pbrtcontentsurl}%
+}
+\DeclarePBRTSectionURL{1.2}{https://pbr-book.org/4ed/Introduction/Photorealistic_Rendering_and_the_Ray-Tracing_Algorithm.html}
+\DeclarePBRTSectionURL{3.5}{https://pbr-book.org/4ed/Geometry_and_Transformations/Normals.html}
+\DeclarePBRTSectionURL{3.7}{https://pbr-book.org/4ed/Geometry_and_Transformations/Bounding_Boxes.html}
+\DeclarePBRTSectionURL{5.2}{https://pbr-book.org/4ed/Cameras_and_Film/Projective_Camera_Models.html}
+\DeclarePBRTSectionURL{7.3}{https://pbr-book.org/4ed/Primitives_and_Intersection_Acceleration/Bounding_Volume_Hierarchies.html}
+\DeclarePBRTSectionURL{8.1}{https://pbr-book.org/4ed/Sampling_and_Reconstruction/Sampling_Theory.html}
+\DeclarePBRTSectionURL{8.5}{https://pbr-book.org/4ed/Sampling_and_Reconstruction/Stratified_Sampler.html}
+\DeclarePBRTSectionURL{9.3}{https://pbr-book.org/4ed/Reflection_Models/Specular_Reflection_and_Transmission.html}
+\DeclarePBRTSectionURL{9.5}{https://pbr-book.org/4ed/Reflection_Models/Dielectric_BSDF.html}
+\DeclarePBRTSectionURL{11.2}{https://pbr-book.org/4ed/Volume_Scattering/Transmittance.html}
+\DeclarePBRTSectionURL{12.4}{https://pbr-book.org/4ed/Light_Sources/Area_Lights.html}
+\newcommand{\pbrtsec}[1]{\href{\pbrtsectionurl{#1}}{PBRT 4e, Se\c{c}\~ao~#1}~\citep{pharr2023pbrt}}
+\newcommand{\pbrtsecs}[1]{\href{\pbrtcontentsurl}{PBRT 4e, Se\c{c}\~oes~#1}~\citep{pharr2023pbrt}}
+\newcommand{\traceability}[1]{%
+    \begin{quote}
+    \footnotesize\textbf{Rastreabilidade no c\'odigo.}~#1
+    \end{quote}
+}
 
 \definecolor{engtitle}{rgb}{0.5,0.5,0.5}
 \definecolor{orcidlogo}{rgb}{0.37,0.48,0.13}
@@ -41,12 +62,14 @@
 % We disable hyperlinks by default with this line, to avoid the error "\pdfendlink ended up in different nesting level" while writing.
 
 \category{Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica}
-\title[Projeto 1 de INF2608]{Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica: Análise Técnico-Científica de um Ray Tracer Educacional em Alinhamento com os Slides 4--6 e PBRT 4e}
-\engtitle{\textcolor{engtitle}{INF2608 Course Project 1 -- Fundamentals of Computer Graphics: Technical-Scientific Analysis of an Educational Ray Tracer Aligned with Lecture Slides 4--6 and PBRT 4e}}
+\title[Análise Técnico-Científica de Ray Tracing]{Análise Técnico-Científica de uma Implementação de Ray Tracing}
+\engtitle{\textcolor{engtitle}{Technical-Scientific Analysis of a Ray Tracing Implementation}}
 
 \author[Yang Ricardo Barcellos Miranda]{
 \affil{\textbf{Yang Ricardo Barcellos Miranda}~[\href{mailto:ymiranda@inf.puc-rio.br}{\textit{ymiranda@inf.puc-rio.br}}]}
 }
+
+\institution{Pontifícia Universidade Católica do Rio de Janeiro - PUC-Rio}
 
 \begin{document}
 
@@ -54,17 +77,12 @@
 
 \maketitle
 
-\begin{mail}
-Trabalho entregue em 10/05/2026 como Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica.
-\end{mail}
-
-
 \begin{abstract-pt}
-Este artigo apresenta uma reconstrução técnico-científica do Projeto 1 de computação gráfica a partir de três eixos de evidência: os slides 4 a 6 da disciplina, os resumos auxiliares em Markdown e a implementação efetiva do repositório \path{src/ray_tracing_2}. O objetivo central não é apenas descrever o que um ray tracer educacional deveria fazer, mas verificar com precisão o que o código atual implementa, quais extensões além do núcleo mínimo já estão operacionais e em quais pontos a implementação permanece deliberadamente simplificada. A análise mostra aderência forte ao núcleo geométrico e fotométrico do Slide 4, incluindo raio paramétrico, interseções analíticas, câmera pinhole, sombreamento local de Phong e sombra direta. Também evidencia cobertura ampla do Slide 5, com supersampling estocástico, instanciação por transformações afins, luz de área, reflexão com Fresnel-Schlick, refração dielétrica com Lei de Snell, reflexão interna total, atenuação Beer-Lambert e generalização do raio de sombra para transmitância acumulada. Para o Slide 6, o artigo distingue explicitamente entre conteúdo teórico e funcionalidade implementada: o repositório entrega triângulos, \texttt{TriangleMesh} e uma BVH estática local para malhas, mas não implementa grade regular, SAH, compactação linear da BVH nem acelerador global de cena. O trabalho também documenta a infraestrutura experimental do projeto, incluindo CLI padronizada, separação explícita entre amostragem do filme e da luz, geração de artefatos persistentes de render e diagramas PlantUML renderizados como camada adicional de rastreabilidade. Ao final, o artigo argumenta que a principal contribuição do projeto não é a cobertura integral de todo o arco teórico das aulas, mas a coerência entre hipótese geométrica ou física, estrutura algorítmica e evidência observável nas imagens e metadados produzidos.
+Este artigo apresenta uma análise técnico-científica de uma implementação de ray tracing desenvolvida no Projeto 1 da disciplina de INF2608. O objetivo é verificar, a partir do código efetivamente executável, quais componentes geométricos, fotométricos e amostrais foram materializados, como eles se relacionam com os materiais da disciplina e em que medida a implementação se aproxima das referências selecionadas de PBRT 4e. A análise evidencia um núcleo sólido de câmera pinhole, raio paramétrico, interseções analíticas, sombreamento local de Phong e sombras diretas, além de extensões como supersampling, instanciação afim, luz de área, reflexão com Fresnel-Schlick, refração com Lei de Snell, reflexão interna total, Beer-Lambert e transmitância acumulada em raios de sombra. Para triângulos e aceleração, o artigo distingue cuidadosamente entre o conteúdo teórico e o que está implementado: há suporte a \texttt{Triangle}, \texttt{TriangleMesh} e uma BVH estática local para malhas, mas não há um acelerador global de cena. O trabalho também discute a infraestrutura experimental do projeto, com CLI padronizada, persistência de artefatos de render e diagramas que reforçam a rastreabilidade entre formulação teórica, estrutura algorítmica e evidência visual.
 \end{abstract-pt}
 
 \begin{abstract-en}
-This paper presents a technical-scientific reconstruction of the first computer graphics project based on three evidence layers: lecture slides 4 to 6, auxiliary Markdown notes, and the effective implementation in the \path{src/ray_tracing_2} repository. Rather than merely restating what an educational ray tracer should do, the article verifies what the current code actually implements, which extensions beyond the minimum core are already operational, and where the implementation remains deliberately simplified. The analysis shows strong adherence to the geometric and photometric core of Slide 4, including parametric rays, analytic intersections, a pinhole camera, local Phong shading, and direct shadows. It also shows broad coverage of Slide 5, with stochastic supersampling, affine instancing, area lights, Fresnel-Schlick reflection, dielectric refraction with Snell's law, total internal reflection, Beer-Lambert attenuation, and the generalization of shadow rays into accumulated transmittance. For Slide 6, the paper explicitly separates theoretical content from implemented functionality: the repository delivers triangles, \texttt{TriangleMesh}, and a static local BVH for meshes, but it does not implement regular grids, SAH, linear BVH compaction, or a global scene accelerator. The article also documents the project's experimental infrastructure, including a standardized CLI, an explicit separation between film sampling and light sampling, persistent render artifacts, and rendered PlantUML diagrams as an additional traceability layer. The main conclusion is that the project's scientific value lies less in complete theoretical coverage and more in the consistency between geometric or physical hypotheses, algorithmic structure, and observable evidence in the generated images and metadata.
+This paper presents a technical-scientific analysis of a ray tracing implementation developed for the first INF2608 course project. Its main goal is to verify, from the executable code itself, which geometric, photometric, and sampling components were effectively implemented, how they relate to the course material, and to what extent the result aligns with selected PBRT 4e references. The analysis shows a solid core built around a pinhole camera, parametric rays, analytic intersections, local Phong shading, and direct shadows, as well as extensions such as supersampling, affine instancing, area lights, Fresnel-Schlick reflection, dielectric refraction with Snell's law, total internal reflection, Beer-Lambert attenuation, and accumulated transmittance for shadow rays. For triangles and acceleration, the paper carefully distinguishes between theoretical coverage and implemented functionality: the codebase supports \texttt{Triangle}, \texttt{TriangleMesh}, and a static local BVH for meshes, but not a global scene accelerator. The article also discusses the project's experimental infrastructure, including a standardized CLI, persistent render artifacts, and diagrams that strengthen the traceability between theoretical formulation, algorithmic structure, and visual evidence.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -80,45 +98,33 @@ ray tracing, computer graphics, PBRT, BVH, sampling, physically inspired renderi
 \end{dates}
 
 \end{frontmatter}
-\section{Escopo, método e critério de confiança}
+\section{Introdução}
 \label{sec:escopo}
 
-Este relatório reconstrói, com prioridade epistemológica explícita, o conteúdo dos Slides 4, 5 e 6 da disciplina~\citep{inf2608slides04,inf2608slides05,inf2608slides06}, usando os resumos em \path{materiais/traçado_de_raios/*.md} apenas como apoio de leitura e o código em \path{src/ray_tracing_2/}, tomado aqui como artefato primário de implementação do repositório do projeto~\citep{inf2608projectrepo}. A documentação em \path{docs/*.md} foi usada apenas como apoio secundário de estrutura e nunca como autoridade teórica principal.
+Este artigo apresenta uma análise técnico-científica da implementação de ray tracing disponível no repositório do Projeto 1~\citep{inf2608projectrepo}. O objeto principal da análise é o código em \path{src/ray_tracing_2/}, confrontado com os tópicos dos materiais da disciplina~\citep{inf2608slides04,inf2608slides05,inf2608slides06} e com referências selecionadas do PBRT 4e, sobretudo \pbrtsecs{1.2, 3.5, 3.7, 5.2, 7.3, 8.1, 8.5, 9.3, 9.5, 11.2 e 12.4}.
 
-Para separar melhor bibliografia de rastreabilidade interna, os slides da disciplina, PBRT 4e e o repositório do projeto aparecem como referências formais ao longo do texto. Já as menções a arquivos específicos do código seguem a convenção caminho relativo + símbolo + linha, usada apenas como âncora de inspeção local dentro do próprio repositório e não como substituto da bibliografia.
+O objetivo não é recontar genericamente o que um ray tracer deveria fazer, mas verificar o que esta implementação entrega de forma observável, quais decisões algorítmicas sustentam cada efeito visual e em que pontos o projeto simplifica ou parcializa o conteúdo teórico. A leitura adotada separa três camadas: a formulação geométrica e física discutida em aula, a tradução algorítmica efetivamente materializada no repositório e as lacunas entre a teoria de referência e o escopo implementado.
 
-O objetivo não é apenas resumir os slides, mas separar três camadas que frequentemente se confundem em relatórios de implementação:
+Ao longo do texto, os slides da disciplina, o PBRT 4e e o repositório aparecem como referências formais. Já a rastreabilidade interna do código é apresentada por caminho relativo, símbolo e linha, de modo a permitir inspeção local das decisões relevantes sem confundir documentação bibliográfica com evidência de implementação.
 
-\begin{enumerate}
-    \item a formulação geométrica e física apresentada nos slides;
-    \item a tradução algorítmica que o repositório efetivamente materializa;
-    \item as lacunas entre o conteúdo didático e a implementação entregue.
-\end{enumerate}
-
-Como fonte externa, foi usado somente o conteúdo de PBRT 4e permitido pelo enunciado, principalmente os trechos sobre câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. A edição consultada foi a quarta edição online de PBRT~\citep{pharr2023pbrt}, disponível em \url{https://pbr-book.org/4ed/contents}. Em particular, foram úteis as Seções 1.2, 3.5, 3.7, 5.2, 7.3, 8.1, 8.5, 9.3, 9.5, 11.2 e 12.4.
-
-\section{Plano Consolidado do Relatório}
-\label{sec:plano-relatorio}
+A organização da análise segue quatro frentes complementares:
 
 \begin{enumerate}
-    \item Reconstituir o núcleo do Slide 4: raio paramétrico, interseções básicas, câmera pinhole, Phong, luz pontual e sombra dura.
-    \item Explicitar a base de álgebra linear do projeto: mudança de base, espaços local/global, vetores normais e transformações homogêneas.
-    \item Descrever as extensões do Slide 5: supersampling, instanciação, luz de área, AABB/slabs, recursão, Fresnel-Schlick, Snell, reflexão interna total e Beer-Lambert.
-    \item Mostrar como a implementação transforma o teste de sombra binário do Slide 4 em transmitância acumulada no Slide 5.
-    \item Reconstituir o Slide 6 em três níveis: triângulo isolado, malha triangulada e estruturas de aceleração.
-    \item Distinguir com precisão o que o repositório implementa do que o Slide 6 descreve apenas teoricamente.
-    \item Ancorar cada bloco com referências de páginas dos slides e linhas do código atual.
-    \item Fechar com uma validação experimental breve, usando renderizações já existentes no repositório.
-    \item Consolidar, ao fim, as limitações atuais da implementação frente aos materiais da disciplina e ao escopo do enunciado principal.
+    \item reconstituir o núcleo geométrico e fotométrico do traçador, com raio paramétrico, interseções, câmera pinhole, Phong e sombras;
+    \item examinar as extensões ópticas e amostrais, incluindo supersampling, instanciação, luz de área, reflexão, refração e transmitância;
+    \item avaliar a geometria triangular e a aceleração local por BVH, distinguindo implementação real de cobertura apenas teórica;
+    \item consolidar experimentos breves, limitações atuais, diagramas de apoio e uma avaliação final do que a implementação entrega.
 \end{enumerate}
 
-\section{Slide 4: Núcleo Geométrico e Fotométrico do Traçador}
+Como fonte externa, foi usado apenas o conteúdo de PBRT 4e permitido pelo enunciado, com ênfase em câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. A edição consultada foi a quarta edição online de PBRT~\citep{pharr2023pbrt}.
+
+\section{Núcleo Geométrico e Fotométrico do Traçador}
 \label{sec:slide4}
 
-\subsection{Conceitos Estruturantes do Slide 4}
+\subsection{Conceitos Estruturantes do Núcleo de Referência}
 \label{sec:slide4-conceitos}
 
-O Slide 4 organiza-se em torno de um conjunto pequeno de conceitos que estrutura todo o traçador de raios.
+O material introdutório de traçado de raios~\citep{inf2608slides04} organiza-se em torno de um conjunto pequeno de conceitos que estrutura todo o traçador de raios.
 
 \begin{enumerate}
     \item \textbf{Raio paramétrico e visibilidade (pp. 7-9).} A formulação $\mathbf{r}(t)=\mathbf{o}+t\,\hat{\mathbf{d}}$ reduz a linha de visada a uma reta orientada; $t$ funciona como distância assinada ou paramétrica ao longo do feixe, e a visibilidade do ponto observado é determinada pelo menor $t>0$ compatível com uma superfície.
@@ -143,7 +149,7 @@ em que $\mathbf{o}$ é a origem, $\hat{\mathbf{d}}$ é a direção normalizada e
 
 O repositório segue exatamente essa organização. O raio é carregado por \texttt{Ray}, enquanto \texttt{Hit} armazena a melhor interseção conhecida até o momento e também codifica \texttt{front\_face} e \texttt{backfacing}. Essa distinção, que no Slide 4 serve para consistência geométrica da normal, torna-se decisiva no Slide 5 para distinguir entrada e saída de meios refrativos. A rotina \texttt{Scene.compute\_intersection()} preserva o padrão clássico de \emph{closest hit}: percorre os objetos, atualiza um único registro acumulador e retorna apenas a interseção frontal mais próxima.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/hit.py} (\texttt{Hit}, l. 11; \texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24; \texttt{trace\_ray()}, l. 102).
+\traceability{\path{src/ray_tracing_2/hit.py} (\texttt{Hit}, l. 11; \texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24; \texttt{trace\_ray()}, l. 102).}
 
 Referência complementar em \pbrtsecs{1.2 e 3.5}.
 
@@ -172,7 +178,7 @@ que, após substituição do raio, gera uma quadrática $at^2+bt+c=0$ cujo discr
 
 O código espelha esse raciocínio. \texttt{Plane.intersect()} resolve o plano por produto escalar; \texttt{Sphere.intersect()} resolve a quadrática e guarda a menor raiz positiva; \texttt{Scene.offset\_point()} empurra a origem dos raios secundários ao longo da normal geométrica com \texttt{ray\_epsilon = 0.001}, evitando \emph{shadow acne} em sombra, reflexão e refração. O Slide 4 apresenta essa ideia como tolerância numérica; o repositório a aplica de forma centralizada, o que é arquiteturalmente melhor do que espalhar pequenos limiares por todos os materiais.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Sphere}, l. 17; \texttt{Sphere.intersect()}, l. 23; \texttt{Plane}, l. 54; \texttt{Plane.intersect()}, l. 60), \path{src/ray_tracing_2/scene.py} (\texttt{offset\_point()}, l. 33).
+\traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Sphere}, l. 17; \texttt{Sphere.intersect()}, l. 23; \texttt{Plane}, l. 54; \texttt{Plane.intersect()}, l. 60), \path{src/ray_tracing_2/scene.py} (\texttt{offset\_point()}, l. 33).}
 
 Referência complementar em \pbrtsec{1.2}.
 
@@ -193,7 +199,7 @@ Essa distinção também define uma limitação importante do projeto: todos os 
 
 Em \texttt{film.py}, \texttt{get\_sample()} e \texttt{render()} deixam claro que a imagem final é construída como média de amostras por pixel. Mesmo quando o caso básico usa apenas uma amostra central, a interface já está preparada para supersampling estocástico.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/camera.py} (\texttt{Camera}, l. 6; \texttt{\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{Film}, l. 20; \texttt{get\_sample()}, l. 54; \texttt{render()}, l. 108), \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25).
+\traceability{\path{src/ray_tracing_2/camera.py} (\texttt{Camera}, l. 6; \texttt{\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{Film}, l. 20; \texttt{get\_sample()}, l. 54; \texttt{render()}, l. 108), \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25).}
 
 Referência complementar em \pbrtsec{5.2}.
 
@@ -206,15 +212,15 @@ O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, 
 
 Há, contudo, uma nuance importante entre a física dos slides e a convenção da implementação: os slides apresentam a lei usual de decaimento geométrico de uma fonte pontual, proporcional a $1/r^2$, mas \texttt{PointLight.radiance()} não aplica esse fator. O comentário do código explicita a razão: o projeto preserva a convenção do enunciado em que \texttt{power} é tratado como radiância constante da fonte. Isso não é um erro, mas uma simplificação de modelagem que precisa ser declarada no relatório para evitar falsa equivalência com uma formulação radiométrica completa.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/light.py} (\texttt{PointLight}, l. 42; \texttt{PointLight.radiance()}, l. 46), \path{src/ray_tracing_2/material.py} (\texttt{PhongMaterial}, l. 37; \texttt{direct\_lighting()}, l. 45; \texttt{eval()}, l. 72), \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/main.py} (\texttt{Sphere}, l. 54; \texttt{Plane}, l. 55; \texttt{PointLight}, l. 59).
+\traceability{\path{src/ray_tracing_2/light.py} (\texttt{PointLight}, l. 42; \texttt{PointLight.radiance()}, l. 46), \path{src/ray_tracing_2/material.py} (\texttt{PhongMaterial}, l. 37; \texttt{direct\_lighting()}, l. 45; \texttt{eval()}, l. 72), \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/main.py} (\texttt{Sphere}, l. 54; \texttt{Plane}, l. 55; \texttt{PointLight}, l. 59).}
 
 Referência complementar em \pbrtsec{1.2}.
 
-\subsection{Quadro de aderência entre Slide 4 e implementação}
+\subsection{Quadro de aderência do núcleo geométrico e fotométrico}
 \label{sec:slide4-quadro}
 
 \begin{table*}[!ht]
-\caption{Quadro de aderência entre o Slide 4 e a implementação atual.}
+\caption{Quadro de aderência entre o núcleo geométrico-fotométrico de referência e a implementação atual.}
 \label{tab:slide4-aderencia}
 \centering
 \begin{tblr}{
@@ -223,7 +229,7 @@ colspec={Q[l,wd=0.24\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
 row{1}={font=\bfseries},
 rows={valign=t}
 }
-Conceito do Slide 4 & Situação no repositório & Evidência \\
+Conceito de referência & Situação no repositório & Evidência \\
 Raio paramétrico e registro de hit & Implementado & \texttt{Ray}; \texttt{Hit}; \texttt{Scene.compute\_intersection()} \\
 Interseção raio-plano & Implementado & \texttt{Plane.intersect()} \\
 Interseção raio-esfera & Implementado & \texttt{Sphere.intersect()} \\
@@ -237,9 +243,9 @@ Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt
 \end{tblr}
 \end{table*}
 
-O quadro mostra que o núcleo conceitual do Slide 4 está efetivamente materializado no repositório, mas com duas qualificações importantes: a luz pontual segue a convenção simplificada do enunciado, e o teste de sombra já aparece no código em forma mais geral do que a apresentada no bloco introdutório dos slides.
+O quadro mostra que o núcleo conceitual discutido no material introdutório~\citep{inf2608slides04} está efetivamente materializado no repositório, mas com duas qualificações importantes: a luz pontual segue a convenção simplificada do enunciado, e o teste de sombra já aparece no código em forma mais geral do que a apresentada no bloco introdutório dos slides.
   
-\section{Slide 5: Extensões Ópticas, Amostrais e de Transformação}
+\section{Extensões Ópticas, Amostrais e de Transformação}
 \label{sec:slide5}
 
 \subsection{Antialiasing como integração estocástica sobre o pixel}
@@ -255,7 +261,7 @@ convertendo aliasing estruturado em ruído de alta frequência. Os slides enfati
 
 O repositório implementa duas versões dessa ideia em \texttt{Film.get\_samples\_for\_pixel()}: \texttt{jittered} e \texttt{stratified}. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com \pbrtsec{8.5}: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Após a refatoração recente, a definição concreta desses padrões 2D foi extraída para \path{src/ray_tracing_2/sampling.py}, de modo que \texttt{film.py} passou a atuar como camada de interpretação geométrica do domínio do pixel, e não mais como o único lugar onde os padrões são definidos. Isso fortalece a correspondência entre a teoria de amostragem do Slide 5 e a arquitetura do código: há um mesmo quadrado unitário amostral, mas cada domínio o reinterpreta de forma física distinta.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 61; \texttt{render()}, l. 112).
+\traceability{\path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 61; \texttt{render()}, l. 112).}
 
 Referência complementar em \pbrtsecs{8.1 e 8.5}.
 
@@ -272,7 +278,7 @@ preservando a ortogonalidade com o plano tangente após transformações afins g
 
 \texttt{Instance.intersect()} implementa exatamente esse fluxo. O raio é mapeado com \texttt{m\_inv}, a interseção é resolvida no espaço local da forma base e, se houver hit, a posição volta ao mundo pela matriz direta. A normal, porém, usa \texttt{m\_inv\_t}, isto é, a inversa transposta. Essa é a consequência algébrica correta da preservação da ortogonalidade entre normal e plano tangente. O relatório precisa explicitar esse ponto porque ele é um dos poucos trechos em que a implementação realmente depende de um fato sutil de álgebra linear, e não apenas de manipulação vetorial elementar.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Instance}, l. 253; \texttt{Instance.intersect()}, l. 262), \path{src/ray_tracing_2/main_box.py} (\texttt{render()}, l. 63), \path{src/ray_tracing_2/main_triangles.py} (\texttt{render()}, l. 100).
+\traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Instance}, l. 253; \texttt{Instance.intersect()}, l. 262), \path{src/ray_tracing_2/main_box.py} (\texttt{render()}, l. 63), \path{src/ray_tracing_2/main_triangles.py} (\texttt{render()}, l. 100).}
 
 Referência complementar em \pbrtsec{3.5}.
 
@@ -285,7 +291,7 @@ Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor c
 
 Essa dualidade precisa ser registrada: o projeto não usa um único modelo coerente para todas as luzes. Ele usa, deliberadamente, a convenção do enunciado para \texttt{PointLight} e uma aproximação mais geométrica para \texttt{AreaLight}.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}, l. 80; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133; \texttt{radiance()}, l. 173), \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 31; criação da \texttt{AreaLight}, l. 59-66).
+\traceability{\path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}, l. 80; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133; \texttt{radiance()}, l. 173), \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 31; criação da \texttt{AreaLight}, l. 59-66).}
 
 Referência complementar em \pbrtsec{12.4}.
 
@@ -296,7 +302,7 @@ O Slide 5 introduz a caixa alinhada aos eixos tanto como primitiva quanto como f
 
 O repositório usa essa ideia em dois níveis. Primeiro, \texttt{Box.intersect()} implementa a caixa como primitiva visível da cena. Segundo, \texttt{AABB.intersects()} em \texttt{triangle\_bvh.py} reutiliza o mesmo princípio como teste de poda para a BVH de triângulos. Esse reuso é conceitualmente importante: o Slide 5 ensina uma primitiva; o Slide 6 reaproveita exatamente a mesma álgebra como volume de contenção.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Box}, l. 74; \texttt{Box.intersect()}, l. 88), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}, l. 47; \texttt{intersects()}, l. 60).
+\traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Box}, l. 74; \texttt{Box.intersect()}, l. 88), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}, l. 47; \texttt{intersects()}, l. 60).}
 
 Referência complementar em \pbrtsec{3.7}.
 
@@ -307,7 +313,7 @@ O salto conceitual mais importante do Slide 5 é que o pipeline do Slide 4 não 
 
 O repositório codifica essa extensão com clareza. \texttt{Scene.trace\_ray()} continua mínimo: encontra o \texttt{Hit} e delega ao material. A recursão é controlada por \texttt{Scene.can\_spawn\_ray()}, que impõe profundidade máxima finita. Isso é coerente tanto numericamente quanto fisicamente: cada salto adicional é ponderado por refletância ou transmitância menores que 1, de modo que a contribuição tende a decair. A limitação de profundidade, portanto, é ao mesmo tempo um controle de custo e uma aproximação de truncamento de série.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41; \texttt{trace\_ray()}, l. 102).
+\traceability{\path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41; \texttt{trace\_ray()}, l. 102).}
 
 Referência complementar em \pbrtsec{1.2}.
 
@@ -326,7 +332,7 @@ como aproximação de baixo custo das equações de Fresnel para interfaces suav
 
 Há ainda uma nuance angular importante. O cosseno usado na aproximação de Schlick vem da inclinação entre a direção de observação e a normal local, isto é, de um termo do tipo \texttt{dot(v, n)}, e não de um ``ângulo crítico'' pré-computado da interface. Essa escolha é consistente com a forma clássica de Schlick para refletância direcional, mas reforça o caráter aproximado do material: a implementação melhora a dependência angular da reflexão sem migrar para um modelo microfacet completo.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial}, l. 84; \texttt{eval()}, l. 101).
+\traceability{\path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial}, l. 84; \texttt{eval()}, l. 101).}
 
 Referência complementar em \pbrtsec{9.3}.
 
@@ -351,7 +357,7 @@ O uso de \texttt{front\_face} e \texttt{backfacing}, calculado em \texttt{Hit.se
 
 No caso da iluminação direta através de transparentes, \texttt{TransparentMaterial.shadow\_transmittance()} aplica Beer-Lambert apenas quando o raio de sombra deixa o meio, isto é, no caso \texttt{backfacing = True}. Essa escolha é coerente com a hipótese de meio homogêneo adotada pelo projeto: o comprimento óptico relevante já foi acumulado em \texttt{hit.t} no segmento interno do material, de modo que atenuar também na entrada equivaleria a dupla contagem. Trata-se, ainda assim, de uma simplificação relevante: o modelo opera por canal RGB, sem dispersão espectral contínua e sem heterogeneidade volumétrica interna. Em termos de física computacional, isso equivale a resolver um meio homogêneo com profundidade óptica escalar por canal, e não um meio espectral completo.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/hit.py} (\texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/material.py} (\texttt{TransparentMaterial}, l. 137; \texttt{shadow\_transmittance()}, l. 167; \texttt{eval()}, l. 186).
+\traceability{\path{src/ray_tracing_2/hit.py} (\texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/material.py} (\texttt{TransparentMaterial}, l. 137; \texttt{shadow\_transmittance()}, l. 167; \texttt{eval()}, l. 186).}
 
 Referência complementar em \pbrtsecs{9.3, 9.5 e 11.2}.
 
@@ -370,15 +376,15 @@ Em termos computacionais, é uma iteração sobre hits sucessivos até a fonte.
 
 Esse método é particularmente importante porque mostra a coerência arquitetural do projeto: o mesmo mecanismo de interseção da cena é reutilizado tanto para visibilidade direta quanto para óptica recursiva.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/material.py} (\texttt{Material.shadow\_transmittance()}, l. 30; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).
+\traceability{\path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/material.py} (\texttt{Material.shadow\_transmittance()}, l. 30; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).}
 
 Referência complementar em \pbrtsec{11.2}.
 
-\subsection{Quadro de aderência entre Slide 5 e implementação}
+\subsection{Quadro de aderência das extensões ópticas e amostrais}
 \label{sec:slide5-quadro}
 
 \begin{table*}[!ht]
-\caption{Quadro de aderência entre o Slide 5 e a implementação atual.}
+\caption{Quadro de aderência entre as extensões ópticas e amostrais de referência e a implementação atual.}
 \label{tab:slide5-aderencia}
 \centering
 \begin{tblr}{
@@ -387,7 +393,7 @@ colspec={Q[l,wd=0.25\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
 row{1}={font=\bfseries},
 rows={valign=t}
 }
-Conceito do Slide 5 & Situação no repositório & Evidência \\
+Conceito de referência & Situação no repositório & Evidência \\
 Antialiasing por múltiplas amostras por pixel & Implementado com extensão & \texttt{sampling.uniform\_samples\_2d()}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()}; \texttt{Film.render()} \\
 Jitter subpixel aleatório & Implementado & \texttt{SamplingMode.JITTERED}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
 Amostragem estratificada & Implementado como extensão & \texttt{SamplingMode.STRATIFIED}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
@@ -403,9 +409,9 @@ Generalização do shadow ray para transmitância acumulada & Implementado & \te
 \end{tblr}
 \end{table*}
 
-O quadro mostra que o Slide 5 é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com padrão configurável (\texttt{regular}, \texttt{uniform}, \texttt{stratified}), e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
+O quadro mostra que o conjunto de extensões ópticas e amostrais discutido nos slides~\citep{inf2608slides05} é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com padrão configurável (\texttt{regular}, \texttt{uniform}, \texttt{stratified}), e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
 
-\section{Slide 6: Triângulos e Estruturas de Aceleração}
+\section{Triângulos e Estruturas de Aceleração}
 \label{sec:slide6}
 
 \subsection{Triângulo, área orientada e coordenadas baricêntricas}
@@ -427,7 +433,7 @@ A importância disso vai além da geometria elementar: coordenadas baricêntrica
 
 No código, \texttt{Triangle} pré-computa \texttt{e1}, \texttt{e2} e a normal geométrica orientada a partir de \texttt{cross(e1, e2)}. A normal degenerada é rejeitada com exceção explícita, o que evita triângulos colineares ou nulos no carregamento da malha.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Triangle}, l. 144).
+\traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Triangle}, l. 144).}
 
 \subsection{Interseção raio-triângulo por Möller-Trumbore}
 \label{sec:slide6-moller}
@@ -442,7 +448,7 @@ via determinantes e produtos mistos, e a solução só é válida se $u\ge 0$, $
 
 \texttt{Triangle.intersect()} implementa exatamente essa forma operacional: \texttt{pvec}, \texttt{det}, \texttt{inv\_det}, \texttt{u}, \texttt{v}, \texttt{qvec} e \texttt{t\_candidate}. Em termos geométricos, o algoritmo evita construir explicitamente o plano do triângulo; em termos computacionais, ele é compacto e numericamente robusto para o porte do projeto. O teste \texttt{abs(det) < eps} trata o caso de quase paralelismo entre raio e plano do triângulo.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Triangle.intersect()}, l. 158).
+\traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Triangle.intersect()}, l. 158).}
 
 \subsection{Malha triangulada e carregamento de geometria}
 \label{sec:slide6-malha}
@@ -451,12 +457,12 @@ Os slides seguem do triângulo isolado para a malha: tabela de vértices, tabela
 
 Essa homogeneidade é importante: a malha não cria um segundo sistema de renderização. Ela é apenas outra fonte de primitivas compatíveis com \texttt{Scene.compute\_intersection()}. A aceleração, quando presente, muda custo computacional, não semântica geométrica do hit.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{TriangleMesh}, l. 188; \texttt{from\_vertices\_faces()}, l. 221), \path{src/ray_tracing_2/main_triangles.py} (\texttt{\_triangle\_mesh\_from\_spec()}, l. 39; chamada a \texttt{TriangleMesh.from\_vertices\_faces()}, l. 68).
+\traceability{\path{src/ray_tracing_2/shape.py} (\texttt{TriangleMesh}, l. 188; \texttt{from\_vertices\_faces()}, l. 221), \path{src/ray_tracing_2/main_triangles.py} (\texttt{\_triangle\_mesh\_from\_spec()}, l. 39; chamada a \texttt{TriangleMesh.from\_vertices\_faces()}, l. 68).}
 
 \section{Experimentos Breves}
 \label{sec:experimentos}
 
-\subsection{Cena mínima do Slide 4}
+\subsection{Cena mínima do núcleo geométrico}
 \label{sec:experimentos-minima}
 
 Arquivo âncora: \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25; esfera, l. 54; plano, l. 55; luz pontual, l. 59).
@@ -475,7 +481,7 @@ Esta cena valida o núcleo mais simples do projeto: câmera pinhole, uma primiti
 
 Arquivo âncora: \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 23; criação da \texttt{AreaLight}, l. 47-48).
 
-Ao substituir a fonte pontual por uma fonte retangular amostrada, a borda de sombra deixa de ser descontínua e passa a ocupar uma região de penumbra. Esta imagem confirma empiricamente a leitura teórica do Slide 5: a luz de área é uma integral sobre um emissor estendido aproximada por soma finita de amostras.
+Ao substituir a fonte pontual por uma fonte retangular amostrada, a borda de sombra deixa de ser descontínua e passa a ocupar uma região de penumbra. Esta imagem confirma empiricamente a leitura teórica sobre luz de área~\slidescite{inf2608slides05}{14--23}: a luz de área é uma integral sobre um emissor estendido aproximada por soma finita de amostras.
 
 \begin{figure}[!ht]
 \centering
@@ -503,7 +509,7 @@ Esta cena é importante menos pelo efeito óptico avançado e mais pela infraest
 
 Arquivo âncora: \path{src/ray_tracing_2/main_triangles.py} (\texttt{\_triangle\_mesh\_from\_spec()}, l. 39; \texttt{TriangleMesh.from\_vertices\_faces()}, l. 68; \texttt{render()}, l. 100; luzes, l. 179).
 
-Esta é a evidência experimental mais importante para o Slide 6. O arquivo \path{outputs/main_triangles_20260424_233034/properties.md} registra 5 vértices, 6 faces trianguladas, acelerador \texttt{bvh}, \texttt{bvh\_leaf\_size = 2}, 7 nós, 4 folhas e profundidade máxima 3. Portanto, o relatório pode afirmar com segurança que a malha triangular e a BVH local estão de fato ativas na renderização dessa cena específica.
+Esta é a evidência experimental mais importante para a parte de triângulos e aceleração~\slidescite{inf2608slides06}{3--36}. O arquivo \path{outputs/main_triangles_20260424_233034/properties.md} registra 5 vértices, 6 faces trianguladas, acelerador \texttt{bvh}, \texttt{bvh\_leaf\_size = 2}, 7 nós, 4 folhas e profundidade máxima 3. Portanto, o artigo pode afirmar com segurança que a malha triangular e a BVH local estão de fato ativas na renderização dessa cena específica.
 
 \begin{figure}[!ht]
 \centering
@@ -517,7 +523,7 @@ Esta é a evidência experimental mais importante para o Slide 6. O arquivo \pat
 
 Arquivo âncora: \path{src/ray_tracing_2/cornell_box_pyramid.py} (\texttt{render()}, l. 50; construção das duas \texttt{TriangleMesh}, l. 167 e l. 174; luzes, l. 205 e l. 224).
 
-Esta cena combina os dois eixos mais avançados do projeto: materiais recursivos do Slide 5 e geometria triangulada do Slide 6. O arquivo \path{outputs/cornell_box_pyramid_20260425_003203/properties.md} confirma a presença de duas malhas triangulares distintas, uma transparente e outra refletiva, embutidas em uma cena fechada com múltiplas luzes. Isso a torna a melhor demonstração integrada de que triângulos, reflexão e refração não são módulos isolados, mas participam do mesmo pipeline de visibilidade e transporte local e recursivo.
+Esta cena combina os dois eixos mais avançados do projeto: materiais recursivos~\slidescite{inf2608slides05}{26--35} e geometria triangulada~\slidescite{inf2608slides06}{3--14}. O arquivo \path{outputs/cornell_box_pyramid_20260425_003203/properties.md} confirma a presença de duas malhas triangulares distintas, uma transparente e outra refletiva, embutidas em uma cena fechada com múltiplas luzes. Isso a torna a melhor demonstração integrada de que triângulos, reflexão e refração não são módulos isolados, mas participam do mesmo pipeline de visibilidade e transporte local e recursivo.
 
 \begin{figure}[!ht]
 \centering
@@ -557,12 +563,58 @@ python -m ray\_tracing\_2.generate\_scene --input inputs/example\_scene.json\\
 \hspace*{1em}--width 800 --height 600 --spp 1
 \end{quote}
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/cli.py} (\texttt{build\_parser()}, l. 14; \texttt{add\_sampling\_arguments()}, l. 37; \texttt{add\_light\_sampling\_argument()}, l. 52), \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}, l. 17; \texttt{get\_samples\_for\_pixel()}, l. 61), \path{src/ray_tracing_2/light.py} (\texttt{AreaLightSamplingMode}, l. 45; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133), \path{src/ray_tracing_2/main.py} (\texttt{build\_cli\_parser()}, l. 79), \path{src/ray_tracing_2/main_area_light.py} (\texttt{build\_cli\_parser()}, l. 89), \path{src/ray_tracing_2/main_triangles.py} (\texttt{build\_cli\_parser()}, l. 202) e \path{src/ray_tracing_2/generate_scene.py} (\texttt{build\_cli\_parser()}, l. 122).
+\traceability{\path{src/ray_tracing_2/cli.py} (\texttt{build\_parser()}, l. 14; \texttt{add\_sampling\_arguments()}, l. 37; \texttt{add\_light\_sampling\_argument()}, l. 52), \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}, l. 17; \texttt{get\_samples\_for\_pixel()}, l. 61), \path{src/ray_tracing_2/light.py} (\texttt{AreaLightSamplingMode}, l. 45; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133), \path{src/ray_tracing_2/main.py} (\texttt{build\_cli\_parser()}, l. 79), \path{src/ray_tracing_2/main_area_light.py} (\texttt{build\_cli\_parser()}, l. 89), \path{src/ray_tracing_2/main_triangles.py} (\texttt{build\_cli\_parser()}, l. 202) e \path{src/ray_tracing_2/generate_scene.py} (\texttt{build\_cli\_parser()}, l. 122).}
 
-\subsection{Diagramas renderizados como camada adicional de rastreabilidade}
+\section{Limitações Atuais e Delimitação de Escopo}
+\label{sec:limitacoes}
+
+\subsection{Estruturas de aceleração ausentes ou apenas parciais}
+\label{sec:limitacoes-aceleracao}
+
+À luz do Slide 6~\citep{inf2608slides06}, a implementação atual cobre apenas uma fração do espaço de técnicas apresentado nos slides. O repositório não implementa grade regular, refinamento por SAT nem percorrimento incremental célula a célula~\slidescite{inf2608slides06}{15--21}; tampouco implementa SAH, compactação linear da BVH ou um agregador global de cena~\slidescite{inf2608slides06}{22--36}. O que existe de fato é uma BVH estática local a cada \texttt{TriangleMesh}, suficiente para reduzir o custo interno da malha, mas insuficiente para substituir uma estrutura de aceleração global do ray tracer.
+
+Essa distinção é importante porque o custo no topo da cena continua linear. \texttt{Scene.compute\_intersection()} percorre \texttt{self.objects} de forma sequencial, de modo que a aceleração atua apenas dentro da malha triangulada, não entre esferas, caixas, instâncias e múltiplas malhas coexistindo na mesma cena. Portanto, a formulação correta no relatório não é ``o Slide 6 foi implementado'', mas sim ``parte do Slide 6 foi materializada por uma BVH local simplificada''.
+
+\traceability{\path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{TriangleBVH}, l. 140; \texttt{\_build()}, l. 154; \texttt{TriangleBVHNode.intersect()}, l. 109).}
+
+\subsection{Câmera e formação de imagem}
+\label{sec:limitacoes-camera}
+
+O projeto permanece estritamente no modelo pinhole apresentado no material introdutório sobre câmera~\slidescite{inf2608slides04}{19--39}. Isso significa que \texttt{Camera.generate\_ray()} sempre emite raios a partir de um único centro ótico, sem abertura finita, sem lente fina e sem profundidade de campo. A variável \texttt{focal\_distance} controla apenas a escala geométrica do plano de projeção, e não um mecanismo de focalização seletiva.
+
+Essa limitação não invalida o modelo adotado; ela apenas delimita seu alcance. O supersampling discutido no bloco de amostragem~\slidescite{inf2608slides05}{4--8} melhora a aproximação da média radiância por pixel, mas não altera a física óptica da câmera. Logo, qualquer leitura do resultado visual deve ser feita como imagem de câmera pinhole com amostragem estocástica, e não como imagem com desfoque óptico de lente.
+
+\traceability{\path{src/ray_tracing_2/camera.py} (\texttt{Camera.\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 60).}
+
+\subsection{Convenções radiométricas e simplificações de iluminação}
+\label{sec:limitacoes-radiometria}
+
+Há uma simplificação deliberada e potencialmente enganosa se não for declarada: \texttt{PointLight} e \texttt{AreaLight} não seguem a mesma convenção radiométrica nesta base. Os slides de iluminação pontual apresentam o decaimento geométrico clássico por $1/r^2$~\slidescite{inf2608slides04}{40--41}, mas \texttt{PointLight.radiance()} preserva a convenção do enunciado principal e trata \texttt{power} como radiância incidente constante modulada apenas por visibilidade e transmitância. Já \texttt{AreaLight.sample\_radiance()} distribui energia por amostras do emissor e introduz explicitamente o termo geométrico de distância.
+
+O resultado prático é um subsistema de luzes internamente heterogêneo, embora coerente com os objetivos pedagógicos do projeto. Essa decisão é defensável para o Projeto 1, mas precisa ser descrita como simplificação de modelagem, e não como equivalência física entre fonte pontual ideal, emissor extenso e formulação radiométrica completa.
+
+\traceability{\path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).}
+
+\subsection{Materiais recursivos e truncamento computacional}
+\label{sec:limitacoes-materiais}
+
+Os materiais reflexivo e transparente representam uma extensão substancial do núcleo local de Phong, mas permanecem aproximativos sob o ponto de vista da física de materiais. \texttt{ReflectiveMaterial.eval()} mistura Phong local e reflexão recursiva com Fresnel-Schlick de maneira plausível, porém não equivalente a um BRDF fisicamente baseado. \texttt{TransparentMaterial.eval()} usa Snell, TIR e Beer-Lambert, mas assume meio homogêneo, atenuação por canal RGB e ausência de dispersão espectral contínua.
+
+Além disso, toda a recursão é truncada por \texttt{max\_depth}. Isso é necessário para conter custo computacional e evitar crescimento exponencial do número de raios, mas significa que o traçador resolve apenas uma aproximação finita de cadeias longas de reflexão e transmissão. A leitura correta, portanto, é a de um ray tracer recursivo de profundidade limitada, não a de um solucionador completo de transporte de luz.
+
+\traceability{\path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial.eval()}, l. 101; \texttt{TransparentMaterial.eval()}, l. 186; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41).}
+
+\subsection{Leitura correta frente ao enunciado principal}
+\label{sec:limitacoes-escopo}
+
+Frente a \path{materiais/proj1.pdf}, a interpretação tecnicamente correta é que o repositório cobre com segurança o núcleo exigido pelo projeto e ainda incorpora várias extensões relevantes da disciplina: supersampling, instanciação, luz de área, materiais recursivos, malha triangular e BVH local. Por outro lado, ele não esgota o espaço teórico apresentado nas aulas, sobretudo na parte de aceleração e na parte de modelagem física mais rigorosa da câmera, das fontes e dos materiais.
+
+Essa delimitação é importante para o valor científico do artigo. O mérito do trabalho não está em inflar o escopo entregue, mas em mostrar com precisão onde a implementação coincide com a teoria ensinada, onde a simplifica e onde conscientemente para.
+
+\section{Diagramas como Camada Adicional de Rastreabilidade}
 \label{sec:experimentos-diagramas}
 
-Além das imagens de saída das cenas, o repositório inclui diagramas PlantUML efetivamente renderizados em PNG, que funcionam como documentação intermediária entre o texto deste relatório e o código executável. O ponto metodológico importante é que esses diagramas não substituem a análise anterior; eles a condensam em vistas complementares do pipeline real, já validadas sintaticamente pelo próprio PlantUML.
+Além das imagens de saída das cenas, o repositório inclui diagramas PlantUML efetivamente renderizados em PNG, que funcionam como documentação intermediária entre o texto deste artigo e o código executável. O ponto metodológico importante é que esses diagramas não substituem a análise anterior; eles a condensam em vistas complementares do pipeline real, já validadas sintaticamente pelo próprio PlantUML.
 
 \paragraph{Visão geral do pipeline.}
 Este diagrama sintetiza o fluxo entre entrypoint, \texttt{cli.py}, \texttt{CommonRenderOptions}, construção de cena e câmera, \texttt{Render.render()}, \texttt{Film.render()} e geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}.
@@ -575,7 +627,7 @@ Este diagrama sintetiza o fluxo entre entrypoint, \texttt{cli.py}, \texttt{Commo
 \end{figure*}
 
 \paragraph{Fluxo dinâmico de sombreamento recursivo.}
-Esta vista separa do overview o trecho mais denso do Slide 5, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra.
+Esta vista separa do overview o trecho mais denso do material sobre reflexão, refração e transmitância, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra.
 
 \begin{figure*}[!ht]
 \centering
@@ -604,70 +656,19 @@ Esta imagem complementa os diagramas dinâmicos ao mostrar dependências entre \
 \label{fig:diagram-class}
 \end{figure*}
 
-Em conjunto, esses artefatos visuais fortalecem a rastreabilidade do relatório: as Seções~\ref{sec:slide4} e~\ref{sec:slide5} ganham uma representação operacional do pipeline completo, enquanto a Seção~\ref{sec:slide6} passa a contar com uma visualização explícita da fronteira entre interseção global da cena e aceleração local de malhas triangulares.
+Em conjunto, esses artefatos visuais fortalecem a rastreabilidade do artigo: as Seções~\ref{sec:slide4} e~\ref{sec:slide5} ganham uma representação operacional do pipeline completo, enquanto a Seção~\ref{sec:slide6} passa a contar com uma visualização explícita da fronteira entre interseção global da cena e aceleração local de malhas triangulares.
 
-\section{Limitações Atuais e Delimitação de Escopo}
-\label{sec:limitacoes}
-
-\subsection{Estruturas de aceleração ausentes ou apenas parciais}
-\label{sec:limitacoes-aceleracao}
-
-À luz do Slide 6~\citep{inf2608slides06}, a implementação atual cobre apenas uma fração do espaço de técnicas apresentado nos slides. O repositório não implementa grade regular, refinamento por SAT nem percorrimento incremental célula a célula~\slidescite{inf2608slides06}{15--21}; tampouco implementa SAH, compactação linear da BVH ou um agregador global de cena~\slidescite{inf2608slides06}{22--36}. O que existe de fato é uma BVH estática local a cada \texttt{TriangleMesh}, suficiente para reduzir o custo interno da malha, mas insuficiente para substituir uma estrutura de aceleração global do ray tracer.
-
-Essa distinção é importante porque o custo no topo da cena continua linear. \texttt{Scene.compute\_intersection()} percorre \texttt{self.objects} de forma sequencial, de modo que a aceleração atua apenas dentro da malha triangulada, não entre esferas, caixas, instâncias e múltiplas malhas coexistindo na mesma cena. Portanto, a formulação correta no relatório não é ``o Slide 6 foi implementado'', mas sim ``parte do Slide 6 foi materializada por uma BVH local simplificada''.
-
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{TriangleBVH}, l. 140; \texttt{\_build()}, l. 154; \texttt{TriangleBVHNode.intersect()}, l. 109).
-
-\subsection{Câmera e formação de imagem}
-\label{sec:limitacoes-camera}
-
-O projeto permanece estritamente no modelo pinhole apresentado no Slide 4. Isso significa que \texttt{Camera.generate\_ray()} sempre emite raios a partir de um único centro ótico, sem abertura finita, sem lente fina e sem profundidade de campo. A variável \texttt{focal\_distance} controla apenas a escala geométrica do plano de projeção, e não um mecanismo de focalização seletiva.
-
-Essa limitação não invalida o modelo adotado; ela apenas delimita seu alcance. O supersampling do Slide 5 melhora a aproximação da média radiância por pixel, mas não altera a física óptica da câmera. Logo, qualquer leitura do resultado visual deve ser feita como imagem de câmera pinhole com amostragem estocástica, e não como imagem com desfoque óptico de lente.
-
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/camera.py} (\texttt{Camera.\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 60).
-
-\subsection{Convenções radiométricas e simplificações de iluminação}
-\label{sec:limitacoes-radiometria}
-
-Há uma simplificação deliberada e potencialmente enganosa se não for declarada: \texttt{PointLight} e \texttt{AreaLight} não seguem a mesma convenção radiométrica nesta base. Os slides de iluminação pontual apresentam o decaimento geométrico clássico por $1/r^2$~\slidescite{inf2608slides04}{40--41}, mas \texttt{PointLight.radiance()} preserva a convenção do enunciado principal e trata \texttt{power} como radiância incidente constante modulada apenas por visibilidade e transmitância. Já \texttt{AreaLight.sample\_radiance()} distribui energia por amostras do emissor e introduz explicitamente o termo geométrico de distância.
-
-O resultado prático é um subsistema de luzes internamente heterogêneo, embora coerente com os objetivos pedagógicos do projeto. Essa decisão é defensável para o Projeto 1, mas precisa ser descrita como simplificação de modelagem, e não como equivalência física entre fonte pontual ideal, emissor extenso e formulação radiométrica completa.
-
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).
-
-\subsection{Materiais recursivos e truncamento computacional}
-\label{sec:limitacoes-materiais}
-
-Os materiais reflexivo e transparente representam uma extensão substancial do núcleo local de Phong, mas permanecem aproximativos sob o ponto de vista da física de materiais. \texttt{ReflectiveMaterial.eval()} mistura Phong local e reflexão recursiva com Fresnel-Schlick de maneira plausível, porém não equivalente a um BRDF fisicamente baseado. \texttt{TransparentMaterial.eval()} usa Snell, TIR e Beer-Lambert, mas assume meio homogêneo, atenuação por canal RGB e ausência de dispersão espectral contínua.
-
-Além disso, toda a recursão é truncada por \texttt{max\_depth}. Isso é necessário para conter custo computacional e evitar crescimento exponencial do número de raios, mas significa que o traçador resolve apenas uma aproximação finita de cadeias longas de reflexão e transmissão. A leitura correta, portanto, é a de um ray tracer recursivo de profundidade limitada, não a de um solucionador completo de transporte de luz.
-
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial.eval()}, l. 101; \texttt{TransparentMaterial.eval()}, l. 186; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41).
-
-\subsection{Leitura correta frente ao enunciado principal}
-\label{sec:limitacoes-escopo}
-
-Frente a \path{materiais/proj1.pdf}, a interpretação tecnicamente correta é que o repositório cobre com segurança o núcleo exigido pelo projeto e ainda incorpora várias extensões relevantes da disciplina: supersampling, instanciação, luz de área, materiais recursivos, malha triangular e BVH local. Por outro lado, ele não esgota o espaço teórico apresentado nas aulas, sobretudo na parte de aceleração e na parte de modelagem física mais rigorosa da câmera, das fontes e dos materiais.
-
-Essa delimitação é importante para o valor científico do relatório. O mérito do trabalho não está em inflar o escopo entregue, mas em mostrar com precisão onde a implementação coincide com a teoria ensinada, onde a simplifica e onde conscientemente para.
-
-\section{Conclusão}
+\section{Conclusão, Avaliação Final e Disponibilidade de Artefatos}
 \label{sec:conclusao}
 
-O Projeto 1 implementa de forma sólida o núcleo do Slide 4 e a maior parte das extensões do Slide 5. O traçador resultante possui câmera pinhole, interseções analíticas, Phong local, sombras duras, supersampling, instanciação, luz de área, reflexão com Fresnel-Schlick, refração dielétrica com Snell e TIR, além de atenuação Beer-Lambert em raios refratados e de sombra.
+O Projeto 1 implementa de forma sólida o núcleo geométrico e fotométrico do traçador e a maior parte das extensões ópticas e amostrais discutidas ao longo do artigo. O resultado é um ray tracer com câmera pinhole, interseções analíticas, Phong local, sombras duras, supersampling, instanciação, luz de área, reflexão com Fresnel-Schlick, refração dielétrica com Snell e TIR, além de atenuação Beer-Lambert em raios refratados e de sombra.
 
-O principal cuidado técnico desta versão é deixar claro o estatuto do Slide 6 e, mais amplamente, das limitações consolidadas na Seção~\ref{sec:limitacoes}. O repositório entrega triangulação, \texttt{TriangleMesh} e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
+O principal cuidado técnico desta versão é deixar claro o estatuto da geometria triangular e da aceleração frente às limitações consolidadas na Seção~\ref{sec:limitacoes}. O repositório entrega triangulação, \texttt{TriangleMesh} e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
 
-Em outras palavras: a aderência entre teoria e código é alta nos Slides 4 e 5, e parcial, porém tecnicamente legítima, no Slide 6. A contribuição científica mais importante do trabalho é justamente essa rastreabilidade: cada efeito visual principal pode ser ligado a uma hipótese física ou geométrica explícita e a uma região identificável do código atual.
-
-\section{Avaliação Final do que a Implementação Entrega}
-\label{sec:avaliacao-final}
-
-Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões do segundo bloco de slides e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código.
+Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões relevantes do material da disciplina e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código.
 
 \begin{table*}[!ht]
-\caption{Avaliação final do que a implementação entrega efetivamente.}
+\caption{Síntese da avaliação final do que a implementação entrega efetivamente.}
 \label{tab:avaliacao-final}
 \centering
 \begin{tblr}{
@@ -677,14 +678,14 @@ row{1}={font=\bfseries},
 rows={valign=t}
 }
 Bloco avaliado & Situação & O que a implementação entrega de fato \\
-Núcleo do Slide 4 & Entregue & câmera pinhole, raio paramétrico, \texttt{Hit}, interseções analíticas para esfera, plano e caixa, \texttt{closest hit}, Phong local, sombra direta e luz ambiente \\
+Núcleo geométrico e fotométrico & Entregue & câmera pinhole, raio paramétrico, \texttt{Hit}, interseções analíticas para esfera, plano e caixa, \texttt{closest hit}, Phong local, sombra direta e luz ambiente \\
 Amostragem do filme & Entregue & modo central determinístico (\texttt{center}) e modos estocásticos \texttt{jittered} e \texttt{stratified}, todos expostos publicamente por CLI e convertidos em raios primários pelo \texttt{Film} \\
 Separação entre amostragem do filme e da luz & Entregue & \texttt{sampling\_mode} permanece controle público do filme, enquanto \texttt{light\_sampling\_mode} continua separado para \texttt{AreaLight}, evitando confusão conceitual entre domínio do pixel e domínio do emissor \\
-Extensões ópticas do Slide 5 & Entregue com simplificações declaradas & instanciação por transformações afins, luz de área com penumbra, reflexão com Fresnel-Schlick, refração com Snell, reflexão interna total e Beer-Lambert por canal RGB \\
+Extensões ópticas e amostrais & Entregue com simplificações declaradas & instanciação por transformações afins, luz de área com penumbra, reflexão com Fresnel-Schlick, refração com Snell, reflexão interna total e Beer-Lambert por canal RGB \\
 Geometria triangular & Entregue & \texttt{Triangle}, \texttt{TriangleMesh}, leitura de malha por JSON e OBJ e integração dessas primitivas ao mesmo fluxo de interseção e sombreamento das demais formas \\
 Estrutura de aceleração & Parcialmente entregue & existe BVH estática local à \texttt{TriangleMesh}, com AABB por \emph{slabs}, construção por mediana no eixo dominante e travessia recursiva; não existe grade regular nem aceleração global da cena \\
 Infraestrutura experimental & Entregue & CLI padronizada nos principais entrypoints, controle de \texttt{seed}, geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}, registro de \texttt{render\_time\_seconds} e \texttt{render\_time\_minutes}, além de log inicial e final de render \\
-Aderência integral aos Slides 4--6 e ao PBRT & Não integral & faltam câmera além de pinhole, coerência radiométrica uniforme entre todas as luzes, materiais fisicamente baseados completos e estruturas globais de aceleração \\
+Cobertura integral dos materiais da disciplina e do PBRT & Não integral & faltam câmera além de pinhole, coerência radiométrica uniforme entre todas as luzes, materiais fisicamente baseados completos e estruturas globais de aceleração \\
 \end{tblr}
 \end{table*}
 
@@ -692,37 +693,19 @@ Sob o critério do Projeto 1, essa entrega é tecnicamente robusta e supera o n�
 
 Há também um ponto metodológico importante: a implementação agora entrega não apenas imagens, mas também rastreabilidade experimental. A combinação entre \path{src/ray_tracing_2/cli.py}, \path{src/ray_tracing_2/render.py} e \path{src/ray_tracing_2/render_snapshot.py} faz com que cada execução relevante preserve resolução, modo de amostragem, semente, tempo de render e descrição estruturada da cena em artefatos persistentes. Isso aumenta o valor científico do projeto porque permite distinguir claramente entre efeito visual observado, parâmetro de entrada e hipótese geométrica ou física codificada.
 
-\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/cli.py} (\texttt{CommonRenderOptions}; \texttt{add\_common\_render\_arguments()}), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}; \texttt{get\_samples\_for\_pixel()}), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}; \texttt{AreaLightSamplingMode}; \texttt{sample\_radiance()}), \path{src/ray_tracing_2/render.py} (\texttt{Render.render()}), \path{src/ray_tracing_2/render_snapshot.py} (\texttt{RenderSnapshot.from\_runtime()}; \texttt{to\_markdown()}), \path{src/ray_tracing_2/shape.py} (\texttt{Triangle}; \texttt{TriangleMesh}; \texttt{Instance}), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}; \texttt{TriangleBVH}).
+Os artefatos de pesquisa discutidos neste artigo estão disponíveis no repositório do projeto~\citep{inf2608projectrepo}. Em particular, o código-fonte analisado permanece versionado em \path{src/}, as cenas de entrada em \path{inputs/}, as renderizações e seus metadados persistidos em \path{outputs/} e os diagramas utilizados nesta discussão foram mantidos em formato renderizado junto ao repositório. Essa organização torna reprodutíveis tanto os resultados visuais quanto os parâmetros de execução usados na avaliação final.
+
+\traceability{\path{src/ray_tracing_2/cli.py} (\texttt{CommonRenderOptions}; \texttt{add\_common\_render\_arguments()}), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}; \texttt{get\_samples\_for\_pixel()}), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}; \texttt{AreaLightSamplingMode}; \texttt{sample\_radiance()}), \path{src/ray_tracing_2/render.py} (\texttt{Render.render()}), \path{src/ray_tracing_2/render_snapshot.py} (\texttt{RenderSnapshot.from\_runtime()}; \texttt{to\_markdown()}), \path{src/ray_tracing_2/shape.py} (\texttt{Triangle}; \texttt{TriangleMesh}; \texttt{Instance}), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}; \texttt{TriangleBVH}).}
 
 \begin{declarations}
-
-\begin{acknowledgements}
-Não há agradecimentos adicionais a declarar nesta versão do manuscrito.
-\end{acknowledgements}
-
-\begin{funding}
-Não foi informado financiamento específico para o desenvolvimento deste trabalho.
-\end{funding}
 
 \begin{contributions}
 Yang Ricardo Barcellos Miranda foi responsável pela organização do manuscrito, consolidação da análise técnico-científica do repositório, revisão do alinhamento entre slides, PBRT e implementação, e preparação da versão atual em \LaTeX.
 \end{contributions}
 
-\begin{interests}
-O autor declara que não tem conflitos de interesse.
-\end{interests}
-
-\begin{materials}
-O código-fonte, as cenas de entrada, os artefatos de saída, os diagramas PlantUML e os arquivos de documentação analisados estão disponíveis no repositório do projeto, em especial nos diretórios \path{src/}, \path{inputs/}, \path{outputs/} e \path{docs/}, bem como nos arquivos de diagrama utilizados ao longo deste artigo.
-\end{materials}
-
 \begin{aitools}
-Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e conversão inicial do relatório em Markdown para a versão atual em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelo autor.
+Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e padronização da redação em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelo autor.
 \end{aitools}
-
-\begin{furtherinformation}
-O estudo não envolveu participantes humanos, dados pessoais sensíveis nem experimentos com intervenção em seres vivos. Assim, avaliação por comitê de ética não se aplica ao escopo deste manuscrito.
-\end{furtherinformation}
 
 \end{declarations}
 

@@ -183,9 +183,11 @@
 \def\@engtitle{}
 \def\@category{}
 \def\@copyrightstatement{}
+\def\@institution{}
 \def\@issn{}
 \def\@doi{}
 
+\newcommand{\institution}[1]{\gdef\@institution{#1}}
 \newcommand{\issn}[1]{\gdef\@issn{#1}}
 \newcommand{\doi}[1]{\gdef\@doi{#1}}
 \newcommand{\jyear}[1]{\gdef\@jyear{#1}}
@@ -277,7 +279,11 @@
   \fancyhf{}
   \lhead[L]{\footnotesize%
     \emph{\vskip6pt \@jtitle}\ifdefempty{\@jid}{}%
-    \ifdefempty{\@issn}{}{\par \vskip3pt ISSN:\space\href{https://portal.issn.org/resource/ISSN/\@issn}{\@issn}}%
+    \ifdefempty{\@institution}{%
+      \ifdefempty{\@issn}{}{\par \vskip3pt ISSN:\space\href{https://portal.issn.org/resource/ISSN/\@issn}{\@issn}}%
+    }{%
+      \par \vskip3pt \@institution
+    }%
     \ifdefempty{\@doi}{}{~~$\bullet$~~doi:\space\href{https://doi.org/\@doi}{\@doi}}\\%
 											  
     \scriptsize \ifdefempty{\@copyrightstatement}{}{\vskip3pt \faCreativeCommons~~\@copyrightstatement.\\}%
