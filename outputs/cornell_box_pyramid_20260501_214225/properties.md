@@ -1,0 +1,177 @@
+# Propriedades da Simulação
+
+![Imagem da Simulação](render.png)
+
+## Render
+
+- **name**: cornell_box_pyramid
+- **width**: 800
+- **height**: 600
+- **samples_per_pixel**: 10
+- **sampling_mode**: jittered
+- **seed**: None
+- **gamma_fix**: False
+- **render_time_seconds**: 1027.7674058329976
+- **render_time_minutes**: 17.129456763883294
+
+## Scene
+
+- **ambient_light**: [0.30000001192092896, 0.30000001192092896, 0.30000001192092896]
+- **background_color**: [0.019999999552965164, 0.019999999552965164, 0.05000000074505806]
+- **max_depth**: 4
+- **ray_epsilon**: 0.001
+
+## Camera
+
+- **eye**: [2.7750000953674316, 3.200000047683716, 12.774999618530273]
+- **center**: [2.7750000953674316, 2.7750000953674316, 2.7750000953674316]
+- **up**: [0.0, 1.0, 0.0]
+- **fov**: 50.0
+- **focal_distance**: 1.0
+- **aspect**: 1.3333333333333333
+
+## Objetos (detalhado)
+
+### Objeto 1: Box
+- **shape_chain**: ['Box']
+- **p_min**: [-0.10000000149011612, -0.10000000149011612, -0.10000000149011612]
+- **p_max**: [5.650000095367432, 5.650000095367432, 0.0]
+- **material**:
+  - **type**: ReflectiveMaterial
+  - **ambient**: [0.07999999821186066, 0.07999999821186066, 0.07999999821186066]
+  - **diffuse**: [0.75, 0.75, 0.75]
+  - **specular**: [0.05000000074505806, 0.05000000074505806, 0.05000000074505806]
+  - **shininess**: 32.0
+  - **reflectivity**: [0.550000011920929, 0.550000011920929, 0.550000011920929]
+
+### Objeto 2: Box
+- **shape_chain**: ['Box']
+- **p_min**: [-0.10000000149011612, -0.10000000149011612, 0.0]
+- **p_max**: [0.0, 5.550000190734863, 5.550000190734863]
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.0, 0.07999999821186066, 0.0]
+  - **diffuse**: [0.05000000074505806, 0.75, 0.05000000074505806]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 3: Box
+- **shape_chain**: ['Box']
+- **p_min**: [5.550000190734863, -0.10000000149011612, 0.0]
+- **p_max**: [5.650000095367432, 5.550000190734863, 5.550000190734863]
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.07999999821186066, 0.0, 0.0]
+  - **diffuse**: [0.75, 0.05000000074505806, 0.05000000074505806]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 4: Box
+- **shape_chain**: ['Box']
+- **p_min**: [0.0, 5.550000190734863, 0.0]
+- **p_max**: [5.550000190734863, 5.650000095367432, 5.550000190734863]
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.07999999821186066, 0.07999999821186066, 0.07999999821186066]
+  - **diffuse**: [0.75, 0.75, 0.75]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 5: Box
+- **shape_chain**: ['Box']
+- **p_min**: [-0.10000000149011612, -0.10000000149011612, 0.0]
+- **p_max**: [5.650000095367432, 0.0, 5.550000190734863]
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.07999999821186066, 0.07999999821186066, 0.07999999821186066]
+  - **diffuse**: [0.75, 0.75, 0.75]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 6: Translate
+- **shape_chain**: ['Translate', 'Rotate', 'Box']
+- **material**:
+  - **type**: TransparentMaterial
+  - **ambient**: [0.0, 0.0, 0.0]
+  - **diffuse**: [0.0, 0.0, 0.0]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+  - **attenuation**: [1.0, 1.0, 1.0]
+  - **ior**: 1.5
+
+### Objeto 7: Translate
+- **shape_chain**: ['Translate', 'Rotate', 'Box']
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.07999999821186066, 0.0, 0.0]
+  - **diffuse**: [0.75, 0.05000000074505806, 0.05000000074505806]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 8: Sphere
+- **shape_chain**: ['Sphere']
+- **center**: [2.5, 0.5, 5.0]
+- **radius**: 0.6
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [0.0, 0.07999999821186066, 0.0]
+  - **diffuse**: [0.05000000074505806, 0.75, 0.05000000074505806]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+
+### Objeto 9: TriangleMesh
+- **shape_chain**: ['TriangleMesh']
+- **material**:
+  - **type**: TransparentMaterial
+  - **ambient**: [0.0, 0.0, 0.0]
+  - **diffuse**: [0.0, 0.0, 0.0]
+  - **specular**: [0.0, 0.0, 0.0]
+  - **shininess**: 1.0
+  - **attenuation**: [0.8799999952316284, 0.9399999976158142, 0.9800000190734863]
+  - **ior**: 1.5
+
+### Objeto 10: TriangleMesh
+- **shape_chain**: ['TriangleMesh']
+- **material**:
+  - **type**: ReflectiveMaterial
+  - **ambient**: [0.03999999910593033, 0.03999999910593033, 0.03999999910593033]
+  - **diffuse**: [0.20000000298023224, 0.20000000298023224, 0.20000000298023224]
+  - **specular**: [0.30000001192092896, 0.30000001192092896, 0.30000001192092896]
+  - **shininess**: 96.0
+  - **reflectivity**: [0.7799999713897705, 0.7799999713897705, 0.7799999713897705]
+
+### Objeto 11: Sphere
+- **shape_chain**: ['Sphere']
+- **center**: [2.7750000953674316, 5.550000190734863, 2.7750000953674316]
+- **radius**: 0.1
+- **material**:
+  - **type**: PhongMaterial
+  - **ambient**: [1.0, 1.0, 1.0]
+  - **diffuse**: [0.0, 0.0, 0.0]
+  - **specular**: [1.0, 1.0, 1.0]
+  - **shininess**: 0.0
+
+## Luzes (detalhado)
+
+- **Light 1 (AreaLight)**:
+  - pos: [1.25, 1.9500000476837158, 13.449999809265137]
+  - power: [80.0, 80.0, 80.0]
+  - samples_u: 2
+  - samples_v: 2
+  - light_sampling_mode: stratified
+  - e_u: [3.049999952316284, 0.0, 0.0]
+  - e_v: [0.0, 2.3499999046325684, 0.0]
+
+- **Light 2 (PointLight)**:
+  - pos: [2.7750000953674316, 5.0, 2.7750000953674316]
+  - power: [0.699999988079071, 0.699999988079071, 0.699999988079071]
+
+- **Light 3 (PointLight)**:
+  - pos: [2.7750000953674316, 5.550000190734863, 2.7750000953674316]
+  - power: [0.699999988079071, 0.699999988079071, 0.699999988079071]
+
+## Artefatos
+
+- [Snapshot JSON](properties.json): payload serializado do render, da câmera, da cena, dos objetos e das luzes.
+
+> Nota: abra este `properties.md` dentro da pasta de saída para visualizar a imagem incorporada e navegar até o snapshot JSON.
