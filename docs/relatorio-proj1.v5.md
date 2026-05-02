@@ -397,6 +397,10 @@ Esta cena combina os dois eixos mais avançados do projeto: materiais recursivos
 
 ![Cornell Box com duas pirâmides trianguladas](../outputs/cornell_box_pyramid_20260425_003203/render.png)
 
+Uma execução mais recente da mesma cena, agora com `--spp 10` e `--sampling_mode stratified`, reforça o mesmo ponto com uma evidência visual menos ruidosa e também documenta melhor o custo computacional da integração recursiva nessa configuração. O arquivo `outputs/cornell_box_pyramid_20260501_210143/properties.md` registra `samples_per_pixel = 10`, `sampling_mode = stratified`, `render_time_seconds = 1035.4509` e `render_time_minutes = 17.2575`, mantendo a mesma combinação central de duas `TriangleMesh`, uma transparente e outra refletiva, em uma Cornell Box com luz de área e luzes pontuais auxiliares.
+
+![Cornell Box com duas pirâmides trianguladas em spp 10 estratificado](../outputs/cornell_box_pyramid_20260501_210143/render.png)
+
 ### 6.6. Reprodutibilidade experimental por CLI padronizada
 
 Embora a padronização do parser não altere a física do renderizador, ela melhora diretamente a rastreabilidade dos experimentos. Em particular, ela torna explícito um ponto conceitual importante do Slide 5: a amostragem bidimensional sobre o pixel (`5.tracado_de_raios2.pdf`, pp. 4-9) e a amostragem bidimensional sobre a fonte extensa (`5.tracado_de_raios2.pdf`, pp. 14-23) não são a mesma integral, ainda que ambas usem padrões 2D. Por isso, o repositório preserva dois controles públicos distintos, `sampling_mode` para o filme e `light_sampling_mode` para `AreaLight`, enquanto reutiliza apenas uma infraestrutura interna compartilhada de geração de padrões 2D.
@@ -414,6 +418,28 @@ python -m ray_tracing_2.generate_scene --input inputs/example_scene.json --width
 ```
 
 Rastreabilidade no código: `src/ray_tracing_2/cli.py` (`build_parser()`, l. 14; `add_sampling_arguments()`, l. 37; `add_light_sampling_argument()`, l. 52), `src/ray_tracing_2/sampling.py` (`uniform_samples_2d()`, l. 15; `regular_grid_samples_2d()`, l. 26; `stratified_grid_samples_2d()`, l. 42), `src/ray_tracing_2/film.py` (`SamplingMode`, l. 17; `get_samples_for_pixel()`, l. 61), `src/ray_tracing_2/light.py` (`AreaLightSamplingMode`, l. 45; `_iter_sample_uvs()`, l. 114; `sample_radiance()`, l. 133), `src/ray_tracing_2/main.py` (`build_cli_parser()`, l. 79), `src/ray_tracing_2/main_area_light.py` (`build_cli_parser()`, l. 89), `src/ray_tracing_2/main_triangles.py` (`build_cli_parser()`, l. 202) e `src/ray_tracing_2/generate_scene.py` (`build_cli_parser()`, l. 122).
+
+### 6.7. Diagramas renderizados como camada adicional de rastreabilidade
+
+Além das imagens de saída das cenas, o repositório agora inclui diagramas PlantUML efetivamente renderizados em PNG, que funcionam como documentação intermediária entre o texto deste relatório e o código executável. O ponto metodológico importante é que esses diagramas não substituem a análise anterior; eles a condensam em vistas complementares do pipeline real, já validadas sintaticamente pelo próprio PlantUML.
+
+- Visão geral do pipeline: [arquivo PlantUML](../ray_tracing_render_overview_v1.puml) e [imagem PNG](../ray_tracing_render_overview_v1.puml.png). Este diagrama sintetiza o fluxo entre entrypoint, `cli.py`, `CommonRenderOptions`, construção de cena/câmera, `Render.render()`, `Film.render()` e geração de `render.png`, `properties.json` e `properties.md`.
+
+![Diagrama renderizado da visão geral do pipeline](../ray_tracing_render_overview_v1.puml.png)
+
+- Fluxo dinâmico de sombreamento recursivo: [arquivo PlantUML](../ray_tracing_trace_flow_v1.puml) e [imagem PNG](../ray_tracing_trace_flow_v1.puml.png). Esta vista separa do overview o trecho mais denso do Slide 5, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra.
+
+![Diagrama renderizado do fluxo de trace ray e shading recursivo](../ray_tracing_trace_flow_v1.puml.png)
+
+- Fluxo local de aceleração para malhas: [arquivo PlantUML](../ray_tracing_bvh_flow_v1.puml) e [imagem PNG](../ray_tracing_bvh_flow_v1.puml.png). Este diagrama deixa explícito que a poda por AABB e a travessia da BVH acontecem dentro de `TriangleMesh`, e não como acelerador global da cena, o que reforça a leitura defendida na Seção 5.
+
+![Diagrama renderizado do fluxo local de BVH para TriangleMesh](../ray_tracing_bvh_flow_v1.puml.png)
+
+- Visão estrutural estática: [arquivo PlantUML](../ray_tracing_classes_v1.puml) e [imagem PNG](../ray_tracing_2_class-diagram.puml.png). Esta imagem complementa os diagramas dinâmicos ao mostrar dependências entre `Render`, `Scene`, `Film`, `Camera`, `Light`, `Material`, `TriangleMesh` e `TriangleBVH`.
+
+![Diagrama renderizado da arquitetura principal do ray_tracing_2](../ray_tracing_2_class-diagram.puml.png)
+
+Em conjunto, esses artefatos visuais fortalecem a rastreabilidade do relatório: as Seções 3 e 4 ganham uma representação operacional do pipeline completo, enquanto a Seção 5 passa a contar com uma visualização explícita da fronteira entre interseção global da cena e aceleração local de malhas triangulares.
 
 ## 7. Limitações Atuais e Delimitação de Escopo
 
