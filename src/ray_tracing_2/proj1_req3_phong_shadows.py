@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-
+from pyglm import glm
 from ray_tracing_2.cli import CommonRenderOptions, add_common_render_arguments, build_parser
 from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.proj1_scene_common import add_req3_phong_objects, add_req3_phong_shadow_lights, build_cornell_room, build_proj1_camera, build_proj1_scene
@@ -25,7 +25,7 @@ def render(
     gamma_fix=gamma_fix,
   )
   camera = build_proj1_camera(render_options.width, render_options.height)
-  scene = build_proj1_scene(ambient=(0.02, 0.02, 0.02), max_depth=2)
+  scene = build_proj1_scene(ambient=glm.vec3(0.02, 0.02, 0.02), max_depth=2)
   build_cornell_room(scene)
   add_req3_phong_objects(scene)
   add_req3_phong_shadow_lights(scene)
