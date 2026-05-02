@@ -25,6 +25,7 @@ from ray_tracing_2.cli import (
 from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import AmbientLight, AreaLight, AreaLightSamplingMode, PointLight
 from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
+from ray_tracing_2.render_estimator import run_render_with_estimation
 from ray_tracing_2.render import Render
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Rotate, Sphere, Translate, TriangleMesh
@@ -62,6 +63,10 @@ def render(width: int = 800,
            light_sampling_mode: str = AreaLightSamplingMode.STRATIFIED.value,
            seed: int | None = None,
            gamma_fix: bool = False,
+           calibrate: bool = True,
+           calibrate_only: bool = False,
+           calibrate_grid: int = 16,
+           calibrate_max_seconds: float = 5.0,
            max_depth: int = 10,
            small_block_material: str = 'opaque',
            large_block_material: str = 'opaque'):
@@ -80,6 +85,10 @@ def render(width: int = 800,
     sampling_mode=sampling_mode,
     seed=seed,
     gamma_fix=gamma_fix,
+    calibrate=calibrate,
+    calibrate_only=calibrate_only,
+    calibrate_grid=calibrate_grid,
+    calibrate_max_seconds=calibrate_max_seconds,
   )
   # Slide 4, p. 24-29: define a resolução do filme e a câmera pinhole da cena.
   W, H = render_options.width, render_options.height
@@ -242,7 +251,19 @@ def render(width: int = 800,
   scene.lights.append(PointLight(pos=glm.vec3(2.775, 5.55, 2.775), power=glm.vec3(0.7, 0.7, 0.7)))  
   # Slide 4, p. 24-29: usa a classe Render para criar saída e markdown
   r = Render()
-  r.render(scene=scene, cam=cam, **render_options.to_render_kwargs(name='cornell_box_pyramid'))
+  run_render_with_estimation(
+    render=r,
+    scene=scene,
+    cam=cam,
+    width=render_options.width,
+    height=render_options.height,
+    name='cornell_box_pyramid',
+    samples_per_pixel=render_options.spp,
+    sampling_mode=render_options.sampling_mode,
+    seed=render_options.seed,
+    gamma_fix=render_options.gamma_fix,
+    estimator_options=render_options.to_estimator_options(),
+  )
 
 
 def build_cli_parser() -> argparse.ArgumentParser:
@@ -265,7 +286,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
   common_options = CommonRenderOptions.from_namespace(args)
   render(
-    **common_options.to_entrypoint_kwargs(),
+    **common_options.to_entrypoint_kwargs(include_calibration=True),
     light_sampling_mode=args.light_sampling_mode,
     max_depth=args.max_depth,
     small_block_material=args.small_block_material,
