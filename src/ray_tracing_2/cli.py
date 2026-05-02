@@ -6,6 +6,7 @@ from typing import Any, Sequence
 
 from ray_tracing_2.film import SamplingMode, sampling_mode_help_text
 from ray_tracing_2.light import AreaLightSamplingMode
+from ray_tracing_2.render_estimator import EstimatorOptions
 
 
 MATERIAL_MODEL_CHOICES = ['opaque', 'reflective', 'transparent']
@@ -28,6 +29,10 @@ class CommonRenderOptions:
   sampling_mode: str = SamplingMode.JITTERED.value
   seed: int | None = None
   gamma_fix: bool = False
+  calibrate: bool = True
+  calibrate_only: bool = False
+  calibrate_grid: int = 16
+  calibrate_max_seconds: float = 5.0
 
   def __post_init__(self) -> None:
     self.width = int(self.width)
@@ -36,6 +41,10 @@ class CommonRenderOptions:
     self.sampling_mode = str(self.sampling_mode)
     self.seed = None if self.seed is None else int(self.seed)
     self.gamma_fix = bool(self.gamma_fix)
+    self.calibrate = bool(self.calibrate)
+    self.calibrate_only = bool(self.calibrate_only)
+    self.calibrate_grid = int(self.calibrate_grid)
+    self.calibrate_max_seconds = float(self.calibrate_max_seconds)
 
   @classmethod
   def from_namespace(cls, args: argparse.Namespace) -> CommonRenderOptions:
@@ -46,10 +55,14 @@ class CommonRenderOptions:
       sampling_mode=str(args.sampling_mode),
       seed=getattr(args, 'seed', None),
       gamma_fix=bool(getattr(args, 'gamma_fix', False)),
+      calibrate=bool(getattr(args, 'calibrate', True)),
+      calibrate_only=bool(getattr(args, 'calibrate_only', False)),
+      calibrate_grid=int(getattr(args, 'calibrate_grid', 16)),
+      calibrate_max_seconds=float(getattr(args, 'calibrate_max_seconds', 5.0)),
     )
 
-  def to_entrypoint_kwargs(self) -> dict[str, Any]:
-    return {
+  def to_entrypoint_kwargs(self, *, include_calibration: bool = False) -> dict[str, Any]:
+    payload: dict[str, Any] = {
       'width': self.width,
       'height': self.height,
       'spp': self.spp,
@@ -57,6 +70,17 @@ class CommonRenderOptions:
       'seed': self.seed,
       'gamma_fix': self.gamma_fix,
     }
+    # Compatibilidade: entrypoints legados não aceitam parâmetros de calibração.
+    if include_calibration:
+      payload.update(
+        {
+          'calibrate': self.calibrate,
+          'calibrate_only': self.calibrate_only,
+          'calibrate_grid': self.calibrate_grid,
+          'calibrate_max_seconds': self.calibrate_max_seconds,
+        }
+      )
+    return payload
 
   def to_render_kwargs(self, *, name: str) -> dict[str, Any]:
     return {
@@ -68,6 +92,14 @@ class CommonRenderOptions:
       'seed': self.seed,
       'gamma_fix': self.gamma_fix,
     }
+
+  def to_estimator_options(self) -> EstimatorOptions:
+    return EstimatorOptions(
+      calibrate=self.calibrate,
+      calibrate_only=self.calibrate_only,
+      calibrate_grid=self.calibrate_grid,
+      calibrate_max_seconds=self.calibrate_max_seconds,
+    )
 
 
 class CLIHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter):
@@ -163,6 +195,36 @@ def add_common_render_arguments(
   )
   add_seed_argument(parser)
   add_gamma_fix_argument(parser)
+  parser.add_argument(
+    '--calibrate',
+    action='store_true',
+    default=True,
+    help='Enable calibration before render (default: enabled)',
+  )
+  parser.add_argument(
+    '--no-calibrate',
+    dest='calibrate',
+    action='store_false',
+    help='Disable calibration before render',
+  )
+  parser.add_argument(
+    '--calibrate-only',
+    action='store_true',
+    default=False,
+    help='Run only calibration and write snapshot files without full image render',
+  )
+  parser.add_argument(
+    '--calibrate-grid',
+    type=int,
+    default=16,
+    help='Calibration sampling grid size (NxN points over the image plane)',
+  )
+  parser.add_argument(
+    '--calibrate-max-seconds',
+    type=float,
+    default=5.0,
+    help='Maximum seconds to spend inside calibration sampling',
+  )
 
 
 def add_max_depth_argument(
