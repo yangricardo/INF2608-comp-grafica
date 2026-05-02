@@ -104,16 +104,52 @@ python -m ray_tracing_2.proj1_req3_phong_shadows --width 800 --height 600 --spp 
 python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 1 --sampling_mode center
 \end{verbatim}
 
-\section{Discussao Tecnica Resumida}
+\section{Discussao Tecnica e Evidencias}
 \label{sec:discussao-v2}
 
-\textbf{R1.} A cena principal usa apenas caixas instanciadas e esferas no mesmo enquadramento de camera.
+\subsection{R1 -- Instanciacao de esferas e caixas}
 
-\textbf{R2.} A iluminacao usa exclusivamente fontes pontuais para separar contribuicoes de luz.
+A cena usa apenas dois \texttt{Instance(Box)} com rotacao em Y e uma \texttt{Sphere} dentro da sala Cornell. A iluminacao e exclusivamente por \texttt{AmbientLight} (intensidade elevada) para revelar a geometria sem dependencia de fontes pontuais.
 
-\textbf{R3.} O sombreamento local de Phong e as sombras duras aparecem no mesmo setup, com materiais de resposta angular distinta.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_req1_geometry_20260502_121509/render.png}
+  \caption{R1: geometria instanciada -- dois \texttt{Instance(Box)} e uma \texttt{Sphere} (800x600, spp=1, center, \textasciitilde9.4\,s).}
+  \label{fig:req1}
+\end{figure}
 
-\textbf{R4.} O requisito de multiplas amostras e validado por comparacao controlada de \texttt{center} contra modos estocasticos no mesmo quadro.
+\subsection{R2 -- Fontes de luz pontuais}
+
+Tres \texttt{PointLight} com posicoes e potencias distintas (key/fill/back). Duas esferas Phong com \texttt{shininess} 20 e 96 evidenciam a variacao do highlight especular por material.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_req2_point_lights_20260502_121731/render.png}
+  \caption{R2: tres \texttt{PointLight} e esferas com shininess diferente (800x600, spp=1, center, \textasciitilde19.7\,s).}
+  \label{fig:req2}
+\end{figure}
+
+\subsection{R3 -- Phong com sombras duras}
+
+O sombreamento local combina difusa lambertiana e especular de Phong. As sombras duras sao geradas via \texttt{Scene.transmittance()} para materiais opacos. Dois materiais distintos: matte vermelho (\texttt{shininess=16}) e glossy azul (\texttt{shininess=120}).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_req3_phong_shadows_20260502_121809/render.png}
+  \caption{R3: sombras duras e resposta Phong com materiais de shininess distinto (800x600, spp=1, center, \textasciitilde20.1\,s).}
+  \label{fig:req3}
+\end{figure}
+
+\subsection{R4 -- Multiplas amostras por pixel}
+
+Geometria com arestas finas (caixa delgada) e esferas branca/preta para tornar aliasing visivel. Os modos \texttt{center} (baseline), \texttt{jittered} e \texttt{stratified} usam o mesmo enquadramento de camera.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_req4_sampling_20260502_122009/render.png}
+  \caption{R4: baseline \texttt{center} (spp=1). Executar spp=4 com \texttt{jittered} ou \texttt{stratified} para comparar AA (800x600, spp=1, center, \textasciitilde20.7\,s).}
+  \label{fig:req4}
+\end{figure}
 
 \section{Limites e Requisitos Adicionais}
 \label{sec:limites-v2}

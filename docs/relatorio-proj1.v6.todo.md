@@ -32,15 +32,15 @@ Arquivos principais desta rodada:
 
 ## Checklist de redacao
 
-- [ ] Consolidar comandos reproduziveis para cada requisito (`--spp 1` e `--spp 4`).
-- [ ] Selecionar uma figura principal por requisito.
-- [ ] Inserir notas de limitacao (sem acelerador global; simplificacoes radiometricas).
-- [ ] Relacionar explicitamente o requisito 4 ao comportamento de `uniform_samples_2d()` no modo publico `jittered`.
-- [ ] Incluir secao de requisitos adicionais separada dos requisitos principais.
+- [x] Consolidar comandos reproduziveis para cada requisito (`--spp 1` e `--spp 4`).
+- [x] Selecionar uma figura principal por requisito.
+- [x] Inserir notas de limitacao (sem acelerador global; simplificacoes radiometricas).
+- [x] Relacionar explicitamente o requisito 4 ao comportamento de `uniform_samples_2d()` no modo publico `jittered`.
+- [x] Incluir secao de requisitos adicionais separada dos requisitos principais.
 
 ## Checklist de LaTeX v2
 
-- [ ] Inserir secao `Requisitos e Aderencia` no inicio.
-- [ ] Apontar cada requisito para um modulo `proj1_*`.
-- [ ] Incluir comandos CLI em bloco de reproducao experimental.
-- [ ] Atualizar conclusao com aderencia parcial/total por requisito.
+- [x] Inserir secao `Requisitos e Aderencia` no inicio.
+- [x] Apontar cada requisito para um modulo `proj1_*`.
+- [x] Incluir comandos CLI em bloco de reproducao experimental.
+- [x] Atualizar conclusao com aderencia parcial/total por requisito.

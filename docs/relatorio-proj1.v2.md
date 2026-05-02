@@ -147,7 +147,81 @@ Na cena inspirada na Cornell Box, o objetivo experimental muda. O foco deixa de 
 
 Mesmo quando renderizada em uma configuração visual mais simples, essa cena é importante porque ela concentra os mecanismos que tornam viáveis as extensões do Slide 5: controle de profundidade recursiva, correção de normais transformadas, organização de materiais opacos, reflectivos e transparentes, e tratamento robusto de `ray_epsilon` em superfícies muito próximas.
 
-## 4. Critérios Atendidos e Não Atendidos Integralmente
+## 4. Evidência Orientada por Requisitos do Enunciado
+
+Esta seção complementa a análise técnica anterior com cenas produzidas especificamente para atender 1:1 aos requisitos do enunciado (`materiais/proj1.pdf`). A câmera é a mesma em todos os experimentos (eye=(2.775,3.2,12.775), center=(2.775,2.775,2.775), fov=50°), variando apenas objetos, materiais e luzes.
+
+### 4.1. R1: Instanciação de esferas e caixas
+
+Módulo: `src/ray_tracing_2/proj1_req1_geometry.py`
+
+Sala Cornell com dois `Instance(Box)` rotacionados e uma `Sphere`. Iluminação exclusivamente por `AmbientLight` para evidenciar geometria sem dependência de fontes pontuais.
+
+```bash
+python -m ray_tracing_2.proj1_req1_geometry --width 800 --height 600 --spp 1
+```
+
+![R1 geometry](../outputs/proj1_req1_geometry_20260502_121509/render.png)
+
+*800×600, spp=1, center, ~9.4 s.*
+
+### 4.2. R2: Uma ou mais fontes de luz pontuais
+
+Módulo: `src/ray_tracing_2/proj1_req2_point_lights.py`
+
+Três `PointLight` (key/fill/back) com posições e potências distintas; duas esferas Phong com `shininess` 20 e 96 para observar variação de highlight por material.
+
+```bash
+python -m ray_tracing_2.proj1_req2_point_lights --width 800 --height 600 --spp 1
+```
+
+![R2 point lights](../outputs/proj1_req2_point_lights_20260502_121731/render.png)
+
+*800×600, spp=1, center, ~19.7 s.*
+
+### 4.3. R3: Iluminação direta com modelo de Phong e sombras duras
+
+Módulo: `src/ray_tracing_2/proj1_req3_phong_shadows.py`
+
+Dois materiais contrastantes: matte vermelho (`shininess=16`) e glossy azul (`shininess=120`, `specular=0.60`). Sombras duras via `Scene.transmittance()` com dois `PointLight` posicionados para gerar oclusão visível.
+
+```bash
+python -m ray_tracing_2.proj1_req3_phong_shadows --width 800 --height 600 --spp 1
+```
+
+![R3 Phong shadows](../outputs/proj1_req3_phong_shadows_20260502_121809/render.png)
+
+*800×600, spp=1, center, ~20.1 s.*
+
+### 4.4. R4: Múltiplas amostras por pixel
+
+Módulo: `src/ray_tracing_2/proj1_req4_sampling.py`
+
+Geometria com arestas finas (caixa delgada) e esferas branca/preta para tornar aliasing visível. Comparar `center` (baseline) com `jittered`/`stratified` no mesmo enquadramento.
+
+```bash
+# baseline
+python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 1 --sampling_mode center
+# anti-aliasing
+python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 4 --sampling_mode jittered --seed 42
+```
+
+![R4 sampling baseline](../outputs/proj1_req4_sampling_20260502_122009/render.png)
+
+*800×600, spp=1, center, ~20.7 s. Executar spp=4 para comparar AA.*
+
+### 4.5. Matriz de aderência
+
+| Requisito                    | Status | Módulo                            |
+| ---------------------------- | ------ | --------------------------------- |
+| R1: esferas e caixas         | OK     | `proj1_req1_geometry.py`          |
+| R2: luz pontual              | OK     | `proj1_req2_point_lights.py`      |
+| R3: Phong + sombras          | OK     | `proj1_req3_phong_shadows.py`     |
+| R4: multiplas amostras/pixel | OK     | `proj1_req4_sampling.py`          |
+
+---
+
+## 5. Critérios Atendidos e Não Atendidos Integralmente
 
 ### 4.1. Critérios atendidos no escopo do projeto
 
