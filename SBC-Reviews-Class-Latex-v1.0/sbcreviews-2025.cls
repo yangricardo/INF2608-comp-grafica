@@ -25,22 +25,18 @@
 % orcidlink. Afinal o único glifo usado do academicons é o do orcid!
 \RequirePackage{orcidlink}
 
-\RequirePackage{fontawesome} % o glifo de envelope de carta
+% Fallback ASCII glyphs keep the template compilable even when icon fonts are
+% unavailable in the local XeLaTeX/LuaLaTeX environment.
+\providecommand{\faEnvelope}{@}
+\providecommand{\faEnvelopeO}{@}
+\providecommand{\faCreativeCommons}{CC}
 
 % Identify the engine in use (pdftex, luatex, xetex)
 \RequirePackage{iftex}
-\ifpdftex % caso o engine seja o pdflatex
-	\RequirePackage[T1]{fontenc}
-	%\RequirePackage{lmodern}
-        \usepackage{tgtermes}
-	\RequirePackage[tracking=smallcaps]{microtype}
-	\RequirePackage[book]{FiraSans}
-\else % caso o engine seja o xelatex ou lualatex
-    \RequirePackage{fontspec}
-    \def\faEnvelopeO{\symbol{"F003}}
-    \setmainfont{TeX Gyre Termes} 
-	\setsansfont{Roboto}
-\fi
+\RequirePackage[T1]{fontenc}
+\RequirePackage{tgtermes}
+\RequirePackage[tracking=smallcaps]{microtype}
+\RequirePackage[book]{FiraSans}
 
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}

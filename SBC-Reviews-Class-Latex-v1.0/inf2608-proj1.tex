@@ -46,26 +46,19 @@
 % We disable hyperlinks by default with this line, to avoid the error "\pdfendlink ended up in different nesting level" while writing.
 
 \jid{ROCS}
-\jtitle{SBC Computing Reviews, 202X, XX:1}
+\jtitle{SBC Computing Reviews, 2025, XX:1}
 \issn{2966-3938}
-\doi{10.5753/rocs.202X.XXXXXX}
+\doi{10.5753/rocs.2025.XXXXXX}
 \copyrightstatement{This work is licensed under a Creative Commons Attribution 4.0 International License}
-\jyear{202X}
+\jyear{2025}
 
-\category{Revisão da Literatura}
-\title[Template da SBC Reviews 2025 para artigos em português]{Apresentação do template da SBC Reviews 2025 - Versão para artigos em português}
-\engtitle{\textcolor{engtitle}{Presenting the SBC Reviews 2025 template - Version for papers in Portuguese}}
+\category{Revisão Técnica}
+\title[Análise de um Ray Tracer Educacional]{Análise Técnico-Científica de um Ray Tracer Educacional: Alinhamento entre Slides 4--6, PBRT 4e e Implementação}
+\engtitle{\textcolor{engtitle}{Technical-Scientific Analysis of an Educational Ray Tracer: Alignment Among Slides 4--6, PBRT 4e, and the Implementation}}
 
 %THE ORCID IS MANDATORY FOR EACH AUTHOR
-\author[Silva et al. 202X]{
-\affil{\textbf{João Silva}~\orcidlink{0000-0000-0000-0000}~\textcolor{blue}{\faEnvelope}~~[{Universidade Federal}~|\href{mailto: ...}{~{\textit{...@...br}}}~]}
-
-\affil{\textbf{Maria Santos}~\orcidlink{0000-0000-0000-0000}~[{Universidade Federal}~|\href{mailto: ...}{~{\textit{...@...br}}}~]}
-
-\affil{\textbf{Ana Silva }~\orcidlink{0000-0000-0000-0000}~[{Universidade Federal}~|\href{mailto: ...}{~{\textit{...@...br}}}~]}
-
-\affil{\textbf{José Santos}~\orcidlink{0000-0000-0000-0000}~[{Universidade Federal}~|\href{mailto: ...}{~{\textit{...@...br}}}~]}
-
+\author[Autor a definir]{
+\affil{\textbf{Autor(a) a definir}~[Afiliação institucional a confirmar~|~\href{mailto:contato@exemplo.com}{\textit{contato@exemplo.com}}]}
 }
 
 \begin{document}
@@ -75,24 +68,24 @@
 \maketitle
 
 \begin{mail}
-Instituto ..., Universidade ..., Endereço, Cidade, Estado, CEP, Brasil. 
+Dados institucionais, endereço postal e identificação autoral definitiva serão confirmados na versão final do manuscrito.
 \end{mail}
 
 
 \begin{abstract-pt}
-Este texto, em formato de artigo científico, tem por objetivo apresentar o novo modelo para artigos da SBC, descrevendo suas principais características e explicando como deve ser utilizado. Esta versão, mais especificamente, deve ser utilizada exclusivamente para artigos escritos em português que serão publicados em alguma série de anais de eventos na SBC OpenLib. O resumo em português, como pode-se notar neste exemplo, deve vir antes do resumo em inglês (abstract) e ter entre 500 e 750 palavras.
+Este artigo apresenta uma reconstrução técnico-científica do Projeto 1 de computação gráfica a partir de três eixos de evidência: os slides 4 a 6 da disciplina, os resumos auxiliares em Markdown e a implementação efetiva do repositório \path{src/ray_tracing_2}. O objetivo central não é apenas descrever o que um ray tracer educacional deveria fazer, mas verificar com precisão o que o código atual implementa, quais extensões além do núcleo mínimo já estão operacionais e em quais pontos a implementação permanece deliberadamente simplificada. A análise mostra aderência forte ao núcleo geométrico e fotométrico do Slide 4, incluindo raio paramétrico, interseções analíticas, câmera pinhole, sombreamento local de Phong e sombra direta. Também evidencia cobertura ampla do Slide 5, com supersampling estocástico, instanciação por transformações afins, luz de área, reflexão com Fresnel-Schlick, refração dielétrica com Lei de Snell, reflexão interna total, atenuação Beer-Lambert e generalização do raio de sombra para transmitância acumulada. Para o Slide 6, o artigo distingue explicitamente entre conteúdo teórico e funcionalidade implementada: o repositório entrega triângulos, \texttt{TriangleMesh} e uma BVH estática local para malhas, mas não implementa grade regular, SAH, compactação linear da BVH nem acelerador global de cena. O trabalho também documenta a infraestrutura experimental do projeto, incluindo CLI padronizada, separação explícita entre amostragem do filme e da luz, geração de artefatos persistentes de render e diagramas PlantUML renderizados como camada adicional de rastreabilidade. Ao final, o artigo argumenta que a principal contribuição do projeto não é a cobertura integral de todo o arco teórico das aulas, mas a coerência entre hipótese geométrica ou física, estrutura algorítmica e evidência observável nas imagens e metadados produzidos.
 \end{abstract-pt}
 
 \begin{abstract-en}
-This text, formatted as a scientific article, aims to present the new SBC paper template, describing its main features and explaining how it should be used. This version, more specifically, should be used exclusively for articles written in Portuguese that will be published in any event proceeding series at SBC OpenLib. The abstract in Portuguese, as you can see in this example, must be before the abstract in English and must have between 500 and 750 words.
+This paper presents a technical-scientific reconstruction of the first computer graphics project based on three evidence layers: lecture slides 4 to 6, auxiliary Markdown notes, and the effective implementation in the \path{src/ray_tracing_2} repository. Rather than merely restating what an educational ray tracer should do, the article verifies what the current code actually implements, which extensions beyond the minimum core are already operational, and where the implementation remains deliberately simplified. The analysis shows strong adherence to the geometric and photometric core of Slide 4, including parametric rays, analytic intersections, a pinhole camera, local Phong shading, and direct shadows. It also shows broad coverage of Slide 5, with stochastic supersampling, affine instancing, area lights, Fresnel-Schlick reflection, dielectric refraction with Snell's law, total internal reflection, Beer-Lambert attenuation, and the generalization of shadow rays into accumulated transmittance. For Slide 6, the paper explicitly separates theoretical content from implemented functionality: the repository delivers triangles, \texttt{TriangleMesh}, and a static local BVH for meshes, but it does not implement regular grids, SAH, linear BVH compaction, or a global scene accelerator. The article also documents the project's experimental infrastructure, including a standardized CLI, an explicit separation between film sampling and light sampling, persistent render artifacts, and rendered PlantUML diagrams as an additional traceability layer. The main conclusion is that the project's scientific value lies less in complete theoretical coverage and more in the consistency between geometric or physical hypotheses, algorithmic structure, and observable evidence in the generated images and metadata.
 \end{abstract-en}
 
 \begin{pchaves}
-Anais de evento, Modelo, SBC OpenLib, Indexação
+traçado de raios, computação gráfica, PBRT, BVH, amostragem, renderização fisicamente inspirada
 \end{pchaves}
 
 \begin{keywords}
-Proceedings, Template, SBC OpenLib, Indexing
+ray tracing, computer graphics, PBRT, BVH, sampling, physically inspired rendering
 \end{keywords}
 
 \begin{dates}
@@ -265,345 +258,489 @@ Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt
 
 O quadro mostra que o núcleo conceitual do Slide 4 está efetivamente materializado no repositório, mas com duas qualificações importantes: a luz pontual segue a convenção simplificada do enunciado, e o teste de sombra já aparece no código em forma mais geral do que a apresentada no bloco introdutório dos slides.
   
-\section{Sobre a SBC Reviews}
+\section{Slide 5: Extensões Ópticas, Amostrais e de Transformação}
+\label{sec:slide5}
 
-Os tópicos de interesse incluem, mas não estão limitados a:
+\subsection{Antialiasing como integração estocástica sobre o pixel}
+\label{sec:slide5-antialiasing}
 
-\begin{itemize}
-\item Algoritmos, Combinatória e Otimização
-\item Inteligência Artificial
-\item Sistemas Colaborativos
-\item Biologia Computacional
-\item Inteligência Computacional
-\item Computação Gráfica e Processamento de Imagens
-\item Redes de Computadores e Sistemas Distribuídos
-\item Ontologias Computacionais
-\item Engenharia de Sistemas Computacionais
-\item Computação Aplicada à Saúde
-\item Educação em Computação
-\item Modelagem Conceitual
-\item Bancos de Dados
-\item Projeto de Circuitos e Sistemas Integrados
-\item Jogos Digitais e Entretenimento
-\item Sistemas Tolerantes a Falhas
-\item Métodos Formais
-\item Geoinformática
-\item Computação Verde
-\item Arquitetura e Processamento de Computadores de Alto Desempenho
-\item Aspectos Humanos e Sociais na Computação
-\item Interação Humano-Computador
-\item Informática na Educação
-\item Segurança da Informação e de Sistemas Computacionais
-\item Informação Sistemas
-\item Sistemas Multimídia e Web
-\item Computação Musical
-\item Processamento de Linguagem Natural
-\item Linguagens de Programação
-\item Robótica
-\item Engenharia de Software
-\item Realidade Virtual
-\end{itemize}
+O Slide 5 reinterpreta o pixel não como uma posição única, mas como um domínio de amostragem no qual múltiplos raios podem ser gerados (\texttt{5.tracado\_de\_raios2.pdf}, pp. 4-8). A leitura correta em termos numéricos é de integração de Monte Carlo: a cor do pixel passa a ser estimada pela média de amostras da radiância incidente,
 
-Os dois pacotes \texttt{fontenc} e \texttt{fontspec} pertencem a ``universos'' distintos e não devem ser ambos incluídos no mesmo preâmbulo sob a pena de conflitos.
-
-O pacote \texttt{fontspec} lida com o universo dos fontes Truetype e/ou Opentype. 
-A distribuição TeXlive---a qual é usada pelo Overleaf---instala uma vasta gama de fontes: por exemplo, o \textbf{TeX Gyre Termes} é o equivalente livre e gratuito do fonte \textbf{Times New Roman}. 
-
-Obs: para os engines xetex e luatex não é obrigatório realizar a inclusão do pacote \texttt{fontspec}. A omissão faz o engine assumir valores default para fonte e suas propriedades.
-
-Para o engine pdftex, o pacote a ser incluido deveria ser o \textbf{fontenc}. 
-A inclusão desse pacote faz com que o engine leia arquivos de definição, e outros associados e com isso executa uma ligação ``estrita'' ao fonte.  
-
-\begin{table}[!ht]
-\caption{Exemplo de legenda de tabela.}
-\centering
-\begin{tabular}{@{}cc@{}}
-\hline\hline
-Dimensão & Classificação\\
-\hline%
- 1  & 0.6232 \\
- 2  & 0.9635 \\ 
- 3  & 0.9724 \\ 
- 4  & 0.9690 \\ 
- 5  & 0.9840 \\ 
- 6  & 0.9842 \\ 
- 7  & 0.9873 \\ 
- 8  & 0.9884 \\
- 9  & 0.9873 \\ 
- 10 & 0.9898 \\ 
- 11 & 0.9914 \\
-\hline\hline
-\end{tabular}
-\label{tab1}
-\end{table}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum (see \textbf{ Table~\ref{tab1}}). 
-Assim, recomendamos fortemente o uso do pacote \texttt{tabularray}. 
-
-\begin{table}[!ht]
-\caption{Exemplo de legenda de tabela.}
-\centering
-\begin{tblr}{%
-columns={c},
-row{even}={gray9},
-row{1}={bg=red!10, font=\bfseries}
-}
-\hline
-Dimensão & Classificação\\
-\hline%
- 1  & 0.6 \\
- 2  & 0.963 \\ 
- 3  & 0.97 \\ 
- 4  & 0.9690 \\ 
- 5  & 0.9840 \\ 
- 6  & 0.98423 \\ 
- 7  & 0.9873 \\ 
- 8  & 0.9884 \\
- 9  & 0.9873 \\ 
- 10 & 0.9898 \\ 
- 11 & 0.991 \\
-\end{tblr}
-\label{tab1-1}
-\end{table}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \citep{ref3}, dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat~\citep{ref4}.
-
-\subsection{Modelo de Publicação}
-
-A SBC Reviews adota o modelo de Publicação Contínua, o que significa que os artigos são publicados imediatamente após a aceitação, sem esperar pela compilação de uma edição completa. Essa abordagem acelera a disseminação e a disponibilidade de descobertas científicas, beneficiando pesquisadores, estudantes, leitores, editoras e agências de fomento, promovendo rapidez e acesso oportuno a pesquisas de alta qualidade para leitura e citação.
-
-\subsection{Acesso Aberto Diamante}
-
-A SBC Reviews é de acesso aberto e gratuito para autores e leitores. Todos os artigos publicados pela SBC Reviews são disponibilizados online de forma gratuita e permanente imediatamente após a publicação, sem taxas de assinatura ou barreiras de registro. Acreditamos que a política adotada elimina barreiras econômicas e geográficas, promove a democratização global e acelera o progresso da pesquisa.
-
-\subsection{Aviso de Direitos Autorais}
-Os autores que publicam na SBC Reviews mantêm os direitos autorais de seus artigos e autorizam a SBC a publicá-los sob os termos da Licença Pública Internacional Creative Commons Atribuição 4.0 (CC BY 4.0). Assim, os autores ou terceiros podem reproduzir ou distribuir, no todo ou em parte, conteúdo extraído dos artigos publicados, na íntegra, adaptado ou remixado, desde que sejam atribuídos os devidos créditos aos autores originais e à publicação original.
-
-\section{Submissões}
-
-\subsection{Checklist de Preparação para Submissão}
-
-Como parte do processo de submissão, os autores devem verificar a conformidade de sua submissão com todos os itens a seguir. As submissões poderão ser devolvidas aos autores que não seguirem estas diretrizes.
-
-\section{Revisões de Literatura}
-
-Revisões de literatura são estudos retrospectivos e observacionais.
-A SBC Reviews publica revisões de literatura em áreas de pesquisa em Computação, incluindo, entre outros, os seguintes tipos de revisão:
-
-\textbf{Revisões sistemáticas de literatura} são revisões rigorosas e abrangentes que visam responder a uma questão de pesquisa específica e focada, avaliando e sintetizando criticamente todos os estudos de pesquisa originais relevantes. Se métodos estatísticos forem usados para combinar dados quantitativos de vários estudos, trata-se de um estudo de Meta-Análise.
-
-\textbf{Revisões multivocais da literatura} são um tipo de RSL que incorpora tanto literatura formal revisada por pares (como artigos de periódicos e trabalhos de conferências) quanto literatura cinzenta. A literatura cinzenta inclui materiais como relatórios técnicos, postagens em blogs e apresentações em conferências, que podem não ser formalmente publicados ou revisados por pares.
-
-\textbf{Revisões de escopo} abordam questões de pesquisa mais amplas e exploratórias para mapear a extensão, o alcance e a natureza da pesquisa sobre um tópico específico. Entre outros objetivos, as revisões de escopo ajudam a determinar se uma revisão sistemática da literatura é necessária.
-
-\textbf{Mapeamentos sistemáticos da literatura} concentram-se na categorização e quantificação da literatura existente para fornecer uma visão geral da atividade de pesquisa em um subcampo.
-
-O periódico SBC Reviews também avalia submissões de revisões de literatura que abordam avaliações de progresso e/ou avaliações críticas relevantes para subcampos específicos.
-
-\section{Exemplo de Título Nível 1 (Seção)}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\subsection{Exemplo de Título Nível 2 (Subseção)}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\begin{quotation}
-\textit{This is a longer quotation. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et magna aliqua. 
-}\end{quotation} 
-
-\subsubsection{Exemplo de Título Nível 3 (Subsubseção)}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\paragraph{Exemplo de Título Nível 4 (Parágrafo).}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. 
-Let
 \[
-x=(x_1,\dots,x_n)\in R^n
-\]be an \(n\)-dimensional vector. The sparse PCA problem can be written as
-\begin{equation}\label{eq1}
-\max\limits_{x}\{x^TAx-\rho\|x\|_0:x^Tx=1\},
-\end{equation}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur\break equation (\ref{eq1}). 
-\[\max\limits_{x}\{x^TAx :x^Tx=1\}.\]
-If $A$ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+\hat L = \frac{1}{N}\sum_{k=1}^{N} L(x_k),
+\]
 
+convertendo aliasing estruturado em ruído de alta frequência. Os slides enfatizam o caso aleatório uniforme e a fórmula de jitter subpixel nas páginas 4-9.
 
-Equation (\ref{eq1}) is a special case of the following sparse generalized eigenvector problem (GEV):
-\begin{equation}\label{GEV}
-\max\limits_{x}\{x^TAx-\rho \|x\|_0: x^TBx\leq 1\},
-\end{equation}
+O repositório implementa duas versões dessa ideia em \texttt{Film.get\_samples\_for\_pixel()}: \texttt{jittered} e \texttt{stratified}. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com PBRT 4e~\citep{pharr2023pbrt}, \S 8.5: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Após a refatoração recente, a definição concreta desses padrões 2D foi extraída para \path{src/ray_tracing_2/sampling.py}, de modo que \texttt{film.py} passou a atuar como camada de interpretação geométrica do domínio do pixel, e não mais como o único lugar onde os padrões são definidos. Isso fortalece a correspondência entre a teoria de amostragem do Slide 5 e a arquitetura do código: há um mesmo quadrado unitário amostral, mas cada domínio o reinterpreta de forma física distinta.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. 
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 61; \texttt{render()}, l. 112).
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \textbf{Table~\ref{tab2}}.
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S\S 8.1 e 8.5.
 
-\section{Exemplo de Título Nível 1}
+\subsection{Instanciação, coordenadas homogêneas e transformação correta de normais}
+\label{sec:slide5-instanciacao}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+O Slide 5 também formaliza a ideia de instância geométrica: em vez de reescrever a interseção de um elipsoide, por exemplo, transforma-se o raio do espaço global para o espaço local de uma primitiva canônica (\texttt{5.tracado\_de\_raios2.pdf}, pp. 9-13). Em álgebra linear, isso significa representar translação, rotação e escala em coordenadas homogêneas e aplicar a inversa da transformação ao raio incidente. A síntese mais importante desse bloco aparece na dedução da transformação de normais por
 
+\[
+\mathbf{n}' = (M^{-1})^{T}\mathbf{n},
+\]
 
-\begin{table*}
-\caption{Exemplo de legenda de tabela.  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit.} 
+preservando a ortogonalidade com o plano tangente após transformações afins gerais.
+
+\texttt{Instance.intersect()} implementa exatamente esse fluxo. O raio é mapeado com \texttt{m\_inv}, a interseção é resolvida no espaço local da forma base e, se houver hit, a posição volta ao mundo pela matriz direta. A normal, porém, usa \texttt{m\_inv\_t}, isto é, a inversa transposta. Essa é a consequência algébrica correta da preservação da ortogonalidade entre normal e plano tangente. O relatório precisa explicitar esse ponto porque ele é um dos poucos trechos em que a implementação realmente depende de um fato sutil de álgebra linear, e não apenas de manipulação vetorial elementar.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Instance}, l. 253; \texttt{Instance.intersect()}, l. 262), \path{src/ray_tracing_2/main_box.py} (\texttt{render()}, l. 63), \path{src/ray_tracing_2/main_triangles.py} (\texttt{render()}, l. 100).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 3.5.
+
+\subsection{Luz de área, integração sobre o emissor e penumbra}
+\label{sec:slide5-arealight}
+
+Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor com extensão geométrica finita, o que exige integrar a contribuição luminosa sobre uma superfície (\texttt{5.tracado\_de\_raios2.pdf}, pp. 14-23). Essa mudança é fisicamente relevante: penumbra surge porque diferentes subregiões da fonte são visíveis ou ocluídas de maneira diferente a partir do ponto sombreado. As páginas 14-17 introduzem o emissor extenso; as páginas 18-23 traduzem isso em soma de amostras e variabilidade espacial da visibilidade.
+
+\texttt{AreaLight.sample\_radiance()} aproxima essa integral por soma discreta sobre uma grade \texttt{samples\_u} $\times$ \texttt{samples\_v}, com jitter em cada célula. A construção é coerente com os slides e com PBRT 4e~\citep{pharr2023pbrt}, \S 12.4: a energia é distribuída entre as amostras e sofre decaimento geométrico explícito com $1/r^2$, diferentemente da \texttt{PointLight}. Depois da extração de \path{src/ray_tracing_2/sampling.py}, os padrões \texttt{uniform}, \texttt{regular} e \texttt{stratified} passaram a ser definidos em um único módulo interno e a \texttt{AreaLight} apenas os converte do quadrado unitário para a superfície emissiva por meio da parametrização afim $p + u\,e_u + v\,e_v$. Em outras palavras, a implementação preserva a convenção simplificada para luz pontual, mas usa uma aproximação radiometricamente mais próxima do caso físico quando a fonte possui área.
+
+Essa dualidade precisa ser registrada: o projeto não usa um único modelo coerente para todas as luzes. Ele usa, deliberadamente, a convenção do enunciado para \texttt{PointLight} e uma aproximação mais geométrica para \texttt{AreaLight}.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}, l. 80; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133; \texttt{radiance()}, l. 173), \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 31; criação da \texttt{AreaLight}, l. 59-66).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 12.4.
+
+\subsection{Caixa, AABB e método de slabs}
+\label{sec:slide5-aabb}
+
+O Slide 5 introduz a caixa alinhada aos eixos tanto como primitiva quanto como ferramenta de raciocínio geométrico (\texttt{5.tracado\_de\_raios2.pdf}, pp. 24-25). A essência do método de slabs é decompor a interseção do raio com a caixa em três intervalos unidimensionais, um por eixo, e combinar os tempos de entrada e saída por máximos e mínimos. Isso é uma interseção de intervalos, não um teste de plano isolado.
+
+O repositório usa essa ideia em dois níveis. Primeiro, \texttt{Box.intersect()} implementa a caixa como primitiva visível da cena. Segundo, \texttt{AABB.intersects()} em \texttt{triangle\_bvh.py} reutiliza o mesmo princípio como teste de poda para a BVH de triângulos. Esse reuso é conceitualmente importante: o Slide 5 ensina uma primitiva; o Slide 6 reaproveita exatamente a mesma álgebra como volume de contenção.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Box}, l. 74; \texttt{Box.intersect()}, l. 88), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}, l. 47; \texttt{intersects()}, l. 60).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 3.7.
+
+\subsection{De traçador local a traçador recursivo}
+\label{sec:slide5-recursao}
+
+O salto conceitual mais importante do Slide 5 é que o pipeline do Slide 4 não é descartado; ele é recursivamente reusado (\texttt{5.tracado\_de\_raios2.pdf}, pp. 26-35). Em termos da equação de transporte, isso equivale a acrescentar alguns caminhos óticos privilegiados ao estimador: reflexão perfeita, transmissão perfeita e luzes explícitas. Em termos algorítmicos, significa que certos materiais deixam de devolver apenas uma cor local e passam a disparar novos raios. As páginas 26-28 cobrem a reflexão, as páginas 29-34 cobrem a transmissão, e a página 35 consolida a generalização do shadow ray em transmitância acumulada.
+
+O repositório codifica essa extensão com clareza. \texttt{Scene.trace\_ray()} continua mínimo: encontra o \texttt{Hit} e delega ao material. A recursão é controlada por \texttt{Scene.can\_spawn\_ray()}, que impõe profundidade máxima finita. Isso é coerente tanto numericamente quanto fisicamente: cada salto adicional é ponderado por refletância ou transmitância menores que 1, de modo que a contribuição tende a decair. A limitação de profundidade, portanto, é ao mesmo tempo um controle de custo e uma aproximação de truncamento de série.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41; \texttt{trace\_ray()}, l. 102).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 1.2.
+
+\subsection{Reflexão especular com Fresnel-Schlick}
+\label{sec:slide5-fresnel}
+
+O Slide 5 introduz a reflexão metálica via aproximação de Schlick, isto é,
+
+\[
+R(\theta)=R_0 + (1-R_0)(1-\cos\theta)^5,
+\]
+
+como aproximação de baixo custo das equações de Fresnel para interfaces suaves (\texttt{5.tracado\_de\_raios2.pdf}, pp. 26-28). O papel físico de $R_0$ é resumir a refletância em incidência normal; o papel geométrico de $\theta$ é medir a inclinação relativa entre direção de visão e normal. As páginas 26-27 são as mais importantes aqui: nelas os slides ligam a expressão de Schlick ao rateio entre resposta local e raio refletido recursivo.
+
+\texttt{ReflectiveMaterial.eval()} implementa exatamente esse rateio: a componente local de Phong é ponderada por $(1-R)$ e a contribuição do raio refletido é ponderada por $R$. É importante, contudo, qualificar a frase ``conservação de energia'' que aparece nos slides-resumo. No repositório, essa mistura é fisicamente plausível, mas não é um BRDF estrito nem um balanço energético formal no sentido de PBRT. O termo local de Phong permanece empírico, e o uso de Schlick aqui deve ser entendido como melhora angular do modelo, não como substituição integral por um material fisicamente baseado.
+
+Há ainda uma nuance angular importante. O cosseno usado na aproximação de Schlick vem da inclinação entre a direção de observação e a normal local, isto é, de um termo do tipo \texttt{dot(v, n)}, e não de um ``ângulo crítico'' pré-computado da interface. Essa escolha é consistente com a forma clássica de Schlick para refletância direcional, mas reforça o caráter aproximado do material: a implementação melhora a dependência angular da reflexão sem migrar para um modelo microfacet completo.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial}, l. 84; \texttt{eval()}, l. 101).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 9.3.
+
+\subsection{Refração dielétrica, Lei de Snell, reflexão interna total e Beer-Lambert}
+\label{sec:slide5-refracao}
+
+O bloco de refração dos slides (\texttt{5.tracado\_de\_raios2.pdf}, pp. 29-36) é o trecho de física mais rico do projeto. A interface entre meios com índices de refração diferentes obedece a Snell,
+
+\[
+\eta_i \sin\theta_i = \eta_t \sin\theta_t,
+\]
+
+enquanto a fração refletida continua sendo modulada por Fresnel. As páginas 29-32 concentram a dedução geométrica da refração a partir da decomposição em componentes normal e tangencial; a página 33 introduz Beer-Lambert; a página 34 sintetiza o algoritmo completo do dielétrico. Além disso, quando o radicando da solução vetorial de transmissão fica negativo, ocorre reflexão interna total. Finalmente, se o raio efetivamente penetra no material, a intensidade transmitida deve ser atenuada pela espessura percorrida, segundo Beer-Lambert.
+
+\texttt{TransparentMaterial.eval()} implementa essa sequência de decisões. Primeiro calcula $R_0$ e $R$ por Schlick; depois escolhe a razão $\eta_i/\eta_t$ a partir de \texttt{front\_face} e \texttt{backfacing}; em seguida chama \texttt{glm.refract()} e interpreta um vetor nulo como TIR; por fim, aplica a atenuação por canal
+
+\[
+I(\lambda,s)=I_0(\lambda)\,a(\lambda)^s.
+\]
+
+O uso de \texttt{front\_face} e \texttt{backfacing}, calculado em \texttt{Hit.set\_face\_normal()}, é crucial: ele traduz a orientação geométrica da interface em semântica ótica de entrada e saída do meio. Isso é um caso exemplar de acoplamento correto entre álgebra linear local da superfície e física de propagação.
+
+No caso da iluminação direta através de transparentes, \texttt{TransparentMaterial.shadow\_transmittance()} aplica Beer-Lambert apenas quando o raio de sombra deixa o meio, isto é, no caso \texttt{backfacing = True}. Essa escolha é coerente com a hipótese de meio homogêneo adotada pelo projeto: o comprimento óptico relevante já foi acumulado em \texttt{hit.t} no segmento interno do material, de modo que atenuar também na entrada equivaleria a dupla contagem. Trata-se, ainda assim, de uma simplificação relevante: o modelo opera por canal RGB, sem dispersão espectral contínua e sem heterogeneidade volumétrica interna. Em termos de física computacional, isso equivale a resolver um meio homogêneo com profundidade óptica escalar por canal, e não um meio espectral completo.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/hit.py} (\texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/material.py} (\texttt{TransparentMaterial}, l. 137; \texttt{shadow\_transmittance()}, l. 167; \texttt{eval()}, l. 186).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S\S 9.3, 9.5 e 11.2.
+
+\subsection{Da sombra binária à transmitância acumulada}
+\label{sec:slide5-transmitancia}
+
+O Slide 5 culmina em uma generalização conceitualmente elegante: o antigo raio de sombra do Slide 4 deixa de responder apenas ``visível'' ou ``ocluído'' e passa a acumular atenuações ao atravessar materiais transparentes (\texttt{5.tracado\_de\_raios2.pdf}, pp. 33-35). Em termos físicos, esse é um primeiro passo em direção à ideia mais geral de transmitância ao longo de um segmento, isto é, à acumulação multiplicativa de fatores do tipo
+
+\[
+T = \prod_k a_k^{s_k}.
+\]
+
+Em termos computacionais, é uma iteração sobre hits sucessivos até a fonte.
+
+\texttt{Scene.transmittance()} implementa precisamente essa lógica. O segmento entre ponto sombreado e luz é percorrido em vários passos; objetos opacos zeram a energia; materiais transparentes delegam a \texttt{shadow\_transmittance()}, que no caso dielétrico aplica Beer-Lambert apenas ao sair do meio. O algoritmo ainda adiciona dois cuidados numéricos: limiar inferior para throughput muito pequeno e limite \texttt{max\_steps} para evitar laços indevidos em cenas mal condicionadas.
+
+Esse método é particularmente importante porque mostra a coerência arquitetural do projeto: o mesmo mecanismo de interseção da cena é reutilizado tanto para visibilidade direta quanto para óptica recursiva.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/material.py} (\texttt{Material.shadow\_transmittance()}, l. 30; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).
+
+PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 11.2.
+
+\subsection{Quadro de aderência entre Slide 5 e implementação}
+\label{sec:slide5-quadro}
+
+\begin{table*}[!ht]
+\caption{Quadro de aderência entre o Slide 5 e a implementação atual.}
+\label{tab:slide5-aderencia}
 \centering
-\begin{tabular*}{\textwidth}{@{}c\x c\x c\x c\x c\x c\x c\x c\x c\x c\x c\x c@{}}
-\hline \hline
- Número   &  Vel (km/h)   & $\alpha$ (m/s$^2$)    &  $\epsilon^{(1)}$  &  $\epsilon^{(2)}$ 
-         & $\delta^{(1)}$ & $\delta^{(2)}$  &  $\delta^{(3)}$    & $\gamma^{(1)}$ 
-         & $\gamma^{(2)}$ & $\alpha^{(1)}$  & $\alpha^{(2)}$ \\
-%
-\hline
- 1 & 3.5 & 2.0 & 0.20 & -0.05 & 0.00 & -0.20 & -0.05 & 0.20 & ~0.05 & 20 & 10 \\ 
- 2 & 2.5 & 1.5 & 0.10 & -0.15 & 0.05 & -0.15 & ~0.00 & 0.10 & -0.05 & 20 & 40 \\ 
- 3 & 3.0 & 1.8 & 0.20 & -0.05 & 0.25 & ~0.05 & ~0.20 & 0.15 & ~0.00 & 20 & 70$^a$ \\
-\hline \hline
-\end{tabular*}\label{tab2}
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.25\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t}
+}
+Conceito do Slide 5 & Situação no repositório & Evidência \\
+Antialiasing por múltiplas amostras por pixel & Implementado com extensão & \texttt{sampling.uniform\_samples\_2d()}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()}; \texttt{Film.render()} \\
+Jitter subpixel aleatório & Implementado & \texttt{SamplingMode.JITTERED}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
+Amostragem estratificada & Implementado como extensão & \texttt{SamplingMode.STRATIFIED}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
+Instanciação por transformações afins em coordenadas homogêneas & Implementado & \texttt{Instance.intersect()}; \texttt{main\_ellipse.py}; \texttt{main\_box.py} \\
+Transformação correta de normais por inversa transposta & Implementado & \texttt{m\_inv\_t} em \texttt{Instance.intersect()} \\
+Luz de área com integração discreta e penumbra & Implementado com aproximação & \texttt{AreaLight.sample\_radiance()}; \texttt{AreaLight.radiance()}; \texttt{main\_area\_light.py} \\
+Padrões regular e uniforme puros para amostragem da luz & Implementado com modos explícitos & \texttt{AreaLightSamplingMode.REGULAR}; \texttt{AreaLightSamplingMode.UNIFORM}; \texttt{sampling.regular\_grid\_samples\_2d()}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{AreaLight.\_iter\_sample\_uvs()} \\
+Caixa/AABB e método de slabs & Implementado & \texttt{Box.intersect()}; \texttt{AABB.intersects()} \\
+Traçador recursivo com profundidade finita & Implementado & \texttt{Scene.can\_spawn\_ray()}; \texttt{Scene.trace\_ray()} \\
+Reflexão especular com Fresnel-Schlick & Implementado com aproximação & \texttt{ReflectiveMaterial.eval()} \\
+Refração dielétrica com Snell, TIR e Beer-Lambert & Implementado com simplificação & \texttt{TransparentMaterial.eval()}; \texttt{TransparentMaterial.shadow\_transmittance()} \\
+Generalização do shadow ray para transmitância acumulada & Implementado & \texttt{Scene.transmittance()} \\
+\end{tblr}
 \end{table*}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+O quadro mostra que o Slide 5 é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com padrão configurável (\texttt{regular}, \texttt{uniform}, \texttt{stratified}), e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
 
-\begin{itemize}
-\item Esse é um exemplo de lista de tópicos. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\end{itemize}
+\section{Slide 6: Triângulos e Estruturas de Aceleração}
+\label{sec:slide6}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\subsection{Triângulo, área orientada e coordenadas baricêntricas}
+\label{sec:slide6-triangulo}
 
-\begin{enumerate}%
-\item Esse é um exemplo de lista numerada. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\end{enumerate}
+O Slide 6 começa corretamente pelo triângulo como primitiva elementar de malhas (\texttt{6.estrutura\_aceleracao.pdf}, pp. 3-4). Os vetores de aresta $\mathbf{e}_1=\mathbf{b}-\mathbf{a}$ e $\mathbf{e}_2=\mathbf{c}-\mathbf{a}$ definem uma área orientada via produto vetorial,
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\[
+A = \frac{\lVert\mathbf{e}_1 \times \mathbf{e}_2\rVert}{2},
+\]
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+e qualquer ponto do triângulo pode ser expresso por coordenadas baricêntricas,
 
+\[
+\mathbf{p}=\mathbf{a}+u\mathbf{e}_1+v\mathbf{e}_2,\qquad u\ge 0,\ v\ge 0,\ u+v\le 1.
+\]
 
-\subsection{Exemplo de Título Nível 2}
+A importância disso vai além da geometria elementar: coordenadas baricêntricas são a ponte entre interior do triângulo, teste de pertencimento e parametrização afim da superfície.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \textbf{Figure \ref{Fig1}}.
+No código, \texttt{Triangle} pré-computa \texttt{e1}, \texttt{e2} e a normal geométrica orientada a partir de \texttt{cross(e1, e2)}. A normal degenerada é rejeitada com exceção explícita, o que evita triângulos colineares ou nulos no carregamento da malha.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Triangle}, l. 144).
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\subsection{Interseção raio-triângulo por Möller-Trumbore}
+\label{sec:slide6-moller}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{sol.jpg}
-\caption{Exemplo de legenda de figura.}\label{Fig1}
-\end{center}
+O coração algébrico do Slide 6 é a dedução do teste de Möller-Trumbore a partir do sistema linear que iguala ponto do raio e combinação baricêntrica dos vértices (\texttt{6.estrutura\_aceleracao.pdf}, pp. 5-12). Em notação compacta, os slides resolvem algo do tipo
+
+\[
+\mathbf{o}+t\hat{\mathbf{d}} = \mathbf{a}+u\mathbf{e}_1+v\mathbf{e}_2,
+\]
+
+via determinantes e produtos mistos, e a solução só é válida se $u\ge 0$, $v\ge 0$, $u+v\le 1$ e $t>0$.
+
+\texttt{Triangle.intersect()} implementa exatamente essa forma operacional: \texttt{pvec}, \texttt{det}, \texttt{inv\_det}, \texttt{u}, \texttt{v}, \texttt{qvec} e \texttt{t\_candidate}. Em termos geométricos, o algoritmo evita construir explicitamente o plano do triângulo; em termos computacionais, ele é compacto e numericamente robusto para o porte do projeto. O teste \texttt{abs(det) < eps} trata o caso de quase paralelismo entre raio e plano do triângulo.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Triangle.intersect()}, l. 158).
+
+\subsection{Malha triangulada e carregamento de geometria}
+\label{sec:slide6-malha}
+
+Os slides seguem do triângulo isolado para a malha: tabela de vértices, tabela de incidência e necessidade de estruturas de aceleração (\texttt{6.estrutura\_aceleracao.pdf}, pp. 13-14). O repositório segue essa linha em \texttt{TriangleMesh}, que pode ser construído diretamente de listas de vértices e faces e ainda ser instanciado por \texttt{Instance}, preservando o mesmo pipeline de interseção e material das primitivas analíticas.
+
+Essa homogeneidade é importante: a malha não cria um segundo sistema de renderização. Ela é apenas outra fonte de primitivas compatíveis com \texttt{Scene.compute\_intersection()}. A aceleração, quando presente, muda custo computacional, não semântica geométrica do hit.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{TriangleMesh}, l. 188; \texttt{from\_vertices\_faces()}, l. 221), \path{src/ray_tracing_2/main_triangles.py} (\texttt{\_triangle\_mesh\_from\_spec()}, l. 39; chamada a \texttt{TriangleMesh.from\_vertices\_faces()}, l. 68).
+
+\section{Experimentos Breves}
+\label{sec:experimentos}
+
+\subsection{Cena mínima do Slide 4}
+\label{sec:experimentos-minima}
+
+Arquivo âncora: \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25; esfera, l. 54; plano, l. 55; luz pontual, l. 59).
+
+Esta cena valida o núcleo mais simples do projeto: câmera pinhole, uma primitiva curva, um plano de apoio, iluminação local e sombra dura. Ela é a melhor cena para detectar regressões de geometria, orientação de normal e fluxo básico de \texttt{trace\_ray()}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{../outputs/main_scene_20260405_190325/render.png}
+\caption{Cena mínima com \texttt{PointLight}.}
+\label{fig:main-scene}
 \end{figure}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\subsection{Penumbra por fonte extensa}
+\label{sec:experimentos-penumbra}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \textbf{Figure \ref{Fig2}}.
+Arquivo âncora: \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 23; criação da \texttt{AreaLight}, l. 47-48).
 
-\begin{figure*}
-\begin{center}
-\includegraphics[width=30pc]{sol.jpg}
-\caption{{Exemplo de legenda de figura.}}
- \label{Fig2}
-\end{center}
+Ao substituir a fonte pontual por uma fonte retangular amostrada, a borda de sombra deixa de ser descontínua e passa a ocupar uma região de penumbra. Esta imagem confirma empiricamente a leitura teórica do Slide 5: a luz de área é uma integral sobre um emissor estendido aproximada por soma finita de amostras.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{../outputs/main_area_light_20260405_204336/render.png}
+\caption{Penumbra com \texttt{AreaLight}.}
+\label{fig:area-light}
+\end{figure}
+
+\subsection{Caixa tipo Cornell e instâncias geométricas}
+\label{sec:experimentos-cornell-box}
+
+Arquivo âncora: \path{src/ray_tracing_2/main_box.py} (\texttt{render()}, l. 63; paredes, l. 116; blocos instanciados, l. 140; luz pontual, l. 143).
+
+Esta cena é importante menos pelo efeito óptico avançado e mais pela infraestrutura geométrica: cinco paredes, dois blocos instanciados e uma configuração fechada que expõe erros de transformação, orientação de normal e auto-interseção. Ela demonstra que \texttt{Instance} permite reusar caixas canônicas como blocos orientados e transladados sem reescrever a matemática de interseção.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{../outputs/main_box_20260412_162658/render.png}
+\caption{Cena tipo Cornell Box.}
+\label{fig:main-box}
+\end{figure}
+
+\subsection{Malha triangular com BVH local}
+\label{sec:experimentos-bvh-local}
+
+Arquivo âncora: \path{src/ray_tracing_2/main_triangles.py} (\texttt{\_triangle\_mesh\_from\_spec()}, l. 39; \texttt{TriangleMesh.from\_vertices\_faces()}, l. 68; \texttt{render()}, l. 100; luzes, l. 179).
+
+Esta é a evidência experimental mais importante para o Slide 6. O arquivo \path{outputs/main_triangles_20260424_233034/properties.md} registra 5 vértices, 6 faces trianguladas, acelerador \texttt{bvh}, \texttt{bvh\_leaf\_size = 2}, 7 nós, 4 folhas e profundidade máxima 3. Portanto, o relatório pode afirmar com segurança que a malha triangular e a BVH local estão de fato ativas na renderização dessa cena específica.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{../outputs/main_triangles_20260424_233034/render.png}
+\caption{Malha triangular com BVH local.}
+\label{fig:triangles-bvh}
+\end{figure}
+
+\subsection{Cornell Box com pirâmides refletiva e transparente}
+\label{sec:experimentos-pyramids}
+
+Arquivo âncora: \path{src/ray_tracing_2/cornell_box_pyramid.py} (\texttt{render()}, l. 50; construção das duas \texttt{TriangleMesh}, l. 167 e l. 174; luzes, l. 205 e l. 224).
+
+Esta cena combina os dois eixos mais avançados do projeto: materiais recursivos do Slide 5 e geometria triangulada do Slide 6. O arquivo \path{outputs/cornell_box_pyramid_20260425_003203/properties.md} confirma a presença de duas malhas triangulares distintas, uma transparente e outra refletiva, embutidas em uma cena fechada com múltiplas luzes. Isso a torna a melhor demonstração integrada de que triângulos, reflexão e refração não são módulos isolados, mas participam do mesmo pipeline de visibilidade e transporte local e recursivo.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{../outputs/cornell_box_pyramid_20260425_003203/render.png}
+\caption{Cornell Box com duas pirâmides trianguladas.}
+\label{fig:pyramids-base}
+\end{figure}
+
+Uma execução mais recente da mesma cena, agora com \texttt{--spp 10} e \texttt{--sampling\_mode stratified}, reforça o mesmo ponto com uma evidência visual menos ruidosa e também documenta melhor o custo computacional da integração recursiva nessa configuração. O arquivo \path{outputs/cornell_box_pyramid_20260501_210143/properties.md} registra \texttt{samples\_per\_pixel = 10}, \texttt{sampling\_mode = stratified}, \texttt{render\_time\_seconds = 1035.4509} e \texttt{render\_time\_minutes = 17.2575}, mantendo a mesma combinação central de duas \texttt{TriangleMesh}, uma transparente e outra refletiva, em uma Cornell Box com luz de área e luzes pontuais auxiliares.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{../outputs/cornell_box_pyramid_20260501_210143/render.png}
+\caption{Cornell Box com duas pirâmides trianguladas em spp 10 estratificado.}
+\label{fig:pyramids-spp10}
+\end{figure}
+
+\subsection{Reprodutibilidade experimental por CLI padronizada}
+\label{sec:experimentos-cli}
+
+Embora a padronização do parser não altere a física do renderizador, ela melhora diretamente a rastreabilidade dos experimentos. Em particular, ela torna explícito um ponto conceitual importante do Slide 5: a amostragem bidimensional sobre o pixel (\texttt{5.tracado\_de\_raios2.pdf}, pp. 4-9) e a amostragem bidimensional sobre a fonte extensa (\texttt{5.tracado\_de\_raios2.pdf}, pp. 14-23) não são a mesma integral, ainda que ambas usem padrões 2D. Por isso, o repositório preserva dois controles públicos distintos, \texttt{sampling\_mode} para o filme e \texttt{light\_sampling\_mode} para \texttt{AreaLight}, enquanto reutiliza apenas uma infraestrutura interna compartilhada de geração de padrões 2D.
+
+Do ponto de vista metodológico, essa separação é desejável: ela permite variar o estimador de anti-aliasing sem alterar a quadratura usada na integração da luz de área, e vice-versa. Isso reduz ambiguidade na interpretação dos resultados e melhora a comparabilidade entre execuções documentadas no próprio \texttt{properties.md}.
+
+Exemplos mínimos de reprodução, todos com \texttt{800x600} e \texttt{spp = 1}:
+
+\begin{quote}
+\small\ttfamily
+python -m ray\_tracing\_2.main --width 800 --height 600 --spp 1\\
+python -m ray\_tracing\_2.main\_area\_light --width 800 --height 600 --spp 1\\
+\hspace*{1em}--sampling\_mode stratified --light\_sampling\_mode regular\\
+python -m ray\_tracing\_2.cornell\_box --width 800 --height 600 --spp 1\\
+\hspace*{1em}--sampling\_mode jittered --light\_sampling\_mode uniform\\
+python -m ray\_tracing\_2.main\_triangles --width 800 --height 600 --spp 1\\
+\hspace*{1em}--scene inputs/triangle\_pyramid.json --accelerator bvh\\
+python -m ray\_tracing\_2.generate\_scene --input inputs/example\_scene.json\\
+\hspace*{1em}--width 800 --height 600 --spp 1
+\end{quote}
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/cli.py} (\texttt{build\_parser()}, l. 14; \texttt{add\_sampling\_arguments()}, l. 37; \texttt{add\_light\_sampling\_argument()}, l. 52), \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}, l. 17; \texttt{get\_samples\_for\_pixel()}, l. 61), \path{src/ray_tracing_2/light.py} (\texttt{AreaLightSamplingMode}, l. 45; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133), \path{src/ray_tracing_2/main.py} (\texttt{build\_cli\_parser()}, l. 79), \path{src/ray_tracing_2/main_area_light.py} (\texttt{build\_cli\_parser()}, l. 89), \path{src/ray_tracing_2/main_triangles.py} (\texttt{build\_cli\_parser()}, l. 202) e \path{src/ray_tracing_2/generate_scene.py} (\texttt{build\_cli\_parser()}, l. 122).
+
+\subsection{Diagramas renderizados como camada adicional de rastreabilidade}
+\label{sec:experimentos-diagramas}
+
+Além das imagens de saída das cenas, o repositório inclui diagramas PlantUML efetivamente renderizados em PNG, que funcionam como documentação intermediária entre o texto deste relatório e o código executável. O ponto metodológico importante é que esses diagramas não substituem a análise anterior; eles a condensam em vistas complementares do pipeline real, já validadas sintaticamente pelo próprio PlantUML.
+
+\paragraph{Visão geral do pipeline.}
+Este diagrama sintetiza o fluxo entre entrypoint, \texttt{cli.py}, \texttt{CommonRenderOptions}, construção de cena e câmera, \texttt{Render.render()}, \texttt{Film.render()} e geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}.
+
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_render_overview_v1.puml.png}
+\caption{Diagrama renderizado da visão geral do pipeline.}
+\label{fig:diagram-overview}
 \end{figure*}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\paragraph{Fluxo dinâmico de sombreamento recursivo.}
+Esta vista separa do overview o trecho mais denso do Slide 5, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_trace_flow_v1.puml.png}
+\caption{Diagrama renderizado do fluxo de \texttt{trace\_ray} e shading recursivo.}
+\label{fig:diagram-trace}
+\end{figure*}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\paragraph{Fluxo local de aceleração para malhas.}
+Este diagrama deixa explícito que a poda por AABB e a travessia da BVH acontecem dentro de \texttt{TriangleMesh}, e não como acelerador global da cena, o que reforça a leitura defendida na Seção~\ref{sec:slide6}.
 
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_bvh_flow_v1.puml.png}
+\caption{Diagrama renderizado do fluxo local de BVH para \texttt{TriangleMesh}.}
+\label{fig:diagram-bvh}
+\end{figure*}
 
+\paragraph{Visão estrutural estática.}
+Esta imagem complementa os diagramas dinâmicos ao mostrar dependências entre \texttt{Render}, \texttt{Scene}, \texttt{Film}, \texttt{Camera}, \texttt{Light}, \texttt{Material}, \texttt{TriangleMesh} e \texttt{TriangleBVH}.
 
-\paragraph{Exemplo de Título Nível 4.}
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_2_class-diagram.puml.png}
+\caption{Diagrama renderizado da arquitetura principal do \texttt{ray\_tracing\_2}.}
+\label{fig:diagram-class}
+\end{figure*}
 
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Em conjunto, esses artefatos visuais fortalecem a rastreabilidade do relatório: as Seções~\ref{sec:slide4} e~\ref{sec:slide5} ganham uma representação operacional do pipeline completo, enquanto a Seção~\ref{sec:slide6} passa a contar com uma visualização explícita da fronteira entre interseção global da cena e aceleração local de malhas triangulares.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\section{Limitações Atuais e Delimitação de Escopo}
+\label{sec:limitacoes}
+
+\subsection{Estruturas de aceleração ausentes ou apenas parciais}
+\label{sec:limitacoes-aceleracao}
+
+À luz de \texttt{6.estrutura\_aceleracao.pdf}, a implementação atual cobre apenas uma fração do espaço de técnicas apresentado nos slides. O repositório não implementa grade regular, refinamento por SAT nem percorrimento incremental célula a célula (\texttt{6.estrutura\_aceleracao.pdf}, pp. 15-21); tampouco implementa SAH, compactação linear da BVH ou um agregador global de cena (\texttt{6.estrutura\_aceleracao.pdf}, pp. 22-36). O que existe de fato é uma BVH estática local a cada \texttt{TriangleMesh}, suficiente para reduzir o custo interno da malha, mas insuficiente para substituir uma estrutura de aceleração global do ray tracer.
+
+Essa distinção é importante porque o custo no topo da cena continua linear. \texttt{Scene.compute\_intersection()} percorre \texttt{self.objects} de forma sequencial, de modo que a aceleração atua apenas dentro da malha triangulada, não entre esferas, caixas, instâncias e múltiplas malhas coexistindo na mesma cena. Portanto, a formulação correta no relatório não é ``o Slide 6 foi implementado'', mas sim ``parte do Slide 6 foi materializada por uma BVH local simplificada''.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{TriangleBVH}, l. 140; \texttt{\_build()}, l. 154; \texttt{TriangleBVHNode.intersect()}, l. 109).
+
+\subsection{Câmera e formação de imagem}
+\label{sec:limitacoes-camera}
+
+O projeto permanece estritamente no modelo pinhole apresentado no Slide 4. Isso significa que \texttt{Camera.generate\_ray()} sempre emite raios a partir de um único centro ótico, sem abertura finita, sem lente fina e sem profundidade de campo. A variável \texttt{focal\_distance} controla apenas a escala geométrica do plano de projeção, e não um mecanismo de focalização seletiva.
+
+Essa limitação não invalida o modelo adotado; ela apenas delimita seu alcance. O supersampling do Slide 5 melhora a aproximação da média radiância por pixel, mas não altera a física óptica da câmera. Logo, qualquer leitura do resultado visual deve ser feita como imagem de câmera pinhole com amostragem estocástica, e não como imagem com desfoque óptico de lente.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/camera.py} (\texttt{Camera.\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 60).
+
+\subsection{Convenções radiométricas e simplificações de iluminação}
+\label{sec:limitacoes-radiometria}
+
+Há uma simplificação deliberada e potencialmente enganosa se não for declarada: \texttt{PointLight} e \texttt{AreaLight} não seguem a mesma convenção radiométrica nesta base. Os slides de iluminação pontual apresentam o decaimento geométrico clássico por $1/r^2$ (\texttt{4.tracado\_de\_raios.pdf}, pp. 40-41), mas \texttt{PointLight.radiance()} preserva a convenção do enunciado principal e trata \texttt{power} como radiância incidente constante modulada apenas por visibilidade e transmitância. Já \texttt{AreaLight.sample\_radiance()} distribui energia por amostras do emissor e introduz explicitamente o termo geométrico de distância.
+
+O resultado prático é um subsistema de luzes internamente heterogêneo, embora coerente com os objetivos pedagógicos do projeto. Essa decisão é defensável para o Projeto 1, mas precisa ser descrita como simplificação de modelagem, e não como equivalência física entre fonte pontual ideal, emissor extenso e formulação radiométrica completa.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).
+
+\subsection{Materiais recursivos e truncamento computacional}
+\label{sec:limitacoes-materiais}
+
+Os materiais reflexivo e transparente representam uma extensão substancial do núcleo local de Phong, mas permanecem aproximativos sob o ponto de vista da física de materiais. \texttt{ReflectiveMaterial.eval()} mistura Phong local e reflexão recursiva com Fresnel-Schlick de maneira plausível, porém não equivalente a um BRDF fisicamente baseado. \texttt{TransparentMaterial.eval()} usa Snell, TIR e Beer-Lambert, mas assume meio homogêneo, atenuação por canal RGB e ausência de dispersão espectral contínua.
+
+Além disso, toda a recursão é truncada por \texttt{max\_depth}. Isso é necessário para conter custo computacional e evitar crescimento exponencial do número de raios, mas significa que o traçador resolve apenas uma aproximação finita de cadeias longas de reflexão e transmissão. A leitura correta, portanto, é a de um ray tracer recursivo de profundidade limitada, não a de um solucionador completo de transporte de luz.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial.eval()}, l. 101; \texttt{TransparentMaterial.eval()}, l. 186; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41).
+
+\subsection{Leitura correta frente ao enunciado principal}
+\label{sec:limitacoes-escopo}
+
+Frente a \path{materiais/proj1.pdf}, a interpretação tecnicamente correta é que o repositório cobre com segurança o núcleo exigido pelo projeto e ainda incorpora várias extensões relevantes da disciplina: supersampling, instanciação, luz de área, materiais recursivos, malha triangular e BVH local. Por outro lado, ele não esgota o espaço teórico apresentado nas aulas, sobretudo na parte de aceleração e na parte de modelagem física mais rigorosa da câmera, das fontes e dos materiais.
+
+Essa delimitação é importante para o valor científico do relatório. O mérito do trabalho não está em inflar o escopo entregue, mas em mostrar com precisão onde a implementação coincide com a teoria ensinada, onde a simplifica e onde conscientemente para.
 
 \section{Conclusão}
+\label{sec:conclusao}
 
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+O Projeto 1 implementa de forma sólida o núcleo do Slide 4 e a maior parte das extensões do Slide 5. O traçador resultante possui câmera pinhole, interseções analíticas, Phong local, sombras duras, supersampling, instanciação, luz de área, reflexão com Fresnel-Schlick, refração dielétrica com Snell e TIR, além de atenuação Beer-Lambert em raios refratados e de sombra.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \citep{ref5}.
+O principal cuidado técnico desta versão é deixar claro o estatuto do Slide 6 e, mais amplamente, das limitações consolidadas na Seção~\ref{sec:limitacoes}. O repositório entrega triangulação, \texttt{TriangleMesh} e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
 
+Em outras palavras: a aderência entre teoria e código é alta nos Slides 4 e 5, e parcial, porém tecnicamente legítima, no Slide 6. A contribuição científica mais importante do trabalho é justamente essa rastreabilidade: cada efeito visual principal pode ser ligado a uma hipótese física ou geométrica explícita e a uma região identificável do código atual.
+
+\section{Avaliação Final do que a Implementação Entrega}
+\label{sec:avaliacao-final}
+
+Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões do segundo bloco de slides e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código.
+
+\begin{table*}[!ht]
+\caption{Avaliação final do que a implementação entrega efetivamente.}
+\label{tab:avaliacao-final}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.18\textwidth] Q[l,wd=0.15\textwidth] Q[l,wd=0.59\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t}
+}
+Bloco avaliado & Situação & O que a implementação entrega de fato \\
+Núcleo do Slide 4 & Entregue & câmera pinhole, raio paramétrico, \texttt{Hit}, interseções analíticas para esfera, plano e caixa, \texttt{closest hit}, Phong local, sombra direta e luz ambiente \\
+Amostragem do filme & Entregue & modo central determinístico (\texttt{center}) e modos estocásticos \texttt{jittered} e \texttt{stratified}, todos expostos publicamente por CLI e convertidos em raios primários pelo \texttt{Film} \\
+Separação entre amostragem do filme e da luz & Entregue & \texttt{sampling\_mode} permanece controle público do filme, enquanto \texttt{light\_sampling\_mode} continua separado para \texttt{AreaLight}, evitando confusão conceitual entre domínio do pixel e domínio do emissor \\
+Extensões ópticas do Slide 5 & Entregue com simplificações declaradas & instanciação por transformações afins, luz de área com penumbra, reflexão com Fresnel-Schlick, refração com Snell, reflexão interna total e Beer-Lambert por canal RGB \\
+Geometria triangular & Entregue & \texttt{Triangle}, \texttt{TriangleMesh}, leitura de malha por JSON e OBJ e integração dessas primitivas ao mesmo fluxo de interseção e sombreamento das demais formas \\
+Estrutura de aceleração & Parcialmente entregue & existe BVH estática local à \texttt{TriangleMesh}, com AABB por \emph{slabs}, construção por mediana no eixo dominante e travessia recursiva; não existe grade regular nem aceleração global da cena \\
+Infraestrutura experimental & Entregue & CLI padronizada nos principais entrypoints, controle de \texttt{seed}, geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}, registro de \texttt{render\_time\_seconds} e \texttt{render\_time\_minutes}, além de log inicial e final de render \\
+Aderência integral aos Slides 4--6 e ao PBRT & Não integral & faltam câmera além de pinhole, coerência radiométrica uniforme entre todas as luzes, materiais fisicamente baseados completos e estruturas globais de aceleração \\
+\end{tblr}
+\end{table*}
+
+Sob o critério do Projeto 1, essa entrega é tecnicamente robusta e supera o núcleo mínimo ao incorporar supersampling, luz de área, materiais recursivos, geometria triangular e aceleração local por BVH. Sob o critério mais forte de cobertura integral do arco teórico das aulas, a entrega permanece conscientemente parcial. Essa parcialidade, contudo, não é caótica: ela é bem localizada. O que falta está concentrado em modelagem física mais rigorosa e em estruturas de aceleração mais sofisticadas, e não em inconsistência do pipeline principal.
+
+Há também um ponto metodológico importante: a implementação agora entrega não apenas imagens, mas também rastreabilidade experimental. A combinação entre \path{src/ray_tracing_2/cli.py}, \path{src/ray_tracing_2/render.py} e \path{src/ray_tracing_2/render_snapshot.py} faz com que cada execução relevante preserve resolução, modo de amostragem, semente, tempo de render e descrição estruturada da cena em artefatos persistentes. Isso aumenta o valor científico do projeto porque permite distinguir claramente entre efeito visual observado, parâmetro de entrada e hipótese geométrica ou física codificada.
+
+\noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/cli.py} (\texttt{CommonRenderOptions}; \texttt{add\_common\_render\_arguments()}), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}; \texttt{get\_samples\_for\_pixel()}), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}; \texttt{AreaLightSamplingMode}; \texttt{sample\_radiance()}), \path{src/ray_tracing_2/render.py} (\texttt{Render.render()}), \path{src/ray_tracing_2/render_snapshot.py} (\texttt{RenderSnapshot.from\_runtime()}; \texttt{to\_markdown()}), \path{src/ray_tracing_2/shape.py} (\texttt{Triangle}; \texttt{TriangleMesh}; \texttt{Instance}), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}; \texttt{TriangleBVH}).
 
 \begin{declarations}
 
 \begin{acknowledgements}
-ESTA DECLARAÇÃO É OPCIONAL. Este é um texto de agradecimentos com várias linhas. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Não há agradecimentos adicionais a declarar nesta versão do manuscrito.
 \end{acknowledgements}
 
-
 \begin{funding}
-ESTA DECLARAÇÃO É OPCIONAL. Esta pesquisa foi financiada por lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Não foi informado financiamento específico para o desenvolvimento deste trabalho.
 \end{funding}
 
 \begin{contributions}
-ESTA DECLARAÇÃO É OBRIGATÓRIA. 
-\textit{Considerar o Código de Conduta da SBC.
-Participação em autoria: espera-se que todos os autores de um trabalho publicado 
-ou submetido para publicação, tenham tido efetiva participação no respectivo trabalho.}
-Sugerimos que os autores descrevam sua contribuição usando 
-a Taxonomia CRediT (\href{https://credit.niso.org/}{https://credit.niso.org/}) como neste exemplo: 
-JV contribuiu para a concepção deste estudo. CB, RP e CM realizaram os experimentos. 
-JV é o principal contribuidor e escritor deste manuscrito. 
-Todos os autores leram e aprovaram o manuscrito final. 
+Os metadados autorais finais ainda precisam ser confirmados. Nesta versão, a contribuição declarada corresponde à organização do manuscrito, consolidação da análise técnico-científica do repositório, revisão do alinhamento entre slides, PBRT e implementação, e preparação da versão atual em \LaTeX.
 \end{contributions}
 
 \begin{interests}
-ESTA DECLARAÇÃO É OBRIGATÓRIA. 
-Se não houver conflitos de interesse, os autores devem declarar: 
-``Os autores declaram que não têm nenhum conflito de interesses''. 
-Caso contrário, a declaração deve ser: 
-``Os autores declaram que têm os seguintes conflitos de interesses: 
-lorem ipsum dolor sit amet, consectetur adipiscing elit.''
+Os autores declaram que não têm conflitos de interesse.
 \end{interests}
 
 \begin{materials}
-ESTA DECLARAÇÃO É OBRIGATÓRIA. 
-\textit{Considerar o Código de Conduta da SBC. 
-Reprodutibilidade de resultados de pesquisa: 
-nos casos pertinentes, recomenda-se que artigos indiquem 
-a disponibilidade pública de material utilizado nas revisões, 
-de modo a facilitar a reprodução dos respectivos resultados por outros pesquisadores.}
-%
-Se os autores disponibilizaram seus dados e/ou códigos abertamente, a declaração deve ser: 
-``Os dados e outros materiais criados e/ou usados nesta revisão da literatura
-estão disponíveis em \ldots''. 
-Caso contrário, a declaração deve ser: 
-``Os dados e outros materiais criados e/ou usados nesta revisão da literatura 
-serão disponibilizados mediante solicitação''. 
-%
-Todo o material suplementar disponibilizado publicamente pelos autores aparecerá 
-na página de publicação do artigo em caso de aceitação. 
+O código-fonte, as cenas de entrada, os artefatos de saída, os diagramas PlantUML e os arquivos de documentação analisados estão disponíveis no repositório do projeto, em especial nos diretórios \path{src/}, \path{inputs/}, \path{outputs/} e \path{docs/}, bem como nos arquivos de diagrama utilizados ao longo deste artigo.
 \end{materials}
 
 \begin{aitools}
-ESTA DECLARAÇÃO É OBRIGATÓRIA.  
-\textit{Considerar o Código de Conduta da SBC.
-Uso de Inteligência Artificial (IA) Generativa: 
-a utilização de ferramentas e tecnologias de IA Generativa para geração de conteúdos, 
-na escrita e/ou revisão do conteúdo de artigos, deve ser declarada explicitamente no trabalho.} 
-A declaração deve ocorrer nesta seção, definida especificamente para este fim.
-Deve-se listar as ferramentas (e suas versões) e descrever onde foram empregadas, por exemplo, 
-textos, tabelas, gráficos, citações, etc. 
-Essas ferramentas \textbf{não} podem ser listadas como autores de um artigo. 
-O uso de tais ferramentas não exime os autores da responsabilidade 
-sobre todo o seu conteúdo, inclusive no caso de ser identificado plágio.
-%
-Se os autores não utilizaram tais ferramentas, a declaração deve ser: 
-``Os autores não utilizaram ferramentas de IA generativa no desenvolvimento do estudo''.
-%
+Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e conversão inicial do relatório em Markdown para a versão atual em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelos responsáveis pela preparação do manuscrito.
 \end{aitools}
 
 \begin{furtherinformation}
-Manuscritos devem indicar explicitamente como as questões éticas da pesquisa foram abordadas e gerenciadas, 
-incluindo a aprovação da pesquisa por um comitê de ética, quando aplicável.
+O estudo não envolveu participantes humanos, dados pessoais sensíveis nem experimentos com intervenção em seres vivos. Assim, avaliação por comitê de ética não se aplica ao escopo deste manuscrito.
 \end{furtherinformation}
 
 \end{declarations}
