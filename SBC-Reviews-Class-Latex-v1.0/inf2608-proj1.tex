@@ -1,14 +1,6 @@
-%% —-----------------------------------------------------------
-%% sbcreviews-pt.tex
-%% Template para SBC Reviews 
-%% (https://journals-sol.sbc.org.br/index.php/reviews/) 
-%% 
-%% Esta versão do template para a SBC Reviews inclui algumas
-%% modificações sobre o template original da REIC
-%% (https://journals-sol.sbc.org.br/index.php/reic)
-%%
-%% Licença CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
-%% Sociedade Brasileira de Computação.
+%% -----------------------------------------------------------
+%% Projeto 1 da disciplina de INF2608 - Fundamentos de Computacao Grafica
+%% Versao em LaTeX do relatorio tecnico-cientifico do ray tracer educacional.
 
 \documentclass[portuguese]{sbcreviews-2025}%
 \usepackage[misc,geometry]{ifsym} 
@@ -33,6 +25,9 @@
 \usepackage{pifont}
 
 \setcitestyle{square}
+\newcommand{\slidescite}[2]{\citep[pp.~#2]{#1}}
+\newcommand{\pbrtsec}[1]{PBRT 4e~\citep[Se\c{c}\~ao~#1]{pharr2023pbrt}}
+\newcommand{\pbrtsecs}[1]{PBRT 4e~\citep[Se\c{c}\~oes~#1]{pharr2023pbrt}}
 
 \definecolor{engtitle}{rgb}{0.5,0.5,0.5}
 \definecolor{orcidlogo}{rgb}{0.37,0.48,0.13}
@@ -45,20 +40,12 @@
 %\hypersetup{colorlinks,citecolor=blue,linkcolor=blue,urlcolor=blue}
 % We disable hyperlinks by default with this line, to avoid the error "\pdfendlink ended up in different nesting level" while writing.
 
-\jid{ROCS}
-\jtitle{SBC Computing Reviews, 2025, XX:1}
-\issn{2966-3938}
-\doi{10.5753/rocs.2025.XXXXXX}
-\copyrightstatement{This work is licensed under a Creative Commons Attribution 4.0 International License}
-\jyear{2025}
+\category{Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica}
+\title[Projeto 1 de INF2608]{Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica: Análise Técnico-Científica de um Ray Tracer Educacional em Alinhamento com os Slides 4--6 e PBRT 4e}
+\engtitle{\textcolor{engtitle}{INF2608 Course Project 1 -- Fundamentals of Computer Graphics: Technical-Scientific Analysis of an Educational Ray Tracer Aligned with Lecture Slides 4--6 and PBRT 4e}}
 
-\category{Revisão Técnica}
-\title[Análise de um Ray Tracer Educacional]{Análise Técnico-Científica de um Ray Tracer Educacional: Alinhamento entre Slides 4--6, PBRT 4e e Implementação}
-\engtitle{\textcolor{engtitle}{Technical-Scientific Analysis of an Educational Ray Tracer: Alignment Among Slides 4--6, PBRT 4e, and the Implementation}}
-
-%THE ORCID IS MANDATORY FOR EACH AUTHOR
-\author[Autor a definir]{
-\affil{\textbf{Autor(a) a definir}~[Afiliação institucional a confirmar~|~\href{mailto:contato@exemplo.com}{\textit{contato@exemplo.com}}]}
+\author[Yang Ricardo Barcellos Miranda]{
+\affil{\textbf{Yang Ricardo Barcellos Miranda}~[\href{mailto:ymiranda@inf.puc-rio.br}{\textit{ymiranda@inf.puc-rio.br}}]}
 }
 
 \begin{document}
@@ -68,7 +55,7 @@
 \maketitle
 
 \begin{mail}
-Dados institucionais, endereço postal e identificação autoral definitiva serão confirmados na versão final do manuscrito.
+Trabalho entregue em 10/05/2026 como Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica.
 \end{mail}
 
 
@@ -89,22 +76,16 @@ ray tracing, computer graphics, PBRT, BVH, sampling, physically inspired renderi
 \end{keywords}
 
 \begin{dates}
-% This information will be provided by the editor before publishing the paper
-\noindent{\sffamily\textbf{Recebido/Received:}} DD Month YYYY~~~$\bullet$~~~
-{\sffamily\textbf{Aceito/Accepted:}} DD Month YYYY~~~$\bullet$~~~
-{\sffamily\textbf{Publicado/Published:}} DD Month YYYY
+\noindent{\sffamily\textbf{Entrega:}} 10/05/2026
 \end{dates}
-
-
-%\begin{license}
-%Published under the Creative Commons Attribution 4.0 International Public License (CC BY 4.0)
-%\end{license}
 
 \end{frontmatter}
 \section{Escopo, método e critério de confiança}
 \label{sec:escopo}
 
-Este relatório reconstrói, com prioridade epistemológica explícita, o conteúdo dos arquivos \texttt{4.tracado\_de\_raios.pdf}, \texttt{5.tracado\_de\_raios2.pdf} e \texttt{6.estrutura\_aceleracao.pdf}, usando os resumos em \path{materiais/traçado_de_raios/*.md} apenas como apoio de leitura e o código em \path{src/ray_tracing_2/} como evidência de implementação. A documentação em \path{docs/*.md} foi usada apenas como apoio secundário de estrutura e nunca como autoridade teórica principal.
+Este relatório reconstrói, com prioridade epistemológica explícita, o conteúdo dos Slides 4, 5 e 6 da disciplina~\citep{inf2608slides04,inf2608slides05,inf2608slides06}, usando os resumos em \path{materiais/traçado_de_raios/*.md} apenas como apoio de leitura e o código em \path{src/ray_tracing_2/}, tomado aqui como artefato primário de implementação do repositório do projeto~\citep{inf2608projectrepo}. A documentação em \path{docs/*.md} foi usada apenas como apoio secundário de estrutura e nunca como autoridade teórica principal.
+
+Para separar melhor bibliografia de rastreabilidade interna, os slides da disciplina, PBRT 4e e o repositório do projeto aparecem como referências formais ao longo do texto. Já as menções a arquivos específicos do código seguem a convenção caminho relativo + símbolo + linha, usada apenas como âncora de inspeção local dentro do próprio repositório e não como substituto da bibliografia.
 
 O objetivo não é apenas resumir os slides, mas separar três camadas que frequentemente se confundem em relatórios de implementação:
 
@@ -114,7 +95,7 @@ O objetivo não é apenas resumir os slides, mas separar três camadas que frequ
     \item as lacunas entre o conteúdo didático e a implementação entregue.
 \end{enumerate}
 
-Como fonte externa, foi usado somente o conteúdo de PBRT 4e permitido pelo enunciado, principalmente os trechos sobre câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. Em particular, foram úteis: PBRT 4e \S\S 1.2, 3.5, 3.7, 5.2, 8.1, 8.5, 9.3, 9.5, 11.2, 12.4 e 7.3.
+Como fonte externa, foi usado somente o conteúdo de PBRT 4e permitido pelo enunciado, principalmente os trechos sobre câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. A edição consultada foi a quarta edição online de PBRT~\citep{pharr2023pbrt}, disponível em \url{https://pbr-book.org/4ed/contents}. Em particular, foram úteis as Seções 1.2, 3.5, 3.7, 5.2, 7.3, 8.1, 8.5, 9.3, 9.5, 11.2 e 12.4.
 
 \section{Plano Consolidado do Relatório}
 \label{sec:plano-relatorio}
@@ -158,13 +139,13 @@ O ponto de partida do Slide 4 é a modelagem do raio por
 \mathbf{r}(t)=\mathbf{o}+t\,\hat{\mathbf{d}},\qquad t\ge 0,
 \]
 
-em que $\mathbf{o}$ é a origem, $\hat{\mathbf{d}}$ é a direção normalizada e $t$ parametriza a posição ao longo do feixe. Em ótica geométrica, essa formulação abstrai a propagação retilínea da luz em meios homogêneos; em computação gráfica, ela converte o problema de visibilidade em um problema de encontrar o menor $t$ positivo compatível com uma superfície. Nos slides, isso aparece como o elo entre câmera, interseção e sombreamento local, particularmente na dedução do raio paramétrico e na interpretação física de $t$ como distância assinada ao longo da trajetória (\texttt{4.tracado\_de\_raios.pdf}, pp. 7-9).
+em que $\mathbf{o}$ é a origem, $\hat{\mathbf{d}}$ é a direção normalizada e $t$ parametriza a posição ao longo do feixe. Em ótica geométrica, essa formulação abstrai a propagação retilínea da luz em meios homogêneos; em computação gráfica, ela converte o problema de visibilidade em um problema de encontrar o menor $t$ positivo compatível com uma superfície. Nos slides, isso aparece como o elo entre câmera, interseção e sombreamento local, particularmente na dedução do raio paramétrico e na interpretação física de $t$ como distância assinada ao longo da trajetória~\slidescite{inf2608slides04}{7--9}.
 
 O repositório segue exatamente essa organização. O raio é carregado por \texttt{Ray}, enquanto \texttt{Hit} armazena a melhor interseção conhecida até o momento e também codifica \texttt{front\_face} e \texttt{backfacing}. Essa distinção, que no Slide 4 serve para consistência geométrica da normal, torna-se decisiva no Slide 5 para distinguir entrada e saída de meios refrativos. A rotina \texttt{Scene.compute\_intersection()} preserva o padrão clássico de \emph{closest hit}: percorre os objetos, atualiza um único registro acumulador e retorna apenas a interseção frontal mais próxima.
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/hit.py} (\texttt{Hit}, l. 11; \texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24; \texttt{trace\_ray()}, l. 102).
 
-PBRT 4e de apoio: \S\S 1.2 e 3.5.
+Referência complementar em \pbrtsecs{1.2 e 3.5}.
 
 \subsection{Interseções básicas: plano, esfera e controle numérico de $\varepsilon$}
 \label{sec:slide4-intersecoes}
@@ -181,24 +162,24 @@ e a substituição de $\mathbf{r}(t)$ produz a solução linear
 t=\frac{(\mathbf{p}_0-\mathbf{o})\cdot\hat{\mathbf{n}}}{\hat{\mathbf{d}}\cdot\hat{\mathbf{n}}},
 \]
 
-exatamente como discutido nas páginas de interseção raio-plano (\texttt{4.tracado\_de\_raios.pdf}, pp. 10-13). A esfera, por sua vez, impõe
+exatamente como discutido nas páginas de interseção raio-plano~\slidescite{inf2608slides04}{10--13}. A esfera, por sua vez, impõe
 
 \[
 \lVert\mathbf{x}-\mathbf{c}\rVert^2-r^2=0,
 \]
 
-que, após substituição do raio, gera uma quadrática $at^2+bt+c=0$ cujo discriminante $\Delta=b^2-4ac$ decide ausência, tangência ou dupla interseção (\texttt{4.tracado\_de\_raios.pdf}, pp. 14-18). Em ambos os casos, o aspecto fisicamente relevante é o mesmo: o que interessa para a câmera é a menor raiz positiva. O aspecto numericamente relevante também é comum: deve-se rejeitar soluções com $t$ demasiado pequeno para evitar reinterseção artificial da própria superfície.
+que, após substituição do raio, gera uma quadrática $at^2+bt+c=0$ cujo discriminante $\Delta=b^2-4ac$ decide ausência, tangência ou dupla interseção~\slidescite{inf2608slides04}{14--18}. Em ambos os casos, o aspecto fisicamente relevante é o mesmo: o que interessa para a câmera é a menor raiz positiva. O aspecto numericamente relevante também é comum: deve-se rejeitar soluções com $t$ demasiado pequeno para evitar reinterseção artificial da própria superfície.
 
 O código espelha esse raciocínio. \texttt{Plane.intersect()} resolve o plano por produto escalar; \texttt{Sphere.intersect()} resolve a quadrática e guarda a menor raiz positiva; \texttt{Scene.offset\_point()} empurra a origem dos raios secundários ao longo da normal geométrica com \texttt{ray\_epsilon = 0.001}, evitando \emph{shadow acne} em sombra, reflexão e refração. O Slide 4 apresenta essa ideia como tolerância numérica; o repositório a aplica de forma centralizada, o que é arquiteturalmente melhor do que espalhar pequenos limiares por todos os materiais.
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Sphere}, l. 17; \texttt{Sphere.intersect()}, l. 23; \texttt{Plane}, l. 54; \texttt{Plane.intersect()}, l. 60), \path{src/ray_tracing_2/scene.py} (\texttt{offset\_point()}, l. 33).
 
-PBRT 4e de apoio: \S 1.2.
+Referência complementar em \pbrtsec{1.2}.
 
 \subsection{Câmera pinhole, filme e espaços de coordenadas}
 \label{sec:slide4-camera}
 
-O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando \texttt{eye}, \texttt{center} e \texttt{up} para montar os eixos locais (pp. 19-23), e em seguida projeta amostras do pixel sobre o plano de imagem (pp. 24-29), antes de explicitar a mudança entre espaço de câmera e espaço global (pp. 31-39) (\texttt{4.tracado\_de\_raios.pdf}). A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
+O Slide 4 reconstrói o modelo pinhole por uma base ortonormal de câmera, usando \texttt{eye}, \texttt{center} e \texttt{up} para montar os eixos locais (pp. 19--23), e em seguida projeta amostras do pixel sobre o plano de imagem (pp. 24--29), antes de explicitar a mudança entre espaço de câmera e espaço global (pp. 31--39)~\citep{inf2608slides04}. A formulação algébrica é a de uma mudança de base: do espaço local da câmera para o espaço global da cena. Em uma formulação clássica, isso aparece como matriz de visualização, sua inversa e projeção perspectiva parametrizada por campo de visão, aspecto e distância ao plano de imagem.
 
 No código, a ideia é a mesma, mas a implementação é condensada: \texttt{Camera.\_\_init\_\_()} usa \texttt{glm.lookAt()} para obter a transformação de visualização e armazena sua inversa em \texttt{inv\_view}. A geração do raio em \texttt{generate\_ray()} monta o ponto do pixel em espaço de câmera a partir de coordenadas normalizadas e da relação trigonométrica
 
@@ -206,7 +187,7 @@ No código, a ideia é a mesma, mas a implementação é condensada: \texttt{Cam
 \Delta v = f\tan\left(\frac{\theta}{2}\right),\qquad \Delta u = \Delta v\,\frac{w}{h},
 \]
 
-que é precisamente a síntese entre geometria projetiva e semelhança de triângulos apresentada nos slides (pp. 24-29), e depois transforma esse ponto para o espaço global (pp. 31-39). O comentário recém-ajustado em \texttt{camera.py} deixa explícita uma nuance importante: \texttt{focal\_distance} aqui é distância geométrica ao plano de projeção no modelo pinhole, não distância focal de lente fina nem parâmetro de profundidade de campo. Esse detalhe é essencial para não projetar sobre o código uma física que ele não implementa.
+que é precisamente a síntese entre geometria projetiva e semelhança de triângulos apresentada nos slides (pp. 24--29) e depois transforma esse ponto para o espaço global (pp. 31--39)~\citep{inf2608slides04}. O comentário recém-ajustado em \texttt{camera.py} deixa explícita uma nuance importante: \texttt{focal\_distance} aqui é distância geométrica ao plano de projeção no modelo pinhole, não distância focal de lente fina nem parâmetro de profundidade de campo. Esse detalhe é essencial para não projetar sobre o código uma física que ele não implementa.
 
 Essa distinção também define uma limitação importante do projeto: todos os raios primários partem de um único centro ótico, sem abertura finita, círculo de confusão ou profundidade de campo. Portanto, o antialiasing implementado depois no Slide 5 altera a estratégia de amostragem do pixel, mas não muda o modelo óptico de formação de imagem.
 
@@ -214,12 +195,12 @@ Em \texttt{film.py}, \texttt{get\_sample()} e \texttt{render()} deixam claro que
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/camera.py} (\texttt{Camera}, l. 6; \texttt{\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{Film}, l. 20; \texttt{get\_sample()}, l. 54; \texttt{render()}, l. 108), \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25).
 
-PBRT 4e de apoio: \S 5.2.
+Referência complementar em \pbrtsec{5.2}.
 
 \subsection{Phong, luz pontual, termo ambiente e sombra dura}
 \label{sec:slide4-phong}
 
-O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, uma soma de termo ambiente, componente difusa lambertiana e componente especular dependente do vetor refletido (\texttt{4.tracado\_de\_raios.pdf}, pp. 40-43 e 54-55). Em termos físicos, esse modelo não é um BRDF rigoroso, mas é uma aproximação útil: o termo difuso usa o fator $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$; o termo especular usa um pico angular em função de $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; a sombra dura decorre de um teste binário de visibilidade entre o ponto sombreado e a fonte (\texttt{4.tracado\_de\_raios.pdf}, pp. 51-53). Em particular, as páginas 40-43 articulam a síntese física mínima do projeto: incidência luminosa, orientação local de normal e dependência angular da resposta da superfície.
+O Slide 4 fecha o núcleo do renderizador com o modelo local de Phong, isto é, uma soma de termo ambiente, componente difusa lambertiana e componente especular dependente do vetor refletido~\slidescite{inf2608slides04}{40--43, 54--55}. Em termos físicos, esse modelo não é um BRDF rigoroso, mas é uma aproximação útil: o termo difuso usa o fator $\max(0,\hat{\mathbf{n}}\cdot\hat{\mathbf{l}})$; o termo especular usa um pico angular em função de $\max(0,\hat{\mathbf{r}}\cdot\hat{\mathbf{v}})^s$; a sombra dura decorre de um teste binário de visibilidade entre o ponto sombreado e a fonte~\slidescite{inf2608slides04}{51--53}. Em particular, as páginas 40--43 articulam a síntese física mínima do projeto: incidência luminosa, orientação local de normal e dependência angular da resposta da superfície.
 
 \texttt{PhongMaterial.direct\_lighting()} implementa exatamente esse cálculo. Para cada luz, o código obtém radiância incidente e direção via \texttt{sample\_radiance()}, soma o termo difuso e depois o termo especular. \texttt{Scene.transmittance()} faz o papel do raio de sombra, mas já em uma forma mais geral: para meios opacos, ele reduz-se ao teste binário do Slide 4; para meios transparentes, ele vira um produto acumulado de transmitâncias, o que antecipa o Slide 5.
 
@@ -227,7 +208,7 @@ Há, contudo, uma nuance importante entre a física dos slides e a convenção d
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/light.py} (\texttt{PointLight}, l. 42; \texttt{PointLight.radiance()}, l. 46), \path{src/ray_tracing_2/material.py} (\texttt{PhongMaterial}, l. 37; \texttt{direct\_lighting()}, l. 45; \texttt{eval()}, l. 72), \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/main.py} (\texttt{Sphere}, l. 54; \texttt{Plane}, l. 55; \texttt{PointLight}, l. 59).
 
-PBRT 4e de apoio: \S 1.2.
+Referência complementar em \pbrtsec{1.2}.
 
 \subsection{Quadro de aderência entre Slide 4 e implementação}
 \label{sec:slide4-quadro}
@@ -264,7 +245,7 @@ O quadro mostra que o núcleo conceitual do Slide 4 está efetivamente materiali
 \subsection{Antialiasing como integração estocástica sobre o pixel}
 \label{sec:slide5-antialiasing}
 
-O Slide 5 reinterpreta o pixel não como uma posição única, mas como um domínio de amostragem no qual múltiplos raios podem ser gerados (\texttt{5.tracado\_de\_raios2.pdf}, pp. 4-8). A leitura correta em termos numéricos é de integração de Monte Carlo: a cor do pixel passa a ser estimada pela média de amostras da radiância incidente,
+O Slide 5 reinterpreta o pixel não como uma posição única, mas como um domínio de amostragem no qual múltiplos raios podem ser gerados~\slidescite{inf2608slides05}{4--8}. A leitura correta em termos numéricos é de integração de Monte Carlo: a cor do pixel passa a ser estimada pela média de amostras da radiância incidente,
 
 \[
 \hat L = \frac{1}{N}\sum_{k=1}^{N} L(x_k),
@@ -272,16 +253,16 @@ O Slide 5 reinterpreta o pixel não como uma posição única, mas como um domí
 
 convertendo aliasing estruturado em ruído de alta frequência. Os slides enfatizam o caso aleatório uniforme e a fórmula de jitter subpixel nas páginas 4-9.
 
-O repositório implementa duas versões dessa ideia em \texttt{Film.get\_samples\_for\_pixel()}: \texttt{jittered} e \texttt{stratified}. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com PBRT 4e~\citep{pharr2023pbrt}, \S 8.5: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Após a refatoração recente, a definição concreta desses padrões 2D foi extraída para \path{src/ray_tracing_2/sampling.py}, de modo que \texttt{film.py} passou a atuar como camada de interpretação geométrica do domínio do pixel, e não mais como o único lugar onde os padrões são definidos. Isso fortalece a correspondência entre a teoria de amostragem do Slide 5 e a arquitetura do código: há um mesmo quadrado unitário amostral, mas cada domínio o reinterpreta de forma física distinta.
+O repositório implementa duas versões dessa ideia em \texttt{Film.get\_samples\_for\_pixel()}: \texttt{jittered} e \texttt{stratified}. A primeira preserva a interpretação direta dos slides: amostras aleatórias independentes no interior do pixel. A segunda é uma extensão consistente com \pbrtsec{8.5}: o pixel é subdividido em subcélulas e cada subcélula recebe uma amostra com jitter interno, o que reduz variância sem abandonar o caráter estocástico do estimador. Após a refatoração recente, a definição concreta desses padrões 2D foi extraída para \path{src/ray_tracing_2/sampling.py}, de modo que \texttt{film.py} passou a atuar como camada de interpretação geométrica do domínio do pixel, e não mais como o único lugar onde os padrões são definidos. Isso fortalece a correspondência entre a teoria de amostragem do Slide 5 e a arquitetura do código: há um mesmo quadrado unitário amostral, mas cada domínio o reinterpreta de forma física distinta.
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 61; \texttt{render()}, l. 112).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S\S 8.1 e 8.5.
+Referência complementar em \pbrtsecs{8.1 e 8.5}.
 
 \subsection{Instanciação, coordenadas homogêneas e transformação correta de normais}
 \label{sec:slide5-instanciacao}
 
-O Slide 5 também formaliza a ideia de instância geométrica: em vez de reescrever a interseção de um elipsoide, por exemplo, transforma-se o raio do espaço global para o espaço local de uma primitiva canônica (\texttt{5.tracado\_de\_raios2.pdf}, pp. 9-13). Em álgebra linear, isso significa representar translação, rotação e escala em coordenadas homogêneas e aplicar a inversa da transformação ao raio incidente. A síntese mais importante desse bloco aparece na dedução da transformação de normais por
+O Slide 5 também formaliza a ideia de instância geométrica: em vez de reescrever a interseção de um elipsoide, por exemplo, transforma-se o raio do espaço global para o espaço local de uma primitiva canônica~\slidescite{inf2608slides05}{9--13}. Em álgebra linear, isso significa representar translação, rotação e escala em coordenadas homogêneas e aplicar a inversa da transformação ao raio incidente. A síntese mais importante desse bloco aparece na dedução da transformação de normais por
 
 \[
 \mathbf{n}' = (M^{-1})^{T}\mathbf{n},
@@ -293,42 +274,42 @@ preservando a ortogonalidade com o plano tangente após transformações afins g
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Instance}, l. 253; \texttt{Instance.intersect()}, l. 262), \path{src/ray_tracing_2/main_box.py} (\texttt{render()}, l. 63), \path{src/ray_tracing_2/main_triangles.py} (\texttt{render()}, l. 100).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 3.5.
+Referência complementar em \pbrtsec{3.5}.
 
 \subsection{Luz de área, integração sobre o emissor e penumbra}
 \label{sec:slide5-arealight}
 
-Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor com extensão geométrica finita, o que exige integrar a contribuição luminosa sobre uma superfície (\texttt{5.tracado\_de\_raios2.pdf}, pp. 14-23). Essa mudança é fisicamente relevante: penumbra surge porque diferentes subregiões da fonte são visíveis ou ocluídas de maneira diferente a partir do ponto sombreado. As páginas 14-17 introduzem o emissor extenso; as páginas 18-23 traduzem isso em soma de amostras e variabilidade espacial da visibilidade.
+Nos slides, a luz de área substitui a fonte pontual idealizada por um emissor com extensão geométrica finita, o que exige integrar a contribuição luminosa sobre uma superfície~\slidescite{inf2608slides05}{14--23}. Essa mudança é fisicamente relevante: penumbra surge porque diferentes subregiões da fonte são visíveis ou ocluídas de maneira diferente a partir do ponto sombreado. As páginas 14--17 introduzem o emissor extenso; as páginas 18--23 traduzem isso em soma de amostras e variabilidade espacial da visibilidade.
 
-\texttt{AreaLight.sample\_radiance()} aproxima essa integral por soma discreta sobre uma grade \texttt{samples\_u} $\times$ \texttt{samples\_v}, com jitter em cada célula. A construção é coerente com os slides e com PBRT 4e~\citep{pharr2023pbrt}, \S 12.4: a energia é distribuída entre as amostras e sofre decaimento geométrico explícito com $1/r^2$, diferentemente da \texttt{PointLight}. Depois da extração de \path{src/ray_tracing_2/sampling.py}, os padrões \texttt{uniform}, \texttt{regular} e \texttt{stratified} passaram a ser definidos em um único módulo interno e a \texttt{AreaLight} apenas os converte do quadrado unitário para a superfície emissiva por meio da parametrização afim $p + u\,e_u + v\,e_v$. Em outras palavras, a implementação preserva a convenção simplificada para luz pontual, mas usa uma aproximação radiometricamente mais próxima do caso físico quando a fonte possui área.
+\texttt{AreaLight.sample\_radiance()} aproxima essa integral por soma discreta sobre uma grade \texttt{samples\_u} $\times$ \texttt{samples\_v}, com jitter em cada célula. A construção é coerente com os slides e com \pbrtsec{12.4}: a energia é distribuída entre as amostras e sofre decaimento geométrico explícito com $1/r^2$, diferentemente da \texttt{PointLight}. Depois da extração de \path{src/ray_tracing_2/sampling.py}, os padrões \texttt{uniform}, \texttt{regular} e \texttt{stratified} passaram a ser definidos em um único módulo interno e a \texttt{AreaLight} apenas os converte do quadrado unitário para a superfície emissiva por meio da parametrização afim $p + u\,e_u + v\,e_v$. Em outras palavras, a implementação preserva a convenção simplificada para luz pontual, mas usa uma aproximação radiometricamente mais próxima do caso físico quando a fonte possui área.
 
 Essa dualidade precisa ser registrada: o projeto não usa um único modelo coerente para todas as luzes. Ele usa, deliberadamente, a convenção do enunciado para \texttt{PointLight} e uma aproximação mais geométrica para \texttt{AreaLight}.
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}, l. 80; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133; \texttt{radiance()}, l. 173), \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 31; criação da \texttt{AreaLight}, l. 59-66).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 12.4.
+Referência complementar em \pbrtsec{12.4}.
 
 \subsection{Caixa, AABB e método de slabs}
 \label{sec:slide5-aabb}
 
-O Slide 5 introduz a caixa alinhada aos eixos tanto como primitiva quanto como ferramenta de raciocínio geométrico (\texttt{5.tracado\_de\_raios2.pdf}, pp. 24-25). A essência do método de slabs é decompor a interseção do raio com a caixa em três intervalos unidimensionais, um por eixo, e combinar os tempos de entrada e saída por máximos e mínimos. Isso é uma interseção de intervalos, não um teste de plano isolado.
+O Slide 5 introduz a caixa alinhada aos eixos tanto como primitiva quanto como ferramenta de raciocínio geométrico~\slidescite{inf2608slides05}{24--25}. A essência do método de slabs é decompor a interseção do raio com a caixa em três intervalos unidimensionais, um por eixo, e combinar os tempos de entrada e saída por máximos e mínimos. Isso é uma interseção de intervalos, não um teste de plano isolado.
 
 O repositório usa essa ideia em dois níveis. Primeiro, \texttt{Box.intersect()} implementa a caixa como primitiva visível da cena. Segundo, \texttt{AABB.intersects()} em \texttt{triangle\_bvh.py} reutiliza o mesmo princípio como teste de poda para a BVH de triângulos. Esse reuso é conceitualmente importante: o Slide 5 ensina uma primitiva; o Slide 6 reaproveita exatamente a mesma álgebra como volume de contenção.
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/shape.py} (\texttt{Box}, l. 74; \texttt{Box.intersect()}, l. 88), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}, l. 47; \texttt{intersects()}, l. 60).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 3.7.
+Referência complementar em \pbrtsec{3.7}.
 
 \subsection{De traçador local a traçador recursivo}
 \label{sec:slide5-recursao}
 
-O salto conceitual mais importante do Slide 5 é que o pipeline do Slide 4 não é descartado; ele é recursivamente reusado (\texttt{5.tracado\_de\_raios2.pdf}, pp. 26-35). Em termos da equação de transporte, isso equivale a acrescentar alguns caminhos óticos privilegiados ao estimador: reflexão perfeita, transmissão perfeita e luzes explícitas. Em termos algorítmicos, significa que certos materiais deixam de devolver apenas uma cor local e passam a disparar novos raios. As páginas 26-28 cobrem a reflexão, as páginas 29-34 cobrem a transmissão, e a página 35 consolida a generalização do shadow ray em transmitância acumulada.
+O salto conceitual mais importante do Slide 5 é que o pipeline do Slide 4 não é descartado; ele é recursivamente reusado~\slidescite{inf2608slides05}{26--35}. Em termos da equação de transporte, isso equivale a acrescentar alguns caminhos óticos privilegiados ao estimador: reflexão perfeita, transmissão perfeita e luzes explícitas. Em termos algorítmicos, significa que certos materiais deixam de devolver apenas uma cor local e passam a disparar novos raios. As páginas 26--28 cobrem a reflexão, as páginas 29--34 cobrem a transmissão, e a página 35 consolida a generalização do shadow ray em transmitância acumulada.
 
 O repositório codifica essa extensão com clareza. \texttt{Scene.trace\_ray()} continua mínimo: encontra o \texttt{Hit} e delega ao material. A recursão é controlada por \texttt{Scene.can\_spawn\_ray()}, que impõe profundidade máxima finita. Isso é coerente tanto numericamente quanto fisicamente: cada salto adicional é ponderado por refletância ou transmitância menores que 1, de modo que a contribuição tende a decair. A limitação de profundidade, portanto, é ao mesmo tempo um controle de custo e uma aproximação de truncamento de série.
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41; \texttt{trace\_ray()}, l. 102).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 1.2.
+Referência complementar em \pbrtsec{1.2}.
 
 \subsection{Reflexão especular com Fresnel-Schlick}
 \label{sec:slide5-fresnel}
@@ -339,7 +320,7 @@ O Slide 5 introduz a reflexão metálica via aproximação de Schlick, isto é,
 R(\theta)=R_0 + (1-R_0)(1-\cos\theta)^5,
 \]
 
-como aproximação de baixo custo das equações de Fresnel para interfaces suaves (\texttt{5.tracado\_de\_raios2.pdf}, pp. 26-28). O papel físico de $R_0$ é resumir a refletância em incidência normal; o papel geométrico de $\theta$ é medir a inclinação relativa entre direção de visão e normal. As páginas 26-27 são as mais importantes aqui: nelas os slides ligam a expressão de Schlick ao rateio entre resposta local e raio refletido recursivo.
+como aproximação de baixo custo das equações de Fresnel para interfaces suaves~\slidescite{inf2608slides05}{26--28}. O papel físico de $R_0$ é resumir a refletância em incidência normal; o papel geométrico de $\theta$ é medir a inclinação relativa entre direção de visão e normal. As páginas 26--27 são as mais importantes aqui: nelas os slides ligam a expressão de Schlick ao rateio entre resposta local e raio refletido recursivo.
 
 \texttt{ReflectiveMaterial.eval()} implementa exatamente esse rateio: a componente local de Phong é ponderada por $(1-R)$ e a contribuição do raio refletido é ponderada por $R$. É importante, contudo, qualificar a frase ``conservação de energia'' que aparece nos slides-resumo. No repositório, essa mistura é fisicamente plausível, mas não é um BRDF estrito nem um balanço energético formal no sentido de PBRT. O termo local de Phong permanece empírico, e o uso de Schlick aqui deve ser entendido como melhora angular do modelo, não como substituição integral por um material fisicamente baseado.
 
@@ -347,12 +328,12 @@ Há ainda uma nuance angular importante. O cosseno usado na aproximação de Sch
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial}, l. 84; \texttt{eval()}, l. 101).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 9.3.
+Referência complementar em \pbrtsec{9.3}.
 
 \subsection{Refração dielétrica, Lei de Snell, reflexão interna total e Beer-Lambert}
 \label{sec:slide5-refracao}
 
-O bloco de refração dos slides (\texttt{5.tracado\_de\_raios2.pdf}, pp. 29-36) é o trecho de física mais rico do projeto. A interface entre meios com índices de refração diferentes obedece a Snell,
+O bloco de refração dos slides~\slidescite{inf2608slides05}{29--36} é o trecho de física mais rico do projeto. A interface entre meios com índices de refração diferentes obedece a Snell,
 
 \[
 \eta_i \sin\theta_i = \eta_t \sin\theta_t,
@@ -372,12 +353,12 @@ No caso da iluminação direta através de transparentes, \texttt{TransparentMat
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/hit.py} (\texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/material.py} (\texttt{TransparentMaterial}, l. 137; \texttt{shadow\_transmittance()}, l. 167; \texttt{eval()}, l. 186).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S\S 9.3, 9.5 e 11.2.
+Referência complementar em \pbrtsecs{9.3, 9.5 e 11.2}.
 
 \subsection{Da sombra binária à transmitância acumulada}
 \label{sec:slide5-transmitancia}
 
-O Slide 5 culmina em uma generalização conceitualmente elegante: o antigo raio de sombra do Slide 4 deixa de responder apenas ``visível'' ou ``ocluído'' e passa a acumular atenuações ao atravessar materiais transparentes (\texttt{5.tracado\_de\_raios2.pdf}, pp. 33-35). Em termos físicos, esse é um primeiro passo em direção à ideia mais geral de transmitância ao longo de um segmento, isto é, à acumulação multiplicativa de fatores do tipo
+O Slide 5 culmina em uma generalização conceitualmente elegante: o antigo raio de sombra do Slide 4 deixa de responder apenas ``visível'' ou ``ocluído'' e passa a acumular atenuações ao atravessar materiais transparentes~\slidescite{inf2608slides05}{33--35}. Em termos físicos, esse é um primeiro passo em direção à ideia mais geral de transmitância ao longo de um segmento, isto é, à acumulação multiplicativa de fatores do tipo
 
 \[
 T = \prod_k a_k^{s_k}.
@@ -391,7 +372,7 @@ Esse método é particularmente importante porque mostra a coerência arquitetur
 
 \noindent\textbf{Rastreabilidade no código.} \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/material.py} (\texttt{Material.shadow\_transmittance()}, l. 30; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).
 
-PBRT 4e de apoio~\citep{pharr2023pbrt}: \S 11.2.
+Referência complementar em \pbrtsec{11.2}.
 
 \subsection{Quadro de aderência entre Slide 5 e implementação}
 \label{sec:slide5-quadro}
@@ -430,7 +411,7 @@ O quadro mostra que o Slide 5 é amplamente coberto pelo repositório atual, mas
 \subsection{Triângulo, área orientada e coordenadas baricêntricas}
 \label{sec:slide6-triangulo}
 
-O Slide 6 começa corretamente pelo triângulo como primitiva elementar de malhas (\texttt{6.estrutura\_aceleracao.pdf}, pp. 3-4). Os vetores de aresta $\mathbf{e}_1=\mathbf{b}-\mathbf{a}$ e $\mathbf{e}_2=\mathbf{c}-\mathbf{a}$ definem uma área orientada via produto vetorial,
+O Slide 6 começa corretamente pelo triângulo como primitiva elementar de malhas~\slidescite{inf2608slides06}{3--4}. Os vetores de aresta $\mathbf{e}_1=\mathbf{b}-\mathbf{a}$ e $\mathbf{e}_2=\mathbf{c}-\mathbf{a}$ definem uma área orientada via produto vetorial,
 
 \[
 A = \frac{\lVert\mathbf{e}_1 \times \mathbf{e}_2\rVert}{2},
@@ -451,7 +432,7 @@ No código, \texttt{Triangle} pré-computa \texttt{e1}, \texttt{e2} e a normal g
 \subsection{Interseção raio-triângulo por Möller-Trumbore}
 \label{sec:slide6-moller}
 
-O coração algébrico do Slide 6 é a dedução do teste de Möller-Trumbore a partir do sistema linear que iguala ponto do raio e combinação baricêntrica dos vértices (\texttt{6.estrutura\_aceleracao.pdf}, pp. 5-12). Em notação compacta, os slides resolvem algo do tipo
+O coração algébrico do Slide 6 é a dedução do teste de Möller-Trumbore a partir do sistema linear que iguala ponto do raio e combinação baricêntrica dos vértices~\slidescite{inf2608slides06}{5--12}. Em notação compacta, os slides resolvem algo do tipo
 
 \[
 \mathbf{o}+t\hat{\mathbf{d}} = \mathbf{a}+u\mathbf{e}_1+v\mathbf{e}_2,
@@ -466,7 +447,7 @@ via determinantes e produtos mistos, e a solução só é válida se $u\ge 0$, $
 \subsection{Malha triangulada e carregamento de geometria}
 \label{sec:slide6-malha}
 
-Os slides seguem do triângulo isolado para a malha: tabela de vértices, tabela de incidência e necessidade de estruturas de aceleração (\texttt{6.estrutura\_aceleracao.pdf}, pp. 13-14). O repositório segue essa linha em \texttt{TriangleMesh}, que pode ser construído diretamente de listas de vértices e faces e ainda ser instanciado por \texttt{Instance}, preservando o mesmo pipeline de interseção e material das primitivas analíticas.
+Os slides seguem do triângulo isolado para a malha: tabela de vértices, tabela de incidência e necessidade de estruturas de aceleração~\slidescite{inf2608slides06}{13--14}. O repositório segue essa linha em \texttt{TriangleMesh}, que pode ser construído diretamente de listas de vértices e faces e ainda ser instanciado por \texttt{Instance}, preservando o mesmo pipeline de interseção e material das primitivas analíticas.
 
 Essa homogeneidade é importante: a malha não cria um segundo sistema de renderização. Ela é apenas outra fonte de primitivas compatíveis com \texttt{Scene.compute\_intersection()}. A aceleração, quando presente, muda custo computacional, não semântica geométrica do hit.
 
@@ -557,7 +538,7 @@ Uma execução mais recente da mesma cena, agora com \texttt{--spp 10} e \texttt
 \subsection{Reprodutibilidade experimental por CLI padronizada}
 \label{sec:experimentos-cli}
 
-Embora a padronização do parser não altere a física do renderizador, ela melhora diretamente a rastreabilidade dos experimentos. Em particular, ela torna explícito um ponto conceitual importante do Slide 5: a amostragem bidimensional sobre o pixel (\texttt{5.tracado\_de\_raios2.pdf}, pp. 4-9) e a amostragem bidimensional sobre a fonte extensa (\texttt{5.tracado\_de\_raios2.pdf}, pp. 14-23) não são a mesma integral, ainda que ambas usem padrões 2D. Por isso, o repositório preserva dois controles públicos distintos, \texttt{sampling\_mode} para o filme e \texttt{light\_sampling\_mode} para \texttt{AreaLight}, enquanto reutiliza apenas uma infraestrutura interna compartilhada de geração de padrões 2D.
+Embora a padronização do parser não altere a física do renderizador, ela melhora diretamente a rastreabilidade dos experimentos. Em particular, ela torna explícito um ponto conceitual importante do Slide 5: a amostragem bidimensional sobre o pixel~\slidescite{inf2608slides05}{4--9} e a amostragem bidimensional sobre a fonte extensa~\slidescite{inf2608slides05}{14--23} não são a mesma integral, ainda que ambas usem padrões 2D. Por isso, o repositório preserva dois controles públicos distintos, \texttt{sampling\_mode} para o filme e \texttt{light\_sampling\_mode} para \texttt{AreaLight}, enquanto reutiliza apenas uma infraestrutura interna compartilhada de geração de padrões 2D.
 
 Do ponto de vista metodológico, essa separação é desejável: ela permite variar o estimador de anti-aliasing sem alterar a quadratura usada na integração da luz de área, e vice-versa. Isso reduz ambiguidade na interpretação dos resultados e melhora a comparabilidade entre execuções documentadas no próprio \texttt{properties.md}.
 
@@ -631,7 +612,7 @@ Em conjunto, esses artefatos visuais fortalecem a rastreabilidade do relatório:
 \subsection{Estruturas de aceleração ausentes ou apenas parciais}
 \label{sec:limitacoes-aceleracao}
 
-À luz de \texttt{6.estrutura\_aceleracao.pdf}, a implementação atual cobre apenas uma fração do espaço de técnicas apresentado nos slides. O repositório não implementa grade regular, refinamento por SAT nem percorrimento incremental célula a célula (\texttt{6.estrutura\_aceleracao.pdf}, pp. 15-21); tampouco implementa SAH, compactação linear da BVH ou um agregador global de cena (\texttt{6.estrutura\_aceleracao.pdf}, pp. 22-36). O que existe de fato é uma BVH estática local a cada \texttt{TriangleMesh}, suficiente para reduzir o custo interno da malha, mas insuficiente para substituir uma estrutura de aceleração global do ray tracer.
+À luz do Slide 6~\citep{inf2608slides06}, a implementação atual cobre apenas uma fração do espaço de técnicas apresentado nos slides. O repositório não implementa grade regular, refinamento por SAT nem percorrimento incremental célula a célula~\slidescite{inf2608slides06}{15--21}; tampouco implementa SAH, compactação linear da BVH ou um agregador global de cena~\slidescite{inf2608slides06}{22--36}. O que existe de fato é uma BVH estática local a cada \texttt{TriangleMesh}, suficiente para reduzir o custo interno da malha, mas insuficiente para substituir uma estrutura de aceleração global do ray tracer.
 
 Essa distinção é importante porque o custo no topo da cena continua linear. \texttt{Scene.compute\_intersection()} percorre \texttt{self.objects} de forma sequencial, de modo que a aceleração atua apenas dentro da malha triangulada, não entre esferas, caixas, instâncias e múltiplas malhas coexistindo na mesma cena. Portanto, a formulação correta no relatório não é ``o Slide 6 foi implementado'', mas sim ``parte do Slide 6 foi materializada por uma BVH local simplificada''.
 
@@ -649,7 +630,7 @@ Essa limitação não invalida o modelo adotado; ela apenas delimita seu alcance
 \subsection{Convenções radiométricas e simplificações de iluminação}
 \label{sec:limitacoes-radiometria}
 
-Há uma simplificação deliberada e potencialmente enganosa se não for declarada: \texttt{PointLight} e \texttt{AreaLight} não seguem a mesma convenção radiométrica nesta base. Os slides de iluminação pontual apresentam o decaimento geométrico clássico por $1/r^2$ (\texttt{4.tracado\_de\_raios.pdf}, pp. 40-41), mas \texttt{PointLight.radiance()} preserva a convenção do enunciado principal e trata \texttt{power} como radiância incidente constante modulada apenas por visibilidade e transmitância. Já \texttt{AreaLight.sample\_radiance()} distribui energia por amostras do emissor e introduz explicitamente o termo geométrico de distância.
+Há uma simplificação deliberada e potencialmente enganosa se não for declarada: \texttt{PointLight} e \texttt{AreaLight} não seguem a mesma convenção radiométrica nesta base. Os slides de iluminação pontual apresentam o decaimento geométrico clássico por $1/r^2$~\slidescite{inf2608slides04}{40--41}, mas \texttt{PointLight.radiance()} preserva a convenção do enunciado principal e trata \texttt{power} como radiância incidente constante modulada apenas por visibilidade e transmitância. Já \texttt{AreaLight.sample\_radiance()} distribui energia por amostras do emissor e introduz explicitamente o termo geométrico de distância.
 
 O resultado prático é um subsistema de luzes internamente heterogêneo, embora coerente com os objetivos pedagógicos do projeto. Essa decisão é defensável para o Projeto 1, mas precisa ser descrita como simplificação de modelagem, e não como equivalência física entre fonte pontual ideal, emissor extenso e formulação radiométrica completa.
 
@@ -724,11 +705,11 @@ Não foi informado financiamento específico para o desenvolvimento deste trabal
 \end{funding}
 
 \begin{contributions}
-Os metadados autorais finais ainda precisam ser confirmados. Nesta versão, a contribuição declarada corresponde à organização do manuscrito, consolidação da análise técnico-científica do repositório, revisão do alinhamento entre slides, PBRT e implementação, e preparação da versão atual em \LaTeX.
+Yang Ricardo Barcellos Miranda foi responsável pela organização do manuscrito, consolidação da análise técnico-científica do repositório, revisão do alinhamento entre slides, PBRT e implementação, e preparação da versão atual em \LaTeX.
 \end{contributions}
 
 \begin{interests}
-Os autores declaram que não têm conflitos de interesse.
+O autor declara que não tem conflitos de interesse.
 \end{interests}
 
 \begin{materials}
@@ -736,7 +717,7 @@ O código-fonte, as cenas de entrada, os artefatos de saída, os diagramas Plant
 \end{materials}
 
 \begin{aitools}
-Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e conversão inicial do relatório em Markdown para a versão atual em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelos responsáveis pela preparação do manuscrito.
+Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e conversão inicial do relatório em Markdown para a versão atual em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelo autor.
 \end{aitools}
 
 \begin{furtherinformation}

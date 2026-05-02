@@ -1,8 +1,41 @@
 \begin{thebibliography}{}
 
+\bibitem[{Disciplina INF2608}, 2026a]{inf2608slides06}
+{Disciplina INF2608} (2026a).
+\newblock Estruturas de acelera{\c c}{\~a}o.
+\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c
+  c}{\~a}o Gr{\'a}fica.
+\newblock Arquivo local em PDF correspondente ao Slide 6:
+  6.estrutura\_aceleracao.pdf.
+
+\bibitem[{Disciplina INF2608}, 2026b]{inf2608slides04}
+{Disciplina INF2608} (2026b).
+\newblock Tra{\c c}ado de raios.
+\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c
+  c}{\~a}o Gr{\'a}fica.
+\newblock Arquivo local em PDF correspondente ao Slide 4:
+  4.tracado\_de\_raios.pdf.
+
+\bibitem[{Disciplina INF2608}, 2026c]{inf2608slides05}
+{Disciplina INF2608} (2026c).
+\newblock Tra{\c c}ado de raios -- parte ii.
+\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c
+  c}{\~a}o Gr{\'a}fica.
+\newblock Arquivo local em PDF correspondente ao Slide 5:
+  5.tracado\_de\_raios2.pdf.
+
+\bibitem[Miranda, 2026]{inf2608projectrepo}
+Miranda, Y. R.~B. (2026).
+\newblock Ray tracer educacional do projeto 1 de inf2608 -- fundamentos de
+  computa{\c c}{\~a}o gr{\'a}fica.
+\newblock Reposit{\'o}rio local do projeto.
+\newblock C{\'o}digo-fonte principal no diret{\'o}rio src/ray\_tracing\_2, com
+  cenas em inputs, sa{\'\i}das em outputs e documenta{\c c}{\~a}o em docs.
+
 \bibitem[Pharr {\em et~al}., 2023]{pharr2023pbrt}
 Pharr, M., Jakob, W., and Humphreys, G. (2023).
 \newblock {\em Physically Based Rendering: From Theory to Implementation}.
 \newblock MIT Press, 4 edition.
+\newblock Online edition: https://pbr-book.org/4ed/contents.
 
 \end{thebibliography}
