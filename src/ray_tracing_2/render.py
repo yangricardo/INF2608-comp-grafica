@@ -8,7 +8,6 @@ from typing import Optional
 from ray_tracing_2.film import Film
 from ray_tracing_2.film import describe_sampling_configuration
 from ray_tracing_2.film import effective_samples_per_pixel_for_mode
-from ray_tracing_2.render_snapshot import RenderSnapshot
 
 
 def _ensure_parent_dir(path: str) -> None:
@@ -17,30 +16,43 @@ def _ensure_parent_dir(path: str) -> None:
     os.makedirs(parent, exist_ok=True)
 
 
+def _print_log_block(title: str, lines: list[str]) -> None:
+  print('\n' + '=' * 70)
+  print(title)
+  print('=' * 70)
+  for line in lines:
+    print(f'  - {line}')
+  print('=' * 70 + '\n')
+
+
 class Render:
   def __init__(self, out_root: str = 'outputs'):
     self.out_root = out_root
+    self.last_result: dict | None = None
 
-  def render(self,
-             scene,
-             cam,
-             width: int,
-             height: int,
-             name: str = 'scene',
-             samples_per_pixel: int = 16,
-             sampling_mode: str = 'jittered',
-             seed: Optional[int] = None,
-             gamma_fix: bool = False) -> str:
-    """Renderiza a cena, salva `render.png` e `properties.md` em uma pasta timestamp.
-
-    Retorna o caminho da pasta criada.
-    """
+  def _build_output_paths(self, name: str) -> dict[str, str]:
     ts = datetime.now().strftime('%Y%m%d_%H%M%S')
     sim_dir = os.path.join(os.getcwd(), self.out_root, f'{name}_{ts}')
     os.makedirs(sim_dir, exist_ok=True)
+    return {
+      'sim_dir': sim_dir,
+      'img_path': os.path.join(sim_dir, 'render.png'),
+      'properties_json_path': os.path.join(sim_dir, 'properties.json'),
+      'properties_md_path': os.path.join(sim_dir, 'properties.md'),
+    }
 
-    img_path = os.path.join(sim_dir, 'render.png')
-    properties_json_path = os.path.join(sim_dir, 'properties.json')
+  def render_core(self,
+                  scene,
+                  cam,
+                  width: int,
+                  height: int,
+                  name: str = 'scene',
+                  samples_per_pixel: int = 16,
+                  sampling_mode: str = 'jittered',
+                  seed: Optional[int] = None,
+                  gamma_fix: bool = False) -> dict:
+    paths = self._build_output_paths(name)
+
     requested_samples_per_pixel = max(1, int(samples_per_pixel))
     effective_samples_per_pixel = effective_samples_per_pixel_for_mode(
       requested_samples_per_pixel,
@@ -57,7 +69,6 @@ class Render:
       f"  correção gama: {gamma_text}"
     )
 
-    # Cria o Film com parâmetros de AA e renderiza para o arquivo de saída
     film = Film(
       width=width,
       height=height,
@@ -65,43 +76,56 @@ class Render:
       sampling_mode=sampling_mode,
       seed=seed,
     )
+
     render_start = perf_counter()
-    film.render(scene=scene, camera=cam, filename=img_path, gamma_fix=gamma_fix)
+    film.render(scene=scene, camera=cam, filename=paths['img_path'], gamma_fix=gamma_fix)
     render_time_seconds = perf_counter() - render_start
 
-    snapshot = RenderSnapshot.from_runtime(
+    render_time_minutes = render_time_seconds / 60.0
+    _print_log_block(
+      'RENDER FINALIZADO',
+      [
+        f'tempo: {render_time_seconds:.3f}s ({render_time_minutes:.3f} min)',
+        f'imagem: {paths["img_path"]}',
+      ],
+    )
+
+    result = {
+      **paths,
+      'render_time_seconds': render_time_seconds,
+      'render_time_minutes': render_time_minutes,
+      'requested_samples_per_pixel': requested_samples_per_pixel,
+      'effective_samples_per_pixel': effective_samples_per_pixel,
+      'sampling_mode': sampling_mode,
+      'seed': seed,
+      'gamma_fix': gamma_fix,
+      'name': name,
+      'width': width,
+      'height': height,
+    }
+    self.last_result = result
+    return result
+
+  def render(self,
+             scene,
+             cam,
+             width: int,
+             height: int,
+             name: str = 'scene',
+             samples_per_pixel: int = 16,
+             sampling_mode: str = 'jittered',
+             seed: Optional[int] = None,
+             gamma_fix: bool = False) -> str:
+    """Wrapper de compatibilidade: renderiza e retorna o diretório de saída."""
+    result = self.render_core(
       scene=scene,
       cam=cam,
       width=width,
       height=height,
       name=name,
-      samples_per_pixel=effective_samples_per_pixel,
+      samples_per_pixel=samples_per_pixel,
       sampling_mode=sampling_mode,
       seed=seed,
       gamma_fix=gamma_fix,
-      render_time_seconds=render_time_seconds,
     )
-
-    _ensure_parent_dir(properties_json_path)
-    with open(properties_json_path, 'w', encoding='utf-8') as f:
-      f.write(snapshot.to_json(indent=2, ensure_ascii=False))
-
-    md_text = snapshot.to_markdown(
-      image_name=os.path.basename(img_path),
-      properties_json_name=os.path.basename(properties_json_path),
-    )
-    md_path = os.path.join(sim_dir, 'properties.md')
-    _ensure_parent_dir(md_path)
-    with open(md_path, 'w', encoding='utf-8') as f:
-      f.write(md_text)
-
-    render_time_minutes = render_time_seconds / 60.0
-    print(
-      f'Render finalizado em {render_time_seconds:.3f}s '
-      f'({render_time_minutes:.3f} min)\n'
-      f'  imagem: {img_path}\n'
-      f'  resumo: {md_path}\n'
-      f'  propriedades: {properties_json_path}'
-    )
-
-    return sim_dir
+    return str(result['sim_dir'])
