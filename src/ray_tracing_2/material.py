@@ -34,6 +34,39 @@ class Material:
     return glm.vec3(0.0)
 
 
+class EmissiveMaterial(Material):
+  # Material emissivo local: aparece brilhante sem depender de luz incidente.
+  # No modo padrão, é transparente para shadow rays para permitir a estratégia
+  # de dupla identidade (painel visível + AreaLight sobreposta).
+  # Os slides-base do projeto separam materiais de fontes de luz e não definem
+  # um "Phong emissivo" explícito. Para esta extensão, seguimos a ideia de
+  # emissão própria discutida em PBRT 4e, cap. 4.4 (Light Emission): quando um
+  # raio primário atinge uma superfície emissiva, ela pode devolver radiância
+  # emitida localmente sem depender de iluminação incidente.
+  def __init__(self, emission: glm.vec3, shadow_passthrough: bool = True):
+    self.emission = glm.vec3(emission)
+    self.shadow_passthrough = bool(shadow_passthrough)
+
+  def eval(self,
+           scene: 'Scene',
+           hit: Hit,
+           ray: Ray,
+           depth: int = 0,
+           max_depth: int | None = None):
+    # PBRT 4e, cap. 12.4 (Area Lights): quando um raio intersecta uma superfície
+    # emissiva, a contribuição observada pode vir diretamente da radiância
+    # emitida por ela. Aqui modelamos a versão mais simples: emissão constante.
+    return glm.vec3(self.emission)
+
+  def shadow_transmittance(self, scene: 'Scene', hit: Hit, ray: Ray) -> glm.vec3:
+    # Esta escolha não vem diretamente dos slides: ela é um artifício de
+    # engenharia para manter a "dupla identidade". O painel é visível para a
+    # câmera, mas não deve ocluir a AreaLight coincidente ao lançar shadow rays.
+    if self.shadow_passthrough:
+      return glm.vec3(1.0)
+    return glm.vec3(0.0)
+
+
 class PhongMaterial(Material):
   # 5.tracado_de_raios2.pdf - p.27: PhongMaterial.Eval.
   # Sintese fisica: c = c_amb + k_d L_i max(0, n·l) + k_s L_i max(0, r·v)^s.
