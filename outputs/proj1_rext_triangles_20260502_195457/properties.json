@@ -1,0 +1,473 @@
+{
+  "schema_version": "1.0",
+  "render": {
+    "name": "proj1_rext_triangles",
+    "width": 800,
+    "height": 600,
+    "samples_per_pixel": 25,
+    "sampling_mode": "stratified",
+    "seed": null,
+    "gamma_fix": false,
+    "render_time_seconds": 497.88388066600237,
+    "ray_estimation": {
+      "primary_rays": 12000000,
+      "secondary_rays": 942208,
+      "shadow_rays": 13042535,
+      "total_rays": 25984743,
+      "estimated_time_seconds": 534.3905364184367,
+      "estimated_time_minutes": 8.906508940307278,
+      "formatted_time": "534.391s (8.907 min)",
+      "throughput_rays_per_second": 48625,
+      "primary_hit_ratio": 0.5038759689922481,
+      "recursive_surface_ratio": 0.14285714285714285,
+      "shadow_samples_per_hit": 2,
+      "estimated_intersection_tests": 181893201,
+      "measured_intersection_throughput": 340375.0414801033,
+      "estimated_time_by_intersections_seconds": 534.3905364184366,
+      "estimated_time_by_intersections_minutes": 8.906508940307276,
+      "avg_intersections_per_ray": 7.0,
+      "calibration": {
+        "calibration_elapsed_seconds": 0.26632387499921606,
+        "calibration_samples_tested": 6400,
+        "calibration_rays_traced": 6450,
+        "calibration_intersection_tests": 90650,
+        "calibration_shadow_rays": 6500,
+        "measured_throughput_rays_per_second": 48625.005925729034
+      }
+    },
+    "estimation_quality": {
+      "rays_model_estimated_seconds": 534.3905364184367,
+      "rays_model_actual_seconds": 497.88388066600237,
+      "rays_model_absolute_error_seconds": 36.50665575243431,
+      "rays_model_relative_error": 0.07332363462661333,
+      "rays_model_accuracy_percent": 92.66763653733867,
+      "rays_model_actual_over_estimated": 0.9316854374010677,
+      "intersection_model_estimated_seconds": 534.3905364184366,
+      "intersection_model_actual_seconds": 497.88388066600237,
+      "intersection_model_absolute_error_seconds": 36.5066557524342,
+      "intersection_model_relative_error": 0.07332363462661311,
+      "intersection_model_accuracy_percent": 92.6676365373387,
+      "intersection_model_actual_over_estimated": 0.9316854374010679
+    }
+  },
+  "scene": {
+    "ambient_light": [
+      0.029999999329447746,
+      0.029999999329447746,
+      0.029999999329447746
+    ],
+    "background_color": [
+      0.019999999552965164,
+      0.019999999552965164,
+      0.05000000074505806
+    ],
+    "max_depth": 4,
+    "ray_epsilon": 0.001
+  },
+  "camera": {
+    "eye": [
+      2.7750000953674316,
+      3.200000047683716,
+      12.774999618530273
+    ],
+    "center": [
+      2.7750000953674316,
+      2.7750000953674316,
+      2.7750000953674316
+    ],
+    "up": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "fov": 50.0,
+    "focal_distance": 1.0,
+    "aspect": 1.3333333333333333
+  },
+  "objects": [
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.07999999821186066,
+          0.07999999821186066
+        ],
+        "diffuse": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        -0.10000000149011612
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.650000095367432,
+        0.0
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.0,
+          0.07999999821186066,
+          0.0
+        ],
+        "diffuse": [
+          0.05000000074505806,
+          0.75,
+          0.05000000074505806
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        0.0,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.0,
+          0.0
+        ],
+        "diffuse": [
+          0.75,
+          0.05000000074505806,
+          0.05000000074505806
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        5.550000190734863,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.07999999821186066,
+          0.07999999821186066
+        ],
+        "diffuse": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        0.0,
+        5.550000190734863,
+        0.0
+      ],
+      "p_max": [
+        5.550000190734863,
+        5.650000095367432,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.07999999821186066,
+          0.07999999821186066
+        ],
+        "diffuse": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        0.0,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "TriangleMesh",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.05000000074505806,
+          0.029999999329447746,
+          0.0
+        ],
+        "diffuse": [
+          0.699999988079071,
+          0.5,
+          0.20000000298023224
+        ],
+        "specular": [
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224
+        ],
+        "shininess": 32.0
+      },
+      "shape_chain": [
+        "TriangleMesh"
+      ],
+      "vertices": [
+        [
+          0.75,
+          0.019999999552965164,
+          4.550000190734863
+        ],
+        [
+          1.649999976158142,
+          0.019999999552965164,
+          4.550000190734863
+        ],
+        [
+          1.649999976158142,
+          0.019999999552965164,
+          5.449999809265137
+        ],
+        [
+          0.75,
+          0.019999999552965164,
+          5.449999809265137
+        ],
+        [
+          1.2000000476837158,
+          1.2200000286102295,
+          5.0
+        ]
+      ],
+      "faces": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          2,
+          3
+        ],
+        [
+          0,
+          1,
+          4
+        ],
+        [
+          1,
+          2,
+          4
+        ],
+        [
+          2,
+          3,
+          4
+        ],
+        [
+          3,
+          0,
+          4
+        ]
+      ],
+      "name": "phong_pyramid",
+      "vertex_count": 5,
+      "face_count": 6,
+      "triangle_count": 6
+    },
+    {
+      "type": "TriangleMesh",
+      "material": {
+        "type": "ReflectiveMaterial",
+        "ambient": [
+          0.03999999910593033,
+          0.03999999910593033,
+          0.03999999910593033
+        ],
+        "diffuse": [
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224
+        ],
+        "specular": [
+          0.30000001192092896,
+          0.30000001192092896,
+          0.30000001192092896
+        ],
+        "shininess": 96.0,
+        "reflectivity": [
+          0.7799999713897705,
+          0.7799999713897705,
+          0.7799999713897705
+        ]
+      },
+      "shape_chain": [
+        "TriangleMesh"
+      ],
+      "vertices": [
+        [
+          3.3499999046325684,
+          0.019999999552965164,
+          4.550000190734863
+        ],
+        [
+          4.25,
+          0.019999999552965164,
+          4.550000190734863
+        ],
+        [
+          4.25,
+          0.019999999552965164,
+          5.449999809265137
+        ],
+        [
+          3.3499999046325684,
+          0.019999999552965164,
+          5.449999809265137
+        ],
+        [
+          3.799999952316284,
+          1.2200000286102295,
+          5.0
+        ]
+      ],
+      "faces": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          2,
+          3
+        ],
+        [
+          0,
+          1,
+          4
+        ],
+        [
+          1,
+          2,
+          4
+        ],
+        [
+          2,
+          3,
+          4
+        ],
+        [
+          3,
+          0,
+          4
+        ]
+      ],
+      "name": "reflective_pyramid",
+      "vertex_count": 5,
+      "face_count": 6,
+      "triangle_count": 6
+    }
+  ],
+  "lights": [
+    {
+      "type": "PointLight",
+      "pos": [
+        1.5,
+        5.349999904632568,
+        4.949999809265137
+      ],
+      "power": [
+        0.8999999761581421,
+        0.8999999761581421,
+        0.8999999761581421
+      ]
+    },
+    {
+      "type": "PointLight",
+      "pos": [
+        4.099999904632568,
+        5.349999904632568,
+        4.949999809265137
+      ],
+      "power": [
+        0.6000000238418579,
+        0.6499999761581421,
+        0.699999988079071
+      ]
+    }
+  ]
+}
