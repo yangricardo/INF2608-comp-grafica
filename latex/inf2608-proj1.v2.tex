@@ -1,0 +1,131 @@
+%% -----------------------------------------------------------
+%% Projeto 1 da disciplina de INF2608 - Fundamentos de Computacao Grafica
+%% Versao v2 em LaTeX com estrutura orientada a requisitos.
+
+\documentclass[portuguese]{sbcreviews-2025}%
+\usepackage[misc,geometry]{ifsym}
+\usepackage{aas_macros}
+\usepackage[bottom]{footmisc}
+\usepackage{tabularray}
+\usepackage{afterpage}
+\usepackage{url}
+\usepackage{pifont}
+
+\setcitestyle{square}
+\newcommand{\slidescite}[2]{\citep[pp.~#2]{#1}}
+\newcommand{\traceability}[1]{%
+    \begin{quote}
+    \footnotesize\textbf{Rastreabilidade no codigo.}~#1
+    \end{quote}
+}
+
+\definecolor{engtitle}{rgb}{0.5,0.5,0.5}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.0}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+
+\category{Projeto 1 da disciplina de INF2608 -- Fundamentos de Computacao Grafica}
+\title[Analise por Requisitos do Projeto 1]{Analise Tecnico-Cientifica por Requisitos de uma Implementacao de Ray Tracing}
+\engtitle{\textcolor{engtitle}{Requirement-Oriented Technical Analysis of a Ray Tracing Implementation}}
+
+\author[Yang Ricardo Barcellos Miranda]{
+\affil{\textbf{Yang Ricardo Barcellos Miranda}~[\href{mailto:ymiranda@inf.puc-rio.br}{\textit{ymiranda@inf.puc-rio.br}}]}
+}
+
+\institution{Pontificia Universidade Catolica do Rio de Janeiro - PUC-Rio}
+
+\begin{document}
+\begin{frontmatter}
+
+\maketitle
+
+\begin{abstract-pt}
+Este texto apresenta a versao v2 do relatorio do Projeto 1 com organizacao por requisitos do enunciado. O objetivo e tornar a validacao mais direta, mapeando cada requisito principal para uma cena dedicada, um comando de execucao reproduzivel e uma evidencia visual associada, mantendo a mesma configuracao de camera entre os experimentos. A analise preserva a rastreabilidade com o codigo em \path{src/ray_tracing_2/}, destaca aderencia e limites da implementacao atual e separa requisitos principais de extensoes adicionais.
+\end{abstract-pt}
+
+\begin{abstract-en}
+This v2 report reorganizes the Project 1 analysis around statement requirements. The goal is to provide direct validation by mapping each main requirement to a dedicated scene, a reproducible command-line execution, and associated visual evidence, while keeping camera configuration fixed across experiments. The text preserves code traceability in \path{src/ray_tracing_2/}, highlights adherence and current limitations, and separates core requirements from additional extensions.
+\end{abstract-en}
+
+\begin{pchaves}
+tracado de raios, computacao grafica, requisitos, Phong, amostragem
+\end{pchaves}
+
+\begin{keywords}
+ray tracing, computer graphics, requirements, Phong, sampling
+\end{keywords}
+
+\begin{dates}
+\noindent{\sffamily\textbf{Entrega:}} 10/05/2026
+\end{dates}
+
+\end{frontmatter}
+
+\section{Introducao}
+\label{sec:introducao-v2}
+
+Esta versao reorganiza o relatorio por requisitos principais de \path{materiais/proj1.pdf}. O principio metodologico e simples: cada requisito deve ser respondido por uma cena principal, um comando reproduzivel e uma interpretacao objetiva do resultado.
+
+\section{Requisitos e Aderencia}
+\label{sec:aderencia-v2}
+
+\begin{tblr}{|l|l|l|}
+\hline
+\textbf{Requisito} & \textbf{Cena principal} & \textbf{Status} \\
+\hline
+R1: esferas e caixas & \path{proj1_req1_geometry.py} & Implementado \\
+\hline
+R2: luz pontual & \path{proj1_req2_point_lights.py} & Implementado \\
+\hline
+R3: Phong + sombras & \path{proj1_req3_phong_shadows.py} & Implementado \\
+\hline
+R4: multiplas amostras por pixel & \path{proj1_req4_sampling.py} & Implementado \\
+\hline
+\end{tblr}
+
+\traceability{\path{src/ray_tracing_2/proj1_scene_common.py}, \path{src/ray_tracing_2/proj1_req1_geometry.py}, \path{src/ray_tracing_2/proj1_req2_point_lights.py}, \path{src/ray_tracing_2/proj1_req3_phong_shadows.py}, \path{src/ray_tracing_2/proj1_req4_sampling.py}.}
+
+\section{Procedimento Experimental Padrao}
+\label{sec:procedimento-v2}
+
+Os testes de validacao rapida desta versao usam:
+\begin{itemize}
+    \item resolucao fixa \texttt{800x600};
+    \item \texttt{--spp} no intervalo 1 a 4;
+    \item baseline em \texttt{--spp 1}.
+\end{itemize}
+
+Comandos-base:
+\begin{verbatim}
+python -m ray_tracing_2.proj1_req1_geometry --width 800 --height 600 --spp 1 --sampling_mode center
+python -m ray_tracing_2.proj1_req2_point_lights --width 800 --height 600 --spp 1 --sampling_mode center
+python -m ray_tracing_2.proj1_req3_phong_shadows --width 800 --height 600 --spp 1 --sampling_mode center
+python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 1 --sampling_mode center
+\end{verbatim}
+
+\section{Discussao Tecnica Resumida}
+\label{sec:discussao-v2}
+
+\textbf{R1.} A cena principal usa apenas caixas instanciadas e esferas no mesmo enquadramento de camera.
+
+\textbf{R2.} A iluminacao usa exclusivamente fontes pontuais para separar contribuicoes de luz.
+
+\textbf{R3.} O sombreamento local de Phong e as sombras duras aparecem no mesmo setup, com materiais de resposta angular distinta.
+
+\textbf{R4.} O requisito de multiplas amostras e validado por comparacao controlada de \texttt{center} contra modos estocasticos no mesmo quadro.
+
+\section{Limites e Requisitos Adicionais}
+\label{sec:limites-v2}
+
+Triangulos, BVH local e luz de area permanecem como extensoes adicionais e nao substituem as evidencias principais dos requisitos 1--4.
+
+\section{Conclusao}
+\label{sec:conclusao-v2}
+
+A estrutura v2 melhora a rastreabilidade requisito-a-requisito, mantendo custo de reproducao baixo e coerencia de camera entre cenas.
+
+\bibliographystyle{apalike-sol}
+\bibliography{refs}
+
+\end{document}
