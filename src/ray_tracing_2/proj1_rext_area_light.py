@@ -12,6 +12,7 @@ from ray_tracing_2.film import SamplingMode
 from ray_tracing_2.light import AreaLightSamplingMode
 from ray_tracing_2.proj1_scene_common import (
   add_rext_area_light,
+  add_rext_area_light_emissive_panel,
   add_rext_area_light_objects,
   build_cornell_room,
   build_proj1_camera,
@@ -41,6 +42,12 @@ def render(
   scene = build_proj1_scene(ambient=glm.vec3(0.02, 0.02, 0.02), max_depth=3)
   build_cornell_room(scene)
   add_rext_area_light_objects(scene)
+  # Estratégia de "dupla identidade": os slides cobrem a luz de área como fonte
+  # amostrada e o shading local de Phong como resposta do material. Como a
+  # arquitetura do projeto não acopla forma emissiva e fonte física na mesma
+  # entidade, adicionamos explicitamente uma geometria emissiva visível e uma
+  # AreaLight coincidente para iluminar os demais objetos.
+  add_rext_area_light_emissive_panel(scene)
   add_rext_area_light(scene, sampling_mode=light_sampling_mode, seed=seed, samples_u=4, samples_v=4)
 
   renderer = Render()
