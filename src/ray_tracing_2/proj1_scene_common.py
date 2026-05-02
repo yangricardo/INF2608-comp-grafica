@@ -6,7 +6,7 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.light import AmbientLight, AreaLight, AreaLightSamplingMode, PointLight
-from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
+from ray_tracing_2.material import EmissiveMaterial, PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Instance, Sphere, TriangleMesh
 
@@ -21,6 +21,13 @@ class Proj1CameraConfig:
 
 
 CANONICAL_CAMERA = Proj1CameraConfig()
+# Geometria canônica da luminária retangular. Os slides de luz de área (parte 2,
+# pp. 14-23) descrevem a fonte por um ponto de origem p e duas arestas e_u/e_v.
+# Mantemos essa parametrização em constantes para forçar coincidência entre a
+# camada visual (painel emissivo) e a camada física (AreaLight).
+REXT_AREA_LIGHT_P = glm.vec3(1.875, 5.26, 2.575)
+REXT_AREA_LIGHT_EU = glm.vec3(1.80, 0.0, 0.0)
+REXT_AREA_LIGHT_EV = glm.vec3(0.0, 0.0, 0.40)
 
 
 def build_proj1_camera(width: int, height: int, config: Proj1CameraConfig = CANONICAL_CAMERA) -> Camera:
@@ -340,21 +347,96 @@ def add_rext_area_light(
 ) -> None:
   """R_ext luz de area: retângulo no teto centrado na sala Cornell."""
   # A AreaLight usa decaimento 1/r^2, ao contrário da PointLight do enunciado.
-  # Com o teto a y≈5.5 e objetos a y≈0, dist²≈25. Para obter iluminação
-  # equivalente a uma PointLight(power=0.70) sem falloff, a potência precisa
-  # compensar: power ≈ 0.70 × dist² × fator_área ≈ 100.
+  # Mantemos a potência elevada para compensar o decaimento com distância, mas
+  # reduzimos a área emissiva para ~1/3 do tamanho anterior em cada eixo.
+  # Isso deixa a luz mais compacta e direcional sem voltar ao regime escuro.
+  # Luz retangular centrada na sala (2.775 em x e z).
+  # e_u = 1.60 em X, e_v = 0.60 em Z → razão 2.7:1, claramente não quadrada.
+  # O tamanho é suficiente para que a penumbra revele o formato retangular.
   scene.lights.append(
     AreaLight(
-      p=glm.vec3(0.555, 5.54, 0.555),
-      e_u=glm.vec3(4.44, 0.0, 0.0),
-      e_v=glm.vec3(0.0, 0.0, 4.44),
-      power=glm.vec3(100.0, 100.0, 100.0),
+      p=REXT_AREA_LIGHT_P,
+      e_u=REXT_AREA_LIGHT_EU,
+      e_v=REXT_AREA_LIGHT_EV,
+      power=glm.vec3(85.0, 85.0, 85.0),
       samples_u=samples_u,
       samples_v=samples_v,
       sampling_mode=sampling_mode,
       seed=seed,
     )
   )
+
+
+def add_rext_area_light_emissive_panel(
+  scene: Scene,
+  *,
+  emission: glm.vec3 = glm.vec3(1.0, 0.98, 0.95),
+  thickness: float = 0.010,
+  shadow_passthrough: bool = True,
+) -> None:
+  """Painel emissivo visível para a câmera, sobreposto à AreaLight."""
+  # Os slides do projeto mantêm luzes e materiais como conceitos separados;
+  # portanto, este painel não substitui a AreaLight. Seguimos aqui uma versão
+  # simplificada da ideia de "área emissiva visível" discutida em PBRT 4e,
+  # cap. 12.4, implementada localmente como geometria + emissão constante.
+  panel_material = EmissiveMaterial(emission=emission, shadow_passthrough=shadow_passthrough)
+  half_t = max(0.0005, thickness * 0.5)
+  scene.objects.append(
+    Box(
+      p_min=glm.vec3(REXT_AREA_LIGHT_P.x, REXT_AREA_LIGHT_P.y - half_t, REXT_AREA_LIGHT_P.z),
+      p_max=glm.vec3(
+        REXT_AREA_LIGHT_P.x + REXT_AREA_LIGHT_EU.x,
+        REXT_AREA_LIGHT_P.y + half_t,
+        REXT_AREA_LIGHT_P.z + REXT_AREA_LIGHT_EV.z,
+      ),
+      material=panel_material,
+    )
+  )
+
+  frame_material = PhongMaterial(
+    ambient=glm.vec3(0.01),
+    diffuse=glm.vec3(0.03),
+    specular=glm.vec3(0.0),
+    shininess=1.0,
+  )
+  border = 0.06
+  bar_thickness = 0.03
+  frame_height = 0.06
+  x0 = REXT_AREA_LIGHT_P.x
+  x1 = REXT_AREA_LIGHT_P.x + REXT_AREA_LIGHT_EU.x
+  z0 = REXT_AREA_LIGHT_P.z
+  z1 = REXT_AREA_LIGHT_P.z + REXT_AREA_LIGHT_EV.z
+  y0 = REXT_AREA_LIGHT_P.y - (frame_height * 0.5)
+  y1 = REXT_AREA_LIGHT_P.y + (frame_height * 0.5)
+
+  scene.objects.extend([
+    # Moldura escura puramente geométrica: ajuda a leitura perceptual do aspecto
+    # retangular da luminária sem alterar a parametrização física da AreaLight.
+    # Barra esquerda
+    Box(
+      p_min=glm.vec3(x0 - border, y0, z0 - border),
+      p_max=glm.vec3(x0 - border + bar_thickness, y1, z1 + border),
+      material=frame_material,
+    ),
+    # Barra direita
+    Box(
+      p_min=glm.vec3(x1 + border - bar_thickness, y0, z0 - border),
+      p_max=glm.vec3(x1 + border, y1, z1 + border),
+      material=frame_material,
+    ),
+    # Barra frontal
+    Box(
+      p_min=glm.vec3(x0 - border + bar_thickness, y0, z0 - border),
+      p_max=glm.vec3(x1 + border - bar_thickness, y1, z0 - border + bar_thickness),
+      material=frame_material,
+    ),
+    # Barra traseira
+    Box(
+      p_min=glm.vec3(x0 - border + bar_thickness, y0, z1 + border - bar_thickness),
+      p_max=glm.vec3(x1 + border - bar_thickness, y1, z1 + border),
+      material=frame_material,
+    ),
+  ])
 
 
 def add_rext_reflective_objects(scene: Scene) -> None:
