@@ -1,0 +1,128 @@
+@startuml ray_tracing_trace_flow_v1
+title Fluxo de Trace Ray e Shading Recursivo
+
+|Film|
+start
+
+:Receber pixel (i, j), spp e sampling_mode;
+if (sampling_mode == center?) then (sim)
+  :Usar get_sample(i, j);
+elseif (sampling_mode == jittered?) then (sim)
+  :Gerar offsets com uniform_samples_2d();
+else (stratified)
+  :Gerar offsets com stratified_grid_samples_2d();
+endif
+
+repeat
+  |Camera|
+  :generate_ray(xn, yn);
+
+  |Scene|
+  :trace_ray(ray, depth);
+  :compute_intersection(ray);
+  if (Hit encontrado?) then (nao)
+    :sample_color = background_color;
+  else (sim)
+    :Selecionar hit.material;
+    if (Material == PhongMaterial?) then (sim)
+      |Material|
+      :Inicializar cor local\ncom termo ambiente;
+
+      repeat
+        |Light|
+        if (Luz == PointLight?) then (sim)
+          :PointLight.radiance();
+        else (AreaLight)
+          if (light_sampling_mode == regular?) then (sim)
+            :regular_grid_samples_2d();
+          elseif (light_sampling_mode == uniform?) then (sim)
+            :uniform_samples_2d();
+          else (stratified)
+            :stratified_grid_samples_2d();
+          endif
+          :AreaLight.sample_radiance();
+        endif
+
+        |Scene|
+        :transmittance(hit.pos, hit.geo_normal, l, dist);
+        if (Bloqueio opaco?) then (sim)
+          :Li = 0;
+        else (nao)
+          :Acumular shadow_transmittance()\ndos transparentes;
+        endif
+
+        |Material|
+        :Somar difusa + especular;
+      repeat while (Ha mais luzes?) is (sim)
+
+      |Material|
+      :sample_color = cor local;
+
+    elseif (Material == ReflectiveMaterial?) then (sim)
+      |Material|
+      :Calcular R por Fresnel-Schlick;
+      :c_local = (1 - R) * direct_lighting(...);
+
+      |Scene|
+      if (can_spawn_ray(depth, max_depth)?) then (sim)
+        :Construir reflected_ray;
+        :trace_ray(reflected_ray, depth + 1);
+        |Material|
+        :sample_color = c_local + R * c_refletida;
+      else (nao)
+        |Material|
+        :sample_color = c_local;
+      endif
+
+    else (TransparentMaterial)
+      |Material|
+      :Calcular R por Fresnel-Schlick;
+      :Definir razao ior\nentrada/saida;
+      :Calcular refracted = glm.refract(...);
+      if (TIR?) then (sim)
+        :Refracao indisponivel;
+      else (nao)
+        :Preparar Beer-Lambert\npara transmissao;
+      endif
+
+      |Scene|
+      if (can_spawn_ray(depth, max_depth)?) then (sim)
+        :Construir reflected_ray;
+        :trace_ray(reflected_ray, depth + 1);
+        if (Ha refracao valida?) then (sim)
+          :Construir refracted_ray;
+          :trace_ray(refracted_ray, depth + 1);
+        else (nao)
+          :Seguir apenas com reflexao;
+        endif
+      else (nao)
+        :Nao gera raios secundarios;
+      endif
+
+      |Material|
+      if (Ha refracao valida?) then (sim)
+        :sample_color = R * c_refletida\n+ (1 - R) * c_refratada\n* Beer-Lambert;
+      else (nao)
+        :sample_color = c_refletida;
+      endif
+    endif
+  endif
+
+  |Film|
+  :Acumular sample_color;
+repeat while (Ha mais amostras no pixel?) is (sim)
+
+|Film|
+:Media Monte Carlo do pixel;
+:set_pixel(i, j, final_color);
+
+stop
+
+legend bottom
+  Este activity diagram concentra o fluxo dinamico principal que um
+  sequence diagram unico tornaria denso demais: amostragem do filme,
+  despacho de materiais, recursao por profundidade e visibilidade via
+  transmittance(). O overview e os detalhes de BVH ficam separados.
+end legend
+
+@enduml

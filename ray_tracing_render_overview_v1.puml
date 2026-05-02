@@ -1,0 +1,96 @@
+@startuml ray_tracing_render_overview_v1
+title Renderizacao Completa - Visao Geral do Pipeline
+
+autonumber
+
+actor User
+participant "Entry point\n(main.py / cornell_box*.py / main_*.py)" as Entry
+participant "cli.py" as CLI
+participant "CommonRenderOptions" as Options
+participant Camera
+participant Scene
+participant "AreaLight" as ALight
+participant Render
+participant Film
+participant "sampling.py" as Pattern2D
+participant "RenderSnapshot" as Snapshot
+
+User -> Entry : python -m ray_tracing_2....\n--width --height --spp --sampling_mode\n[--light_sampling_mode] [--seed]
+Entry -> CLI : build_parser()\nadd_common_render_arguments()
+CLI --> Entry : argparse parser
+Entry -> Entry : args = parser.parse_args()
+Entry -> Options : CommonRenderOptions.from_namespace(args)
+Options --> Entry : width, height, spp, sampling_mode, seed, gamma_fix
+
+note right of Entry
+  Controles publicos separados:
+  - sampling_mode -> Film
+  - light_sampling_mode -> AreaLight
+end note
+
+Entry -> Camera : Camera(...)
+Entry -> Scene : Scene(...)
+alt cena usa luz de area
+  Entry -> ALight : AreaLight(..., sampling_mode=light_sampling_mode, seed=seed)
+  ALight --> Entry : instancia configurada
+  Entry -> Scene : scene.lights.append(area_light)
+else cena usa luz pontual
+  Entry -> Scene : scene.lights.append(PointLight(...))
+end
+
+Entry -> Render : render(scene, cam, width, height,\nname, samples_per_pixel, sampling_mode, seed, gamma_fix)
+Render -> Render : cria pasta timestamp em outputs/
+Render -> Render : requested_spp = max(1, spp)
+Render -> Render : effective_spp = effective_samples_per_pixel_for_mode(...)
+Render -> Render : log inicial do render
+Render -> Film : Film(width, height, effective_spp, sampling_mode, seed)
+Render -> Film : render(scene, camera, render.png, gamma_fix)
+
+loop para cada pixel do filme
+  Film -> Film : get_samples_for_pixel(i, j)
+  alt sampling_mode = center
+    Film -> Film : retorna amostra central unica
+  else sampling_mode = jittered
+    Film -> Pattern2D : uniform_samples_2d(spp, rng)
+    Pattern2D --> Film : offsets subpixel aleatorios
+  else sampling_mode = stratified
+    Film -> Pattern2D : stratified_grid_samples_2d(G, G, rng)
+    Pattern2D --> Film : offsets subpixel estratificados
+  end
+
+  loop para cada amostra do pixel
+    Film -> Camera : generate_ray(xn, yn)
+    Camera --> Film : Ray
+    Film -> Scene : trace_ray(ray, depth=0)
+    note right of Scene
+      O fluxo recursivo completo de intersecao,
+      materiais, transmittance e luzes aparece em
+      ray_tracing_trace_flow_v1.puml.
+    end note
+    Scene --> Film : cor da amostra
+  end
+
+  Film -> Film : media Monte Carlo do pixel
+end
+
+Film -> Film : aplica gamma_fix se necessario
+Film -> Film : salva render.png
+Film --> Render : imagem final pronta
+
+Render -> Snapshot : RenderSnapshot.from_runtime(..., render_time_seconds)
+Snapshot --> Render : snapshot serializavel
+Render -> Snapshot : to_json(indent=2)
+Snapshot --> Render : properties.json
+Render -> Snapshot : to_markdown(image_name, properties_json_name)
+Snapshot --> Render : properties.md
+Render -> Render : grava properties.json e properties.md
+Render -> Render : log final com tempo e caminhos
+Render --> User : outputs/<nome_timestamp>/\nrender.png + properties.json + properties.md
+
+note bottom
+  Slides 4-5 no codigo atual:
+  - Slide 4: camera pinhole, raio primario, closest hit
+  - Slide 5: anti-aliasing, luz de area, recursao e artefatos experimentais
+end note
+
+@enduml

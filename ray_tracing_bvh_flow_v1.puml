@@ -1,0 +1,64 @@
+@startuml ray_tracing_bvh_flow_v1
+title Fluxo de Interseccao de TriangleMesh e BVH Local
+
+autonumber
+
+participant Scene
+participant "TriangleMesh" as Mesh
+participant "TriangleBVH" as BVH
+participant "TriangleBVHNode" as Node
+participant "AABB" as Box
+participant "Triangle\n(Moller-Trumbore)" as Tri
+
+Scene -> Mesh : intersect(ray, hit)
+
+alt accelerator == bvh
+  Mesh -> BVH : intersect(ray, hit)
+  BVH -> Node : root.intersect(ray, hit)
+
+  loop para cada no visitado na travessia
+    Node -> Box : intersects(ray, t_min, t_max)
+    alt AABB nao intersecta
+      Box --> Node : false
+      Node -> Node : podar subarvore
+    else AABB intersecta
+      Box --> Node : true, t_entry, t_exit
+
+      alt no folha
+        loop para cada triangulo da folha
+          Node -> Tri : intersect(ray, hit)
+          Tri --> Node : atualiza hit se t menor
+        end
+      else no interno
+        Node -> Node : intersect(left, ray, hit)
+        Node -> Node : intersect(right, ray, hit)
+      end
+    end
+  end
+
+  Node --> BVH : melhor hit encontrado na BVH
+  BVH --> Mesh : hit atualizado
+
+else accelerator == linear
+  loop para cada triangulo da malha
+    Mesh -> Tri : intersect(ray, hit)
+    Tri --> Mesh : atualiza hit se t menor
+  end
+end
+
+Mesh --> Scene : bool / hit atualizado
+
+note right of Scene
+  A cena continua percorrendo objetos de forma linear em
+  Scene.compute_intersection(). A aceleracao mostrada aqui
+  vale apenas dentro de cada TriangleMesh.
+end note
+
+note bottom
+  Slides 5-6 no codigo atual:
+  - AABB.intersects() usa a mesma ideia de slabs aplicada em Box
+  - Triangle.intersect() materializa o teste raio-triangulo
+  - TriangleBVH usa median split no eixo dominante
+end note
+
+@enduml
