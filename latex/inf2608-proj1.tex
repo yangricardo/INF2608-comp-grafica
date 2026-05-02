@@ -563,45 +563,9 @@ Essa delimitação é importante para o valor científico do artigo. O mérito d
 
 Além das imagens de saída das cenas, o repositório inclui diagramas PlantUML efetivamente renderizados em PNG, que funcionam como documentação intermediária entre o texto deste artigo e o código executável. O ponto metodológico importante é que esses diagramas não substituem a análise anterior; eles a condensam em vistas complementares do pipeline real, já validadas sintaticamente pelo próprio PlantUML.
 
-\paragraph{Visão geral do pipeline.}
-Este diagrama sintetiza o fluxo entre entrypoint, \texttt{cli.py}, \texttt{CommonRenderOptions}, construção de cena e câmera, \texttt{Render.render()}, \texttt{Film.render()} e geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}.
+Para evitar que quatro figuras largas interrompam a leitura do desenvolvimento principal, os diagramas foram deslocados para um anexo ao final do artigo. Essa mudança é apenas editorial: o papel analítico do conjunto permanece o mesmo.
 
-\begin{figure*}[!ht]
-\centering
-\includegraphics[width=0.95\textwidth]{../ray_tracing_render_overview_v1.puml.png}
-\caption{Diagrama renderizado da visão geral do pipeline.}
-\label{fig:diagram-overview}
-\end{figure*}
-
-\paragraph{Fluxo dinâmico de sombreamento recursivo.}
-Esta vista separa do overview o trecho mais denso do material sobre reflexão, refração e transmitância, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra.
-
-\begin{figure*}[!ht]
-\centering
-\includegraphics[width=0.95\textwidth]{../ray_tracing_trace_flow_v1.puml.png}
-\caption{Diagrama renderizado do fluxo de \texttt{trace\_ray} e shading recursivo.}
-\label{fig:diagram-trace}
-\end{figure*}
-
-\paragraph{Fluxo local de aceleração para malhas.}
-Este diagrama deixa explícito que a poda por AABB e a travessia da BVH acontecem dentro de \texttt{TriangleMesh}, e não como acelerador global da cena, o que reforça a leitura defendida na Seção~\ref{sec:slide6}.
-
-\begin{figure*}[!ht]
-\centering
-\includegraphics[width=0.95\textwidth]{../ray_tracing_bvh_flow_v1.puml.png}
-\caption{Diagrama renderizado do fluxo local de BVH para \texttt{TriangleMesh}.}
-\label{fig:diagram-bvh}
-\end{figure*}
-
-\paragraph{Visão estrutural estática.}
-Esta imagem complementa os diagramas dinâmicos ao mostrar dependências entre \texttt{Render}, \texttt{Scene}, \texttt{Film}, \texttt{Camera}, \texttt{Light}, \texttt{Material}, \texttt{TriangleMesh} e \texttt{TriangleBVH}.
-
-\begin{figure*}[!ht]
-\centering
-\includegraphics[width=0.95\textwidth]{../ray_tracing_2_class-diagram.puml.png}
-\caption{Diagrama renderizado da arquitetura principal do \texttt{ray\_tracing\_2}.}
-\label{fig:diagram-class}
-\end{figure*}
+O anexo reúne quatro vistas complementares. A Figura~\ref{fig:diagram-overview} sintetiza o fluxo entre entrypoint, \texttt{cli.py}, \texttt{CommonRenderOptions}, construção de cena e câmera, \texttt{Render.render()}, \texttt{Film.render()} e geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}. A Figura~\ref{fig:diagram-trace} isola o trecho mais denso do material sobre reflexão, refração e transmitância, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra. A Figura~\ref{fig:diagram-bvh} deixa explícito que a poda por AABB e a travessia da BVH acontecem dentro de \texttt{TriangleMesh}, e não como acelerador global da cena, enquanto a Figura~\ref{fig:diagram-class} complementa as vistas dinâmicas com uma visão estrutural estática das principais dependências do pacote.
 
 Em conjunto, esses artefatos visuais fortalecem a rastreabilidade do artigo: as Seções~\ref{sec:slide4} e~\ref{sec:slide5} ganham uma representação operacional do pipeline completo, enquanto a Seção~\ref{sec:slide6} passa a contar com uma visualização explícita da fronteira entre interseção global da cena e aceleração local de malhas triangulares.
 
@@ -612,7 +576,7 @@ O Projeto 1 implementa de forma sólida o núcleo geométrico e fotométrico do 
 
 O principal cuidado técnico desta versão é deixar claro o estatuto da geometria triangular e da aceleração frente às limitações consolidadas na Seção~\ref{sec:limitacoes}. O repositório entrega triangulação, \texttt{TriangleMesh} e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
 
-Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões relevantes do material da disciplina e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código. Os quadros consolidados apresentados a seguir organizam essa leitura em três tabelas: a Tabela~\ref{tab:slide4-aderencia} sintetiza os conteúdos do Slide 4, a Tabela~\ref{tab:slide5-aderencia} resume os conteúdos do Slide 5 e a Tabela~\ref{tab:slide6-aderencia} reúne o bloco de triângulos e estruturas de aceleração correspondente ao Slide 6.
+ Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões relevantes do material da disciplina e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código. Os quadros consolidados reunidos no anexo final organizam essa leitura em três tabelas: a Tabela~\ref{tab:slide4-aderencia} sintetiza os conteúdos do Slide 4, a Tabela~\ref{tab:slide5-aderencia} resume os conteúdos do Slide 5 e a Tabela~\ref{tab:slide6-aderencia} reúne o bloco de triângulos e estruturas de aceleração correspondente ao Slide 6.
 
 Sob o critério do Projeto 1, essa entrega é tecnicamente robusta e supera o núcleo mínimo ao incorporar supersampling, luz de área, materiais recursivos, geometria triangular e aceleração local por BVH. Sob o critério mais forte de cobertura integral do arco teórico das aulas, a entrega permanece conscientemente parcial. Essa parcialidade, contudo, não é caótica: ela é bem localizada. O que falta está concentrado em modelagem física mais rigorosa e em estruturas de aceleração mais sofisticadas, e não em inconsistência do pipeline principal.
 
@@ -625,9 +589,43 @@ Os artefatos de pesquisa discutidos neste artigo estão disponíveis no reposit�
 \section{Quadros Consolidados de Aderência entre Referência e Implementação}
 \label{sec:quadros-aderencia}
 
-Esta seção reúne, em formato sintético, os quadros de aderência deslocados das seções analíticas anteriores. Eles devem ser lidos como consolidação comparativa do que já foi discutido no corpo do artigo, em articulação com os slides da disciplina e com as referências selecionadas de \pbrtbook.
+Esta seção reúne, em formato sintético, a leitura dos quadros de aderência deslocados das seções analíticas anteriores. Eles devem ser lidos como consolidação comparativa do que já foi discutido no corpo do artigo, em articulação com os slides da disciplina e com as referências selecionadas de \pbrtbook.
+
+Para evitar que três tabelas largas quebrem o fechamento do argumento principal, os quadros consolidados foram deslocados para um anexo ao final do artigo. O que permanece aqui é a chave de leitura de cada quadro, isto é, o enquadramento interpretativo necessário para que as tabelas sejam lidas como síntese comparativa, e não como inventário isolado.
 
 \subsection{Núcleo geométrico e fotométrico}
+
+O Quadro~\ref{tab:slide4-aderencia} deve ser lido como a síntese do bloco mais estável e mais completamente materializado do repositório. Ele mostra que a cadeia câmera-raio-hit-sombreamento está operacional de ponta a ponta, ao mesmo tempo em que explicita duas qualificações importantes para a leitura técnica desta entrega: a convenção simplificada adotada para \texttt{PointLight} e a presença, já nesse núcleo, de um teste de sombra implementado em forma mais geral por transmitância acumulada.
+
+\subsection{Extensões ópticas e amostrais}
+
+O Quadro~\ref{tab:slide5-aderencia} consolida o trecho em que a implementação mais se afasta do núcleo mínimo e passa a operar por aproximações controladas. A leitura correta não é a de um bloco fisicamente completo, mas a de um conjunto coerente de extensões efetivas: amostragem estocástica do pixel, instanciação afim, integração discreta sobre luz de área, reflexão com Fresnel-Schlick, refração com Snell e Beer-Lambert, além da separação metodologicamente útil entre \texttt{sampling\_mode} no filme e \texttt{light\_sampling\_mode} na fonte extensa.
+
+\subsection{Geometria triangular e estruturas de aceleração}
+
+O Quadro~\ref{tab:slide6-aderencia} precisa ser interpretado com mais cuidado do que os anteriores porque o Slide 6 combina, no mesmo arco didático, conteúdo realmente entregue e conteúdo apenas parcialmente coberto. A evidência positiva está em \texttt{Triangle}, \texttt{TriangleMesh}, AABB e BVH local por malha; a evidência negativa é igualmente importante: o repositório não implementa grade regular, SAH, BVH linearizada nem agregador global de cena. O valor deste quadro está justamente em impedir uma leitura inflada da cobertura do bloco de aceleração.
+
+\begin{declarations}
+
+\begin{contributions}
+Yang Ricardo Barcellos Miranda foi responsável pela organização do manuscrito, consolidação da análise técnico-científica do repositório, revisão do alinhamento entre slides, PBRT e implementação, e preparação da versão atual em \LaTeX.
+\end{contributions}
+
+\begin{aitools}
+Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e padronização da redação em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelo autor.
+\end{aitools}
+
+\end{declarations}
+
+\bibliographystyle{apalike-sol}
+\bibliography{refs}
+
+\clearpage
+\section*{Anexo: Quadros Consolidados de Aderência}
+
+Os quadros desta seção final reúnem, em formato tabular, a síntese comparativa discutida na Seção~\ref{sec:quadros-aderencia}. Eles foram deslocados para o anexo para preservar a continuidade da leitura analítica e do fechamento do artigo.
+
+\subsection*{Núcleo geométrico e fotométrico}
 
 \begin{table*}[!ht]
 \caption{Quadro consolidado de aderência entre os conteúdos do Slide 4 e a implementação atual.}
@@ -653,7 +651,7 @@ Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt
 \end{tblr}
 \end{table*}
 
-\subsection{Extensões ópticas e amostrais}
+\subsection*{Extensões ópticas e amostrais}
 
 \begin{table*}[!ht]
 \caption{Quadro consolidado de aderência entre os conteúdos do Slide 5 e a implementação atual.}
@@ -681,7 +679,7 @@ Generalização do shadow ray para transmitância acumulada & Implementado & \te
 \end{tblr}
 \end{table*}
 
-\subsection{Geometria triangular e estruturas de aceleração}
+\subsection*{Geometria triangular e estruturas de aceleração}
 
 \begin{table*}[!ht]
 \caption{Quadro consolidado de aderência entre os conteúdos do Slide 6 e a implementação atual.}
@@ -706,20 +704,54 @@ SAH, BVH linearizada e agregador global de cena & Não implementado & \texttt{Sc
 \end{tblr}
 \end{table*}
 
-\begin{declarations}
+\clearpage
+\section*{Anexo: Diagramas de Rastreabilidade}
 
-\begin{contributions}
-Yang Ricardo Barcellos Miranda foi responsável pela organização do manuscrito, consolidação da análise técnico-científica do repositório, revisão do alinhamento entre slides, PBRT e implementação, e preparação da versão atual em \LaTeX.
-\end{contributions}
+Para preservar a fluidez do corpo principal, os diagramas discutidos na Seção~\ref{sec:experimentos-diagramas} foram reunidos neste anexo final. Eles mantêm a mesma função metodológica: servir como ponte entre a formulação textual do artigo e a organização efetiva do código executável.
 
-\begin{aitools}
-Ferramentas de IA generativa foram utilizadas como apoio à revisão textual, reorganização do conteúdo técnico e padronização da redação em \LaTeX. Todo o conteúdo técnico final foi revisado e validado pelo autor.
-\end{aitools}
+\subsection*{Visão geral do pipeline}
 
-\end{declarations}
+Este diagrama sintetiza o fluxo entre entrypoint, \texttt{cli.py}, \texttt{CommonRenderOptions}, construção de cena e câmera, \texttt{Render.render()}, \texttt{Film.render()} e geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}.
 
-\bibliographystyle{apalike-sol}
-\bibliography{refs}
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_render_overview_v1.puml.png}
+\caption{Diagrama renderizado da visão geral do pipeline.}
+\label{fig:diagram-overview}
+\end{figure*}
+
+\subsection*{Fluxo dinâmico de sombreamento recursivo}
+
+Esta vista separa do overview o trecho mais denso do material sobre reflexão, refração e transmitância, isto é, amostragem do filme, despacho por material, recursão por profundidade, reflexão, refração e transmitância em raios de sombra.
+
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_trace_flow_v1.puml.png}
+\caption{Diagrama renderizado do fluxo de \texttt{trace\_ray} e shading recursivo.}
+\label{fig:diagram-trace}
+\end{figure*}
+
+\subsection*{Fluxo local de aceleração para malhas}
+
+Este diagrama deixa explícito que a poda por AABB e a travessia da BVH acontecem dentro de \texttt{TriangleMesh}, e não como acelerador global da cena, o que reforça a leitura defendida na Seção~\ref{sec:slide6}.
+
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_bvh_flow_v1.puml.png}
+\caption{Diagrama renderizado do fluxo local de BVH para \texttt{TriangleMesh}.}
+\label{fig:diagram-bvh}
+\end{figure*}
+
+\subsection*{Visão estrutural estática}
+
+Esta imagem complementa os diagramas dinâmicos ao mostrar dependências entre \texttt{Render}, \texttt{Scene}, \texttt{Film}, \texttt{Camera}, \texttt{Light}, \texttt{Material}, \texttt{TriangleMesh} e \texttt{TriangleBVH}.
+
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_2_class-diagram.puml.png}
+\caption{Diagrama renderizado da arquitetura principal do \texttt{ray\_tracing\_2}.}
+\label{fig:diagram-class}
+\end{figure*}
 
 \end{document}
 

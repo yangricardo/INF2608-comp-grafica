@@ -277,16 +277,16 @@
   \setlength{\headheight}{36.90002pt}
   \addtolength{\topmargin}{-8.90002pt}
   \fancyhf{}
-  \lhead[L]{\footnotesize%
-    \emph{\vskip6pt \@jtitle}\ifdefempty{\@jid}{}%
+  \fancyhead[L]{%
+    \footnotesize
+    \ifdefempty{\@jtitle}{}{\emph{\@jtitle}\par\vskip3pt}%
     \ifdefempty{\@institution}{%
-      \ifdefempty{\@issn}{}{\par \vskip3pt ISSN:\space\href{https://portal.issn.org/resource/ISSN/\@issn}{\@issn}}%
+      \ifdefempty{\@issn}{}{ISSN:\space\href{https://portal.issn.org/resource/ISSN/\@issn}{\@issn}}%
     }{%
-      \par \vskip3pt \@institution
+      \@institution
     }%
-    \ifdefempty{\@doi}{}{~~$\bullet$~~doi:\space\href{https://doi.org/\@doi}{\@doi}}\\%
-											  
-    \scriptsize \ifdefempty{\@copyrightstatement}{}{\vskip3pt \faCreativeCommons~~\@copyrightstatement.\\}%
+    \ifdefempty{\@doi}{}{~~$\bullet$~~doi:\space\href{https://doi.org/\@doi}{\@doi}}%
+    \ifdefempty{\@copyrightstatement}{}{\par\vskip3pt\scriptsize \faCreativeCommons~~\@copyrightstatement.}%
   }
 % \cfoot{\thepage}
   \cfoot{}
