@@ -152,6 +152,11 @@ class AreaLight(Light):
     if sample_count <= 0:
       return samples
 
+    # Slide 5, pp. 14-23: a normal do emissor retangular vem do produto vetorial
+    # entre as arestas, n = normalize(e_u x e_v). Isso fixa a orientação física
+    # da fonte extensa e entra no termo angular da emissão.
+    emitter_normal = glm.normalize(glm.cross(self.e_u, self.e_v))
+
     for u, v in self._iter_sample_uvs():
       pos = self._sample_position(u, v)
       l_vec = pos - hit.pos
@@ -160,15 +165,26 @@ class AreaLight(Light):
         continue
       l = glm.normalize(l_vec)
 
+      # Os slides pedem a normal da luz de área e discutem o fator angular da
+      # radiância recebida; para a regra explícita de emissão em apenas um lado,
+      # seguimos PBRT 4e, cap. 12.4 (DiffuseAreaLight): por padrão, a emissão é
+      # one-sided e só existe quando a direção de saída está no hemisfério da
+      # normal. Como `l` aponta de hit->luz, usamos `-l` para obter luz->hit.
+      emission_cosine = max(0.0, float(glm.dot(emitter_normal, -l)))
+      if emission_cosine <= 0.0:
+        samples.append((glm.vec3(0.0), l))
+        continue
+
       transmittance = scene.transmittance(hit.pos, hit.geo_normal, l, dist)
       if _is_black(transmittance):
         samples.append((glm.vec3(0.0), l))
         continue
 
-      # Ao contrário da PointLight do enunciado, aqui a contribuição é
-      # distribuída entre amostras de uma área emissiva e decai com 1/r^2,
-      # aproximando a síntese física dos slides para fonte extensa.
-      li = ((self.power / float(sample_count)) / (dist ** 2)) * transmittance
+      # Slide 5, pp. 14-23: a luz de área é aproximada por integração discreta
+      # sobre a superfície emissiva, com queda geométrica em 1/r^2. O fator
+      # `emission_cosine` torna a emissão coerente com uma fonte difusa orientada,
+      # em linha com PBRT 4e, cap. 12.4.
+      li = (((self.power / float(sample_count)) / (dist ** 2)) * emission_cosine) * transmittance
       samples.append((li, l))
 
     # TODO(light): incorporar fator angular do emissor (coseno da emissão) se
