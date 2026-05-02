@@ -1,18 +1,18 @@
 # Fdb version 4
-["bibtex inf2608-proj1"] 1777692896.76687 "inf2608-proj1.aux" "inf2608-proj1.bbl" "inf2608-proj1" 1777693032.50069 0
-  "apalike-sol.bst" 1777689754.7587 24928 269dedab788b7f84af88c155ecb45872 ""
-  "inf2608-proj1.aux" 1777692898.94595 16070 270cfff2d6f0a3709e7055ea10ab7fc7 "xelatex"
-  "refs.bib" 1777692880.1781 2237 c1ee44621df296dfffb837951dad8011 ""
+["bibtex inf2608-proj1"] 1777693934.65325 "inf2608-proj1.aux" "inf2608-proj1.bbl" "inf2608-proj1" 1777693940.65061 0
+  "./apalike-sol.bst" 1777689754.7587 24928 269dedab788b7f84af88c155ecb45872 ""
+  "./refs.bib" 1777693149.2336 2237 c1ee44621df296dfffb837951dad8011 ""
+  "inf2608-proj1.aux" 1777693936.85489 16158 4791bbfbd98fa78168fcf65bad43f9cb "xelatex"
   (generated)
   "inf2608-proj1.bbl"
   "inf2608-proj1.blg"
   (rewritten before read)
-["xdvipdfmx"] 1777692899.5111 "inf2608-proj1.xdv" "inf2608-proj1.pdf" "inf2608-proj1" 1777692902.91413 0
-  "inf2608-proj1.xdv" 1777692898.94824 646776 8e08fa19cbf9ca872d34901abb7abb3f "xelatex"
+["xdvipdfmx"] 1777693937.34313 "inf2608-proj1.xdv" "inf2608-proj1.pdf" "inf2608-proj1" 1777693940.65331 0
+  "inf2608-proj1.xdv" 1777693936.85734 646828 6e77ad68287917007756de22ce6f7b2c "xelatex"
   (generated)
   "inf2608-proj1.pdf"
   (rewritten before read)
-["xelatex"] 1777693032.32863 "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj1.tex" "inf2608-proj1.xdv" "inf2608-proj1" 1777693032.50078 2
+["xelatex"] 1777693934.82248 "inf2608-proj1.tex" "inf2608-proj1.xdv" "inf2608-proj1" 1777693940.65072 0
   "../outputs/cornell_box_pyramid_20260425_003203/render.png" 1777689754.78966 163326 b8a6ba4da4213e6bc967d8149fc7f672 ""
   "../outputs/cornell_box_pyramid_20260501_210143/render.png" 1777689754.79647 182357 7186852690a2fd22b5d1751319eb4879 ""
   "../outputs/main_area_light_20260405_204336/render.png" 1775432887.94997 13473 de06f61a6803a03856f4005b1e251053 ""
@@ -23,7 +23,6 @@
   "../ray_tracing_bvh_flow_v1.puml.png" 1777689754.81441 47969 a34f9fe59b85a272ba98ba7d06216734 ""
   "../ray_tracing_render_overview_v1.puml.png" 1777689754.81582 114036 ec8424c24a981785971677e2fc2ddbd1 ""
   "../ray_tracing_trace_flow_v1.puml.png" 1777689754.81761 219967 aff1a761c2dd3564ddd918b823adc4b1 ""
-  "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj1.tex" 1777693032.10134 68933 2c8a8ecd904f93bff437b363cfdf8f88 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -222,10 +221,10 @@
   "/usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt" 1777678477 5948570 505f2e03eedaee2f38c2252a747843a3 ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "aas_macros.sty" 1777689754.75839 4967 cf45ff75f433e372cec5993ac08f4363 ""
-  "inf2608-proj1.aux" 1777692898.94595 16070 270cfff2d6f0a3709e7055ea10ab7fc7 "xelatex"
-  "inf2608-proj1.bbl" 1777692896.93461 2164 5d4427b4282c76e83445673992fbb047 "bibtex inf2608-proj1"
-  "inf2608-proj1.out" 1777692898.94782 11291 d2b86d2c2ab2a1eb27be76da88369aa0 "xelatex"
-  "inf2608-proj1.tex" 1777693032.10134 68933 2c8a8ecd904f93bff437b363cfdf8f88 ""
+  "inf2608-proj1.aux" 1777693936.85489 16158 4791bbfbd98fa78168fcf65bad43f9cb "xelatex"
+  "inf2608-proj1.bbl" 1777693934.81807 2164 5d4427b4282c76e83445673992fbb047 "bibtex inf2608-proj1"
+  "inf2608-proj1.out" 1777693936.85685 11605 dffb82df41cd1e41bde4c6fe2be1223d "xelatex"
+  "inf2608-proj1.tex" 1777693793.22202 68832 3fe26d3f8cc1d3289ab8f45338a73efa ""
   "sbcreviews-2025.cls" 1777692343.72771 15050 1e5973e25636f73c2093af61f4559868 ""
   (generated)
   "inf2608-proj1.aux"

@@ -404,6 +404,8 @@ Essa homogeneidade é importante: a malha não cria um segundo sistema de render
 
 \traceability{\path{src/ray_tracing_2/shape.py} (\texttt{TriangleMesh}, l. 188; \texttt{from\_vertices\_faces()}, l. 221), \path{src/ray_tracing_2/main_triangles.py} (\texttt{\_triangle\_mesh\_from\_spec()}, l. 39; chamada a \texttt{TriangleMesh.from\_vertices\_faces()}, l. 68).}
 
+A s{\'\i}ntese consolidada de ader{\^e}ncia entre os conte{\'u}dos de geometria triangular e acelera{\c c}{\~a}o e a implementa{\c c}{\~a}o atual foi reunida na Se{\c c}{\~a}o~\ref{sec:quadros-aderencia}, junto aos quadros dos demais blocos conceituais.
+
 \section{Experimentos Breves}
 \label{sec:experimentos}
 
@@ -610,29 +612,7 @@ O Projeto 1 implementa de forma sólida o núcleo geométrico e fotométrico do 
 
 O principal cuidado técnico desta versão é deixar claro o estatuto da geometria triangular e da aceleração frente às limitações consolidadas na Seção~\ref{sec:limitacoes}. O repositório entrega triangulação, \texttt{TriangleMesh} e uma BVH estática local construída por mediana no eixo dominante, com poda por AABB e travessia ordenada aproximadamente pela entrada do raio. Isso é suficiente para caracterizar uma aceleração real da malha, mas não autoriza afirmar implementação de grade regular, SAH, BVH linearizada ou agregador global de cena.
 
-Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões relevantes do material da disciplina e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código.
-
-\begin{table*}[!ht]
-\caption{Síntese da avaliação final do que a implementação entrega efetivamente.}
-\label{tab:avaliacao-final}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.18\textwidth] Q[l,wd=0.15\textwidth] Q[l,wd=0.59\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t}
-}
-Bloco avaliado & Situação & O que a implementação entrega de fato \\
-Núcleo geométrico e fotométrico & Entregue & câmera pinhole, raio paramétrico, \texttt{Hit}, interseções analíticas para esfera, plano e caixa, \texttt{closest hit}, Phong local, sombra direta e luz ambiente \\
-Amostragem do filme & Entregue & modo central determinístico (\texttt{center}) e modos estocásticos \texttt{jittered} e \texttt{stratified}, todos expostos publicamente por CLI e convertidos em raios primários pelo \texttt{Film} \\
-Separação entre amostragem do filme e da luz & Entregue & \texttt{sampling\_mode} permanece controle público do filme, enquanto \texttt{light\_sampling\_mode} continua separado para \texttt{AreaLight}, evitando confusão conceitual entre domínio do pixel e domínio do emissor \\
-Extensões ópticas e amostrais & Entregue com simplificações declaradas & instanciação por transformações afins, luz de área com penumbra, reflexão com Fresnel-Schlick, refração com Snell, reflexão interna total e Beer-Lambert por canal RGB \\
-Geometria triangular & Entregue & \texttt{Triangle}, \texttt{TriangleMesh}, leitura de malha por JSON e OBJ e integração dessas primitivas ao mesmo fluxo de interseção e sombreamento das demais formas \\
-Estrutura de aceleração & Parcialmente entregue & existe BVH estática local à \texttt{TriangleMesh}, com AABB por \emph{slabs}, construção por mediana no eixo dominante e travessia recursiva; não existe grade regular nem aceleração global da cena \\
-Infraestrutura experimental & Entregue & CLI padronizada nos principais entrypoints, controle de \texttt{seed}, geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}, registro de \texttt{render\_time\_seconds} e \texttt{render\_time\_minutes}, além de log inicial e final de render \\
-Cobertura integral das referências didáticas e bibliográficas & Não integral & faltam câmera além de pinhole, coerência radiométrica uniforme entre todas as luzes, materiais fisicamente baseados completos e estruturas globais de aceleração \\
-\end{tblr}
-\end{table*}
+Tomando o estado atual do repositório como objeto de avaliação, a implementação entrega de forma efetiva um \emph{ray tracer} educacional reprodutível, com núcleo geométrico-fotométrico completo, várias extensões relevantes do material da disciplina e uma camada operacional de execução suficientemente organizada para experimentação controlada. Em particular, o projeto já não deve ser lido apenas como um conjunto de cenas isoladas: ele possui um núcleo comum de CLI, uma convenção relativamente estável de geração de artefatos e uma fronteira explícita entre o que está fisicamente simplificado e o que está de fato operacionalizado no código. Os quadros consolidados apresentados a seguir organizam essa leitura em três tabelas: a Tabela~\ref{tab:slide4-aderencia} sintetiza os conteúdos do Slide 4, a Tabela~\ref{tab:slide5-aderencia} resume os conteúdos do Slide 5 e a Tabela~\ref{tab:slide6-aderencia} reúne o bloco de triângulos e estruturas de aceleração correspondente ao Slide 6.
 
 Sob o critério do Projeto 1, essa entrega é tecnicamente robusta e supera o núcleo mínimo ao incorporar supersampling, luz de área, materiais recursivos, geometria triangular e aceleração local por BVH. Sob o critério mais forte de cobertura integral do arco teórico das aulas, a entrega permanece conscientemente parcial. Essa parcialidade, contudo, não é caótica: ela é bem localizada. O que falta está concentrado em modelagem física mais rigorosa e em estruturas de aceleração mais sofisticadas, e não em inconsistência do pipeline principal.
 
@@ -650,7 +630,7 @@ Esta seção reúne, em formato sintético, os quadros de aderência deslocados 
 \subsection{Núcleo geométrico e fotométrico}
 
 \begin{table*}[!ht]
-\caption{Quadro consolidado de aderência entre o núcleo geométrico-fotométrico de referência e a implementação atual.}
+\caption{Quadro consolidado de aderência entre os conteúdos do Slide 4 e a implementação atual.}
 \label{tab:slide4-aderencia}
 \centering
 \begin{tblr}{
@@ -676,7 +656,7 @@ Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt
 \subsection{Extensões ópticas e amostrais}
 
 \begin{table*}[!ht]
-\caption{Quadro consolidado de aderência entre as extensões ópticas e amostrais de referência e a implementação atual.}
+\caption{Quadro consolidado de aderência entre os conteúdos do Slide 5 e a implementação atual.}
 \label{tab:slide5-aderencia}
 \centering
 \begin{tblr}{
@@ -698,6 +678,31 @@ Traçador recursivo com profundidade finita & Implementado & \texttt{Scene.can\_
 Reflexão especular com Fresnel-Schlick & Implementado com aproximação & \texttt{ReflectiveMaterial.eval()} \\
 Refração dielétrica com Snell, TIR e Beer-Lambert & Implementado com simplificação & \texttt{TransparentMaterial.eval()}; \texttt{TransparentMaterial.shadow\_transmittance()} \\
 Generalização do shadow ray para transmitância acumulada & Implementado & \texttt{Scene.transmittance()} \\
+\end{tblr}
+\end{table*}
+
+\subsection{Geometria triangular e estruturas de aceleração}
+
+\begin{table*}[!ht]
+\caption{Quadro consolidado de aderência entre os conteúdos do Slide 6 e a implementação atual.}
+\label{tab:slide6-aderencia}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.25\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t}
+}
+Conceito de referência & Situação no repositório & Evidência \\
+Triângulo como primitiva elementar & Implementado & \texttt{Triangle}; vetores de aresta \texttt{e1}/\texttt{e2}; normal geométrica \\
+Interseção raio-triângulo por Möller-Trumbore & Implementado & \texttt{Triangle.intersect()} \\
+Malha triangulada por vértices e faces & Implementado & \texttt{TriangleMesh}; \texttt{TriangleMesh.from\_vertices\_faces()} \\
+Integração da malha ao pipeline geral da cena & Implementado & \texttt{Scene.compute\_intersection()}; \texttt{main\_triangles.py}; \texttt{Instance.intersect()} \\
+BVH local para malhas triangulares & Implementado com simplificação & \texttt{TriangleBVH}; \texttt{TriangleBVHNode.intersect()}; constru{\c c}{\~a}o por mediana no eixo dominante \\
+Caixas AABB como volumes de contenção & Implementado & \texttt{AABB}; \texttt{AABB.intersects()} \\
+Travessia recursiva com poda local por malha & Implementado com simplificação & ordem aproximada pela entrada do raio em \texttt{TriangleBVHNode.intersect()} \\
+Grade regular para aceleração global & Não implementado & ausente no repositório; a cena continua sem grade uniforme global \\
+SAH, BVH linearizada e agregador global de cena & Não implementado & \texttt{Scene.compute\_intersection()} permanece sequencial; não há SAH nem estrutura global de aceleração \\
 \end{tblr}
 \end{table*}
 
