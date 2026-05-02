@@ -163,7 +163,7 @@ python -m ray_tracing_2.proj1_req1_geometry --width 800 --height 600 --spp 1
 
 ![R1 geometry](../outputs/proj1_req1_geometry_20260502_121509/render.png)
 
-*800×600, spp=1, center, ~9.4 s.*
+_800×600, spp=1, center, ~9.4 s._
 
 ### 4.2. R2: Uma ou mais fontes de luz pontuais
 
@@ -177,7 +177,7 @@ python -m ray_tracing_2.proj1_req2_point_lights --width 800 --height 600 --spp 1
 
 ![R2 point lights](../outputs/proj1_req2_point_lights_20260502_121731/render.png)
 
-*800×600, spp=1, center, ~19.7 s.*
+_800×600, spp=1, center, ~19.7 s._
 
 ### 4.3. R3: Iluminação direta com modelo de Phong e sombras duras
 
@@ -191,7 +191,7 @@ python -m ray_tracing_2.proj1_req3_phong_shadows --width 800 --height 600 --spp 
 
 ![R3 Phong shadows](../outputs/proj1_req3_phong_shadows_20260502_121809/render.png)
 
-*800×600, spp=1, center, ~20.1 s.*
+_800×600, spp=1, center, ~20.1 s._
 
 ### 4.4. R4: Múltiplas amostras por pixel
 
@@ -208,16 +208,16 @@ python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 4 --s
 
 ![R4 sampling baseline](../outputs/proj1_req4_sampling_20260502_122009/render.png)
 
-*800×600, spp=1, center, ~20.7 s. Executar spp=4 para comparar AA.*
+_800×600, spp=1, center, ~20.7 s. Executar spp=4 para comparar AA._
 
 ### 4.5. Matriz de aderência
 
-| Requisito                    | Status | Módulo                            |
-| ---------------------------- | ------ | --------------------------------- |
-| R1: esferas e caixas         | OK     | `proj1_req1_geometry.py`          |
-| R2: luz pontual              | OK     | `proj1_req2_point_lights.py`      |
-| R3: Phong + sombras          | OK     | `proj1_req3_phong_shadows.py`     |
-| R4: multiplas amostras/pixel | OK     | `proj1_req4_sampling.py`          |
+| Requisito                    | Status | Módulo                        |
+| ---------------------------- | ------ | ----------------------------- |
+| R1: esferas e caixas         | OK     | `proj1_req1_geometry.py`      |
+| R2: luz pontual              | OK     | `proj1_req2_point_lights.py`  |
+| R3: Phong + sombras          | OK     | `proj1_req3_phong_shadows.py` |
+| R4: multiplas amostras/pixel | OK     | `proj1_req4_sampling.py`      |
 
 ---
 
@@ -249,4 +249,3 @@ python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 4 --s
 O resultado final mostra uma implementação coerente com a progressão didática dos materiais de referência. O Slide 4 fornece a espinha dorsal do traçador: câmera, amostragem, interseção, visibilidade e sombreamento local. O Slide 5 não rompe essa estrutura; ele a estende com recursão, fenômenos de interface e fontes extensas. Essa continuidade aparece de forma clara no código: `Scene.trace_ray` continua simples, `PhongMaterial` continua sendo a base local, e os materiais e luzes mais avançados apenas acrescentam novos mecanismos físicos sobre esse mesmo alicerce.
 
 Do ponto de vista técnico-científico, a implementação é bem-sucedida porque cada novo efeito visual importante pode ser rastreado até uma escolha matemática explícita no código: Fresnel-Schlick para reflexão angular, Snell para desvio do raio transmitido, Beer-Lambert para absorção no volume, amostragem espacial para penumbra e inversa transposta para normais transformadas. Essa rastreabilidade entre teoria, implementação e imagem renderizada é precisamente o que caracteriza a maturidade do projeto entregue.
-
