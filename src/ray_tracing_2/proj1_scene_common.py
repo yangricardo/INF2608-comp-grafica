@@ -25,7 +25,9 @@ CANONICAL_CAMERA = Proj1CameraConfig()
 # pp. 14-23) descrevem a fonte por um ponto de origem p e duas arestas e_u/e_v.
 # Mantemos essa parametrização em constantes para forçar coincidência entre a
 # camada visual (painel emissivo) e a camada física (AreaLight).
-REXT_AREA_LIGHT_P = glm.vec3(1.875, 5.26, 2.575)
+# O ponto P fica ligeiramente abaixo do teto (y=5.55) para evitar interseção
+# geométrica com a malha do teto, mantendo a fonte visível e funcionando bem.
+REXT_AREA_LIGHT_P = glm.vec3(1.875, 5.15, 2.575)
 REXT_AREA_LIGHT_EU = glm.vec3(1.80, 0.0, 0.0)
 REXT_AREA_LIGHT_EV = glm.vec3(0.0, 0.0, 0.40)
 
