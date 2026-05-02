@@ -168,7 +168,7 @@ Triangulos sem acelerador & \path{proj1_rext_triangles.py} & 1.0 & \textasciitil
 \hline
 Estrutura de aceleracao BVH local & \path{proj1_rext_bvh.py} & 2.0 & \textasciitilde15.6\,s \\
 \hline
-Luz retangular + distribuicoes & \path{proj1_rext_area_light.py} & 2.0 & \textasciitilde78\,s \\
+Luz retangular + distribuicoes & \path{proj1_rext_area_light.py} & 2.0 & \textasciitilde74\,s \\
 \hline
 Objetos reflexivos & \path{proj1_rext_reflective.py} & 1.0 & \textasciitilde18.5\,s \\
 \hline
@@ -180,25 +180,46 @@ Objetos refratarios & \path{proj1_rext_refractive.py} & 2.0 & \textasciitilde22.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_triangles_20260502_131732/render.png}\hfill
-  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_bvh_20260502_131902/render.png}
-  \caption{Esquerda: \texttt{proj1\_rext\_triangles} sem BVH (\textasciitilde19.5\,s). Direita: \texttt{proj1\_rext\_bvh} com BVH local (\textasciitilde15.6\,s). Imagens identicas; a diferenca e de desempenho.}
-  \label{fig:rext-triangles-bvh}
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_triangles_20260502_131732/render.png}
+  \caption{\texttt{proj1\_rext\_triangles} sem BVH (\textasciitilde19.5\,s).}
+  \label{fig:rext-triangles}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_area_light_20260502_133736/render.png}
-  \caption{\texttt{proj1\_rext\_area\_light}: \texttt{AreaLight} no teto (power=100), 16 amostras (4x4) modo \texttt{stratified} (\textasciitilde78\,s). Penumbra visivel e iluminacao de area adequada.}
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_bvh_20260502_131902/render.png}
+  \caption{\texttt{proj1\_rext\_bvh} com BVH local (\textasciitilde15.6\,s). Qualidade visual equivalente ao caso sem BVH, com ganho de desempenho.}
+  \label{fig:rext-bvh}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_area_light_20260502_150206/render.png}
+  \caption{\texttt{proj1\_rext\_area\_light}: painel visivel com \texttt{EmissiveMaterial} sobreposto a uma \texttt{AreaLight} retangular, 16 amostras (4x4) em modo \texttt{stratified} (\textasciitilde173\,s). O emissor passa a ser percebido como luminaria retangular visivel, enquanto a iluminacao direta continua vindo da fonte extensa amostrada.}
   \label{fig:rext-area-light}
 \end{figure}
 
+\paragraph{Material emissivo e dupla identidade.}
+Na arquitetura deste projeto, materiais e luzes pertencem a camadas distintas: um objeto em \texttt{scene.objects} define interseccao e resposta de material, enquanto uma luz em \texttt{scene.lights} define contribuicoes de iluminacao direta. Isso significa que uma \texttt{AreaLight} isolada ilumina a cena, mas nao necessariamente aparece como geometria luminosa quando observada pela camera.
+
+Para resolver essa lacuna, foi introduzido um \texttt{EmissiveMaterial} no modulo \path{src/ray_tracing_2/material.py}. Diferentemente de \texttt{PhongMaterial}, ele nao depende de luz incidente nem calcula termos difuso e especular; ao ser intersectado, devolve diretamente uma cor de emissao constante. Essa decisao permite que o painel no teto "pareca aceso" para os raios primarios mesmo sem transporte global de energia.
+
+Essa camada visual nao substitui a fonte luminosa fisica. A iluminacao dos demais objetos continua sendo produzida por uma \texttt{AreaLight} coincidente, com a mesma parametrizacao retangular \texttt{(p, e\_u, e\_v)} e amostragem 4x4. Em termos práticos, a implementacao usa uma abordagem de dupla identidade: a geometria emissiva resolve a aparencia da luminaria, e a \texttt{AreaLight} resolve penumbra, raios de sombra e iluminacao direta sobre os materiais de Phong.
+
+Essa extensao nao aparece de forma explicita nos slides-base da disciplina, que tratam materiais locais e luzes como entidades separadas. A justificativa teorica mais proxima vem da discussao de emissao em fontes de area no PBRT, onde uma superficie emissiva pode devolver radiancia quando vista diretamente, enquanto a contribuicao luminosa sobre outros pontos e tratada pela amostragem da fonte de luz.
+
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_reflective_20260502_132223/render.png}\hfill
-  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_refractive_20260502_132340/render.png}
-  \caption{Esquerda: \texttt{proj1\_rext\_reflective} -- \texttt{ReflectiveMaterial}, max\_depth=6 (\textasciitilde18.5\,s). Direita: \texttt{proj1\_rext\_refractive} -- \texttt{TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde22.9\,s).}
-  \label{fig:rext-refl-refr}
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_reflective_20260502_132223/render.png}
+  \caption{\texttt{proj1\_rext\_reflective} -- \texttt{ReflectiveMaterial}, max\_depth=6 (\textasciitilde18.5\,s).}
+  \label{fig:rext-reflective}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_refractive_20260502_132340/render.png}
+  \caption{\texttt{proj1\_rext\_refractive} -- \texttt{TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde22.9\,s).}
+  \label{fig:rext-refractive}
 \end{figure}
 
 \subsection{Limites atuais}

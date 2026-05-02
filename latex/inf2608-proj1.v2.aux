@@ -30,15 +30,20 @@
 \newlabel{fig:req3}{{3}{2}{R3: sombras duras e resposta Phong com materiais de shininess distinto (800x600, spp=1, center, \textasciitilde 20.1\,s)}{figure.caption.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces R4: baseline \texttt  {center} (spp=1). Executar spp=4 com \texttt  {jittered} ou \texttt  {stratified} para comparar AA (800x600, spp=1, center, \textasciitilde 20.7\,s).}}{2}{figure.caption.4}\protected@file@percent }
 \newlabel{fig:req4}{{4}{2}{R4: baseline \texttt {center} (spp=1). Executar spp=4 com \texttt {jittered} ou \texttt {stratified} para comparar AA (800x600, spp=1, center, \textasciitilde 20.7\,s)}{figure.caption.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Esquerda: \texttt  {proj1\_rext\_triangles} sem BVH (\textasciitilde 19.5\,s). Direita: \texttt  {proj1\_rext\_bvh} com BVH local (\textasciitilde 15.6\,s). Imagens identicas; a diferenca e de desempenho.}}{2}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:rext-triangles-bvh}{{5}{2}{Esquerda: \texttt {proj1\_rext\_triangles} sem BVH (\textasciitilde 19.5\,s). Direita: \texttt {proj1\_rext\_bvh} com BVH local (\textasciitilde 15.6\,s). Imagens identicas; a diferenca e de desempenho}{figure.caption.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Limites atuais}{2}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusao}{2}{section.6}\protected@file@percent }
-\newlabel{sec:conclusao-v2}{{6}{2}{Conclusao}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Material emissivo e dupla identidade.}{2}{figure.caption.7}\protected@file@percent }
 \bibstyle{apalike-sol}
 \bibdata{refs}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \texttt  {proj1\_rext\_area\_light}: \texttt  {AreaLight} no teto (power=100), 16 amostras (4x4) modo \texttt  {stratified} (\textasciitilde 78\,s). Penumbra visivel e iluminacao de area adequada.}}{3}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:rext-area-light}{{6}{3}{\texttt {proj1\_rext\_area\_light}: \texttt {AreaLight} no teto (power=100), 16 amostras (4x4) modo \texttt {stratified} (\textasciitilde 78\,s). Penumbra visivel e iluminacao de area adequada}{figure.caption.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Esquerda: \texttt  {proj1\_rext\_reflective} -- \texttt  {ReflectiveMaterial}, max\_depth=6 (\textasciitilde 18.5\,s). Direita: \texttt  {proj1\_rext\_refractive} -- \texttt  {TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde 22.9\,s).}}{3}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:rext-refl-refr}{{7}{3}{Esquerda: \texttt {proj1\_rext\_reflective} -- \texttt {ReflectiveMaterial}, max\_depth=6 (\textasciitilde 18.5\,s). Direita: \texttt {proj1\_rext\_refractive} -- \texttt {TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde 22.9\,s)}{figure.caption.7}{}}
-\gdef \@abspage@last{3}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \texttt  {proj1\_rext\_triangles} sem BVH (\textasciitilde 19.5\,s).}}{3}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:rext-triangles}{{5}{3}{\texttt {proj1\_rext\_triangles} sem BVH (\textasciitilde 19.5\,s)}{figure.caption.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \texttt  {proj1\_rext\_bvh} com BVH local (\textasciitilde 15.6\,s). Qualidade visual equivalente ao caso sem BVH, com ganho de desempenho.}}{3}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:rext-bvh}{{6}{3}{\texttt {proj1\_rext\_bvh} com BVH local (\textasciitilde 15.6\,s). Qualidade visual equivalente ao caso sem BVH, com ganho de desempenho}{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Limites atuais}{3}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusao}{3}{section.6}\protected@file@percent }
+\newlabel{sec:conclusao-v2}{{6}{3}{Conclusao}{section.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces \texttt  {proj1\_rext\_area\_light}: painel visivel com \texttt  {EmissiveMaterial} sobreposto a uma \texttt  {AreaLight} retangular, 16 amostras (4x4) em modo \texttt  {stratified} (\textasciitilde 173\,s). O emissor passa a ser percebido como luminaria retangular visivel, enquanto a iluminacao direta continua vindo da fonte extensa amostrada.}}{3}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:rext-area-light}{{7}{3}{\texttt {proj1\_rext\_area\_light}: painel visivel com \texttt {EmissiveMaterial} sobreposto a uma \texttt {AreaLight} retangular, 16 amostras (4x4) em modo \texttt {stratified} (\textasciitilde 173\,s). O emissor passa a ser percebido como luminaria retangular visivel, enquanto a iluminacao direta continua vindo da fonte extensa amostrada}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces \texttt  {proj1\_rext\_reflective} -- \texttt  {ReflectiveMaterial}, max\_depth=6 (\textasciitilde 18.5\,s).}}{3}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:rext-reflective}{{8}{3}{\texttt {proj1\_rext\_reflective} -- \texttt {ReflectiveMaterial}, max\_depth=6 (\textasciitilde 18.5\,s)}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces \texttt  {proj1\_rext\_refractive} -- \texttt  {TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde 22.9\,s).}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:rext-refractive}{{9}{4}{\texttt {proj1\_rext\_refractive} -- \texttt {TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde 22.9\,s)}{figure.caption.9}{}}
+\gdef \@abspage@last{4}

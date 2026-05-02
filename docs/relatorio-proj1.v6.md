@@ -187,6 +187,76 @@ O tempo elevado resulta de 16 raios de sombra por pixel para a luz de area.
 Comparar `regular` vs `uniform` vs `stratified` mostra variacao no padrao de
 amostras do penumbra sem alterar a geometria ou a camera.
 
+### 7.3.1 Objeto emissivo sem path tracing (abordagem de dupla identidade)
+
+Na arquitetura atual, geometria/material e luzes sao entidades separadas.
+Logo, um painel que "parece aceso" e um painel que "ilumina a cena" precisam
+ser modelados com duas camadas sobrepostas no mesmo lugar:
+
+O ponto central aqui e o novo `EmissiveMaterial`. Diferentemente do material de
+Phong usado no restante do projeto, ele nao calcula resposta a partir de luz
+incidente nem produz componente difusa/especular. Seu papel e devolver uma cor
+de emissao constante quando o raio primario da camera intersecta o painel,
+fazendo o retangulo aparecer como fonte visivel mesmo sem path tracing ou
+global illumination.
+
+Em outras palavras: o `EmissiveMaterial` resolve apenas o problema visual de
+"parecer aceso". Ele nao substitui a fonte fisica responsavel por iluminar os
+demais objetos da cena. Por isso a implementacao continua exigindo uma
+`AreaLight` separada para gerar raios de sombra, penumbra e contribuicao de
+iluminacao direta sobre os materiais Phong.
+
+1. Emissao visual (camada de geometria):
+   adicionar um objeto em `scene.objects` com material que nao dependa da
+   iluminacao incidente para aparecer brilhante para a camera.
+2. Emissao fisica (camada de iluminacao):
+   adicionar uma `AreaLight` em `scene.lights` com o mesmo retangulo
+   (mesmo `p`, `e_u`, `e_v`) para iluminar outros objetos e produzir penumbra.
+
+Implementacao realizada no codigo:
+
+- `src/ray_tracing_2/material.py`: nova classe `EmissiveMaterial`, cujo
+  `eval()` retorna apenas a emissao base, sem consultar luzes da cena.
+- `src/ray_tracing_2/material.py`: `EmissiveMaterial.shadow_transmittance()`
+  opera com `shadow_passthrough=True` por padrao, para nao apagar a
+  `AreaLight` sobreposta na estrategia de dupla identidade.
+- `src/ray_tracing_2/proj1_scene_common.py`: novo helper
+  `add_rext_area_light_emissive_panel()` que cria um painel retangular fino
+  (geometria visivel) com o mesmo retangulo da `AreaLight`.
+- `src/ray_tracing_2/proj1_scene_common.py`: parametros da fonte retangular
+  unificados em constantes (`REXT_AREA_LIGHT_P`, `REXT_AREA_LIGHT_EU`,
+  `REXT_AREA_LIGHT_EV`) para garantir coincidencia geometrica.
+- `src/ray_tracing_2/proj1_rext_area_light.py`: o entrypoint agora adiciona o
+  painel emissivo e a `AreaLight` na mesma cena.
+- `src/ray_tracing_2/render_snapshot.py`: suporte a serializacao de
+  `EmissiveMaterial` em `properties.json`.
+
+Resultado esperado desta estrategia:
+
+- Raios primarios enxergam o painel brilhante mesmo em cena escura.
+- Materiais Phong dos demais objetos continuam recebendo luz da `AreaLight`
+  por raios de sombra, com sombras suaves coerentes.
+- O retangulo luminoso passa a ter identidade visual propria, em vez de parecer
+  apenas uma mancha clara no teto causada pela irradiancia projetada.
+
+Validacao de smoke test apos implementacao:
+
+```bash
+python -m ray_tracing_2.proj1_rext_area_light --width 200 --height 150 --spp 1 --light_sampling_mode stratified
+```
+
+Saida validada em `outputs/proj1_rext_area_light_20260502_145033/` com
+`EmissiveMaterial` presente no `properties.json`.
+
+Observacao de aderencia teorica: os slides base (partes 1 e 2) descrevem Phong
+local e luzes como entidades separadas. Portanto, "material emissivo" aqui e
+uma extensao de engenharia sobre a arquitetura existente, nao um bloco teorico
+explicito do material original. Para justificar essa extensao, a referencia mais
+proxima e a discussao de emissao propria em fontes de area do PBRT 4e: uma
+superficie emissiva pode devolver radiancia diretamente ao ser vista pela
+camera, enquanto a iluminacao sobre outros pontos continua sendo tratada pela
+amostragem da fonte luminosa.
+
 ### 7.4 Objetos reflexivos
 
 Cena ancora: `proj1_rext_reflective.py`.
@@ -226,6 +296,9 @@ Evidencia (800x600, spp=1, center, ~22.9 s):
 - Camera estritamente pinhole: sem depth-of-field nem motion blur.
 - Convencoes radiometricas simplificadas: `PointLight` nao usa decaimento 1/r^2;
   `power` e tratada como intensidade constante (convencao do enunciado).
+- Nao ha transporte global (sem path tracing/GI): para obter um objeto emissivo
+  que seja visivel e tambem ilumine a cena, e necessario usar a estrategia de
+  dupla identidade (geometria emissiva visual + `AreaLight` sobreposta).
 - A BVH usa median split sem SAH; nao ha estrutura de aceleracao hierarquica
   global para a cena inteira.
 
