@@ -42,8 +42,9 @@
 \DeclarePBRTSectionURL{9.5}{https://pbr-book.org/4ed/Reflection_Models/Dielectric_BSDF.html}
 \DeclarePBRTSectionURL{11.2}{https://pbr-book.org/4ed/Volume_Scattering/Transmittance.html}
 \DeclarePBRTSectionURL{12.4}{https://pbr-book.org/4ed/Light_Sources/Area_Lights.html}
-\newcommand{\pbrtsec}[1]{\href{\pbrtsectionurl{#1}}{PBRT 4e, Se\c{c}\~ao~#1}~\citep{pharr2023pbrt}}
-\newcommand{\pbrtsecs}[1]{\href{\pbrtcontentsurl}{PBRT 4e, Se\c{c}\~oes~#1}~\citep{pharr2023pbrt}}
+\newcommand{\pbrtbook}{\emph{Physically Based Rendering} (PBRT 4e)}
+\newcommand{\pbrtsec}[1]{\citep[\href{\pbrtsectionurl{#1}}{Se\c{c}\~ao~#1}]{pharr2023pbrt}}
+\newcommand{\pbrtsecs}[1]{\citep[\href{\pbrtcontentsurl}{Se\c{c}\~oes~#1}]{pharr2023pbrt}}
 \newcommand{\traceability}[1]{%
     \begin{quote}
     \footnotesize\textbf{Rastreabilidade no c\'odigo.}~#1
@@ -101,7 +102,7 @@ ray tracing, computer graphics, PBRT, BVH, sampling, physically inspired renderi
 \section{Introdução}
 \label{sec:escopo}
 
-Este artigo apresenta uma análise técnico-científica da implementação de ray tracing disponível no repositório do Projeto 1~\citep{inf2608projectrepo}. O objeto principal da análise é o código em \path{src/ray_tracing_2/}, confrontado com os tópicos dos materiais da disciplina~\citep{inf2608slides04,inf2608slides05,inf2608slides06} e com referências selecionadas do PBRT 4e, sobretudo \pbrtsecs{1.2, 3.5, 3.7, 5.2, 7.3, 8.1, 8.5, 9.3, 9.5, 11.2 e 12.4}.
+Este artigo apresenta uma análise técnico-científica da implementação de ray tracing disponível no repositório do Projeto 1~\citep{inf2608projectrepo}. O objeto principal da análise é o código em \path{src/ray_tracing_2/}, confrontado com os tópicos dos slides da disciplina, de autoria de Waldemar Celes (W.~Celes, \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br})~\citep{inf2608slides04,inf2608slides05,inf2608slides06}, e com referências selecionadas de \pbrtbook, em especial \pbrtsecs{1.2, 3.5, 3.7, 5.2, 7.3, 8.1, 8.5, 9.3, 9.5, 11.2 e 12.4}.
 
 O objetivo não é recontar genericamente o que um ray tracer deveria fazer, mas verificar o que esta implementação entrega de forma observável, quais decisões algorítmicas sustentam cada efeito visual e em que pontos o projeto simplifica ou parcializa o conteúdo teórico. A leitura adotada separa três camadas: a formulação geométrica e física discutida em aula, a tradução algorítmica efetivamente materializada no repositório e as lacunas entre a teoria de referência e o escopo implementado.
 
@@ -116,7 +117,7 @@ A organização da análise segue quatro frentes complementares:
     \item consolidar experimentos breves, limitações atuais, diagramas de apoio e uma avaliação final do que a implementação entrega.
 \end{enumerate}
 
-Como fonte externa, foi usado apenas o conteúdo de PBRT 4e permitido pelo enunciado, com ênfase em câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. A edição consultada foi a quarta edição online de PBRT~\citep{pharr2023pbrt}.
+Como fonte externa, foi usado apenas o conteúdo de \pbrtbook, com ênfase em câmera projetiva, teoria de amostragem, reflexão e transmissão especular, transmitância, luzes de área, caixas envolventes e BVHs. A edição consultada foi a quarta edição online dessa obra~\citep{pharr2023pbrt}.
 
 \section{Núcleo Geométrico e Fotométrico do Traçador}
 \label{sec:slide4}
@@ -151,7 +152,7 @@ O repositório segue exatamente essa organização. O raio é carregado por \tex
 
 \traceability{\path{src/ray_tracing_2/hit.py} (\texttt{Hit}, l. 11; \texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/scene.py} (\texttt{compute\_intersection()}, l. 24; \texttt{trace\_ray()}, l. 102).}
 
-Referência complementar em \pbrtsecs{1.2 e 3.5}.
+Ver também \pbrtsecs{1.2 e 3.5}.
 
 \subsection{Interseções básicas: plano, esfera e controle numérico de $\varepsilon$}
 \label{sec:slide4-intersecoes}
@@ -180,7 +181,7 @@ O código espelha esse raciocínio. \texttt{Plane.intersect()} resolve o plano p
 
 \traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Sphere}, l. 17; \texttt{Sphere.intersect()}, l. 23; \texttt{Plane}, l. 54; \texttt{Plane.intersect()}, l. 60), \path{src/ray_tracing_2/scene.py} (\texttt{offset\_point()}, l. 33).}
 
-Referência complementar em \pbrtsec{1.2}.
+Ver também \pbrtsec{1.2}.
 
 \subsection{Câmera pinhole, filme e espaços de coordenadas}
 \label{sec:slide4-camera}
@@ -201,7 +202,7 @@ Em \texttt{film.py}, \texttt{get\_sample()} e \texttt{render()} deixam claro que
 
 \traceability{\path{src/ray_tracing_2/camera.py} (\texttt{Camera}, l. 6; \texttt{\_\_init\_\_()}, l. 7; \texttt{generate\_ray()}, l. 23), \path{src/ray_tracing_2/film.py} (\texttt{Film}, l. 20; \texttt{get\_sample()}, l. 54; \texttt{render()}, l. 108), \path{src/ray_tracing_2/main.py} (\texttt{render()}, l. 25).}
 
-Referência complementar em \pbrtsec{5.2}.
+Ver também \pbrtsec{5.2}.
 
 \subsection{Phong, luz pontual, termo ambiente e sombra dura}
 \label{sec:slide4-phong}
@@ -214,36 +215,9 @@ Há, contudo, uma nuance importante entre a física dos slides e a convenção d
 
 \traceability{\path{src/ray_tracing_2/light.py} (\texttt{PointLight}, l. 42; \texttt{PointLight.radiance()}, l. 46), \path{src/ray_tracing_2/material.py} (\texttt{PhongMaterial}, l. 37; \texttt{direct\_lighting()}, l. 45; \texttt{eval()}, l. 72), \path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/main.py} (\texttt{Sphere}, l. 54; \texttt{Plane}, l. 55; \texttt{PointLight}, l. 59).}
 
-Referência complementar em \pbrtsec{1.2}.
+Ver também \pbrtsec{1.2}.
 
-\subsection{Quadro de aderência do núcleo geométrico e fotométrico}
-\label{sec:slide4-quadro}
-
-\begin{table*}[!ht]
-\caption{Quadro de aderência entre o núcleo geométrico-fotométrico de referência e a implementação atual.}
-\label{tab:slide4-aderencia}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.24\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t}
-}
-Conceito de referência & Situação no repositório & Evidência \\
-Raio paramétrico e registro de hit & Implementado & \texttt{Ray}; \texttt{Hit}; \texttt{Scene.compute\_intersection()} \\
-Interseção raio-plano & Implementado & \texttt{Plane.intersect()} \\
-Interseção raio-esfera & Implementado & \texttt{Sphere.intersect()} \\
-Tolerância numérica para evitar auto-interseção & Implementado & \texttt{Scene.offset\_point()}; limiar positivo nas interseções \\
-Câmera pinhole e geração de raios primários & Implementado & \texttt{Camera.\_\_init\_\_()}; \texttt{Camera.generate\_ray()} \\
-Mudança de base entre espaço da câmera e espaço global & Implementado & \texttt{glm.lookAt()} + \texttt{inv\_view} em \texttt{Camera} \\
-Modelo local de Phong com ambiente, difusa e especular & Implementado & \texttt{PhongMaterial.direct\_lighting()}; \texttt{PhongMaterial.eval()} \\
-Sombra dura por teste de visibilidade & Implementado com generalização & \texttt{Scene.transmittance()} reduz-se ao caso binário para opacos e estende o slide para transparentes \\
-Luz pontual com síntese radiométrica do slide & Implementado com simplificação & \texttt{PointLight.radiance()} usa a convenção do enunciado sem queda explícita por $1/r^2$ \\
-Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt{Film.render()}; \texttt{Camera.generate\_ray()}; \texttt{Scene.trace\_ray()} \\
-\end{tblr}
-\end{table*}
-
-O quadro mostra que o núcleo conceitual discutido no material introdutório~\citep{inf2608slides04} está efetivamente materializado no repositório, mas com duas qualificações importantes: a luz pontual segue a convenção simplificada do enunciado, e o teste de sombra já aparece no código em forma mais geral do que a apresentada no bloco introdutório dos slides.
+A síntese consolidada de aderência entre o núcleo geométrico-fotométrico de referência e a implementação atual foi deslocada para a Seção~\ref{sec:quadros-aderencia}, de modo a preservar a continuidade argumentativa desta parte analítica.
   
 \section{Extensões Ópticas, Amostrais e de Transformação}
 \label{sec:slide5}
@@ -263,7 +237,7 @@ O repositório implementa duas versões dessa ideia em \texttt{Film.get\_samples
 
 \traceability{\path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/film.py} (\texttt{get\_samples\_for\_pixel()}, l. 61; \texttt{render()}, l. 112).}
 
-Referência complementar em \pbrtsecs{8.1 e 8.5}.
+Ver também \pbrtsecs{8.1 e 8.5}.
 
 \subsection{Instanciação, coordenadas homogêneas e transformação correta de normais}
 \label{sec:slide5-instanciacao}
@@ -280,7 +254,7 @@ preservando a ortogonalidade com o plano tangente após transformações afins g
 
 \traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Instance}, l. 253; \texttt{Instance.intersect()}, l. 262), \path{src/ray_tracing_2/main_box.py} (\texttt{render()}, l. 63), \path{src/ray_tracing_2/main_triangles.py} (\texttt{render()}, l. 100).}
 
-Referência complementar em \pbrtsec{3.5}.
+Ver também \pbrtsec{3.5}.
 
 \subsection{Luz de área, integração sobre o emissor e penumbra}
 \label{sec:slide5-arealight}
@@ -293,7 +267,7 @@ Essa dualidade precisa ser registrada: o projeto não usa um único modelo coere
 
 \traceability{\path{src/ray_tracing_2/sampling.py} (\texttt{uniform\_samples\_2d()}, l. 15; \texttt{regular\_grid\_samples\_2d()}, l. 26; \texttt{stratified\_grid\_samples\_2d()}, l. 42), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}, l. 80; \texttt{\_iter\_sample\_uvs()}, l. 114; \texttt{sample\_radiance()}, l. 133; \texttt{radiance()}, l. 173), \path{src/ray_tracing_2/main_area_light.py} (\texttt{render()}, l. 31; criação da \texttt{AreaLight}, l. 59-66).}
 
-Referência complementar em \pbrtsec{12.4}.
+Ver também \pbrtsec{12.4}.
 
 \subsection{Caixa, AABB e método de slabs}
 \label{sec:slide5-aabb}
@@ -304,7 +278,7 @@ O repositório usa essa ideia em dois níveis. Primeiro, \texttt{Box.intersect()
 
 \traceability{\path{src/ray_tracing_2/shape.py} (\texttt{Box}, l. 74; \texttt{Box.intersect()}, l. 88), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}, l. 47; \texttt{intersects()}, l. 60).}
 
-Referência complementar em \pbrtsec{3.7}.
+Ver também \pbrtsec{3.7}.
 
 \subsection{De traçador local a traçador recursivo}
 \label{sec:slide5-recursao}
@@ -315,7 +289,7 @@ O repositório codifica essa extensão com clareza. \texttt{Scene.trace\_ray()} 
 
 \traceability{\path{src/ray_tracing_2/scene.py} (\texttt{can\_spawn\_ray()}, l. 41; \texttt{trace\_ray()}, l. 102).}
 
-Referência complementar em \pbrtsec{1.2}.
+Ver também \pbrtsec{1.2}.
 
 \subsection{Reflexão especular com Fresnel-Schlick}
 \label{sec:slide5-fresnel}
@@ -334,7 +308,7 @@ Há ainda uma nuance angular importante. O cosseno usado na aproximação de Sch
 
 \traceability{\path{src/ray_tracing_2/material.py} (\texttt{ReflectiveMaterial}, l. 84; \texttt{eval()}, l. 101).}
 
-Referência complementar em \pbrtsec{9.3}.
+Ver também \pbrtsec{9.3}.
 
 \subsection{Refração dielétrica, Lei de Snell, reflexão interna total e Beer-Lambert}
 \label{sec:slide5-refracao}
@@ -359,7 +333,7 @@ No caso da iluminação direta através de transparentes, \texttt{TransparentMat
 
 \traceability{\path{src/ray_tracing_2/hit.py} (\texttt{set\_face\_normal()}, l. 25), \path{src/ray_tracing_2/material.py} (\texttt{TransparentMaterial}, l. 137; \texttt{shadow\_transmittance()}, l. 167; \texttt{eval()}, l. 186).}
 
-Referência complementar em \pbrtsecs{9.3, 9.5 e 11.2}.
+Ver também \pbrtsecs{9.3, 9.5 e 11.2}.
 
 \subsection{Da sombra binária à transmitância acumulada}
 \label{sec:slide5-transmitancia}
@@ -378,38 +352,9 @@ Esse método é particularmente importante porque mostra a coerência arquitetur
 
 \traceability{\path{src/ray_tracing_2/scene.py} (\texttt{transmittance()}, l. 48), \path{src/ray_tracing_2/material.py} (\texttt{Material.shadow\_transmittance()}, l. 30; \texttt{TransparentMaterial.shadow\_transmittance()}, l. 167), \path{src/ray_tracing_2/light.py} (\texttt{PointLight.radiance()}, l. 46; \texttt{AreaLight.sample\_radiance()}, l. 92).}
 
-Referência complementar em \pbrtsec{11.2}.
+Ver também \pbrtsec{11.2}.
 
-\subsection{Quadro de aderência das extensões ópticas e amostrais}
-\label{sec:slide5-quadro}
-
-\begin{table*}[!ht]
-\caption{Quadro de aderência entre as extensões ópticas e amostrais de referência e a implementação atual.}
-\label{tab:slide5-aderencia}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.25\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t}
-}
-Conceito de referência & Situação no repositório & Evidência \\
-Antialiasing por múltiplas amostras por pixel & Implementado com extensão & \texttt{sampling.uniform\_samples\_2d()}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()}; \texttt{Film.render()} \\
-Jitter subpixel aleatório & Implementado & \texttt{SamplingMode.JITTERED}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
-Amostragem estratificada & Implementado como extensão & \texttt{SamplingMode.STRATIFIED}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
-Instanciação por transformações afins em coordenadas homogêneas & Implementado & \texttt{Instance.intersect()}; \texttt{main\_ellipse.py}; \texttt{main\_box.py} \\
-Transformação correta de normais por inversa transposta & Implementado & \texttt{m\_inv\_t} em \texttt{Instance.intersect()} \\
-Luz de área com integração discreta e penumbra & Implementado com aproximação & \texttt{AreaLight.sample\_radiance()}; \texttt{AreaLight.radiance()}; \texttt{main\_area\_light.py} \\
-Padrões regular e uniforme puros para amostragem da luz & Implementado com modos explícitos & \texttt{AreaLightSamplingMode.REGULAR}; \texttt{AreaLightSamplingMode.UNIFORM}; \texttt{sampling.regular\_grid\_samples\_2d()}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{AreaLight.\_iter\_sample\_uvs()} \\
-Caixa/AABB e método de slabs & Implementado & \texttt{Box.intersect()}; \texttt{AABB.intersects()} \\
-Traçador recursivo com profundidade finita & Implementado & \texttt{Scene.can\_spawn\_ray()}; \texttt{Scene.trace\_ray()} \\
-Reflexão especular com Fresnel-Schlick & Implementado com aproximação & \texttt{ReflectiveMaterial.eval()} \\
-Refração dielétrica com Snell, TIR e Beer-Lambert & Implementado com simplificação & \texttt{TransparentMaterial.eval()}; \texttt{TransparentMaterial.shadow\_transmittance()} \\
-Generalização do shadow ray para transmitância acumulada & Implementado & \texttt{Scene.transmittance()} \\
-\end{tblr}
-\end{table*}
-
-O quadro mostra que o conjunto de extensões ópticas e amostrais discutido nos slides~\citep{inf2608slides05} é amplamente coberto pelo repositório atual, mas quase sempre em versões computacionalmente controladas: a recursão é truncada por profundidade, a luz de área é estimada por soma discreta com padrão configurável (\texttt{regular}, \texttt{uniform}, \texttt{stratified}), e o dielétrico permanece no regime homogêneo RGB com Schlick e Beer-Lambert, sem migrar para uma formulação espectral ou microfacet completa.
+A síntese consolidada de aderência entre as extensões ópticas e amostrais de referência e a implementação atual foi reunida na Seção~\ref{sec:quadros-aderencia}, junto ao fechamento do artigo.
 
 \section{Triângulos e Estruturas de Aceleração}
 \label{sec:slide6}
@@ -685,7 +630,7 @@ Extensões ópticas e amostrais & Entregue com simplificações declaradas & ins
 Geometria triangular & Entregue & \texttt{Triangle}, \texttt{TriangleMesh}, leitura de malha por JSON e OBJ e integração dessas primitivas ao mesmo fluxo de interseção e sombreamento das demais formas \\
 Estrutura de aceleração & Parcialmente entregue & existe BVH estática local à \texttt{TriangleMesh}, com AABB por \emph{slabs}, construção por mediana no eixo dominante e travessia recursiva; não existe grade regular nem aceleração global da cena \\
 Infraestrutura experimental & Entregue & CLI padronizada nos principais entrypoints, controle de \texttt{seed}, geração de \texttt{render.png}, \texttt{properties.json} e \texttt{properties.md}, registro de \texttt{render\_time\_seconds} e \texttt{render\_time\_minutes}, além de log inicial e final de render \\
-Cobertura integral dos materiais da disciplina e do PBRT & Não integral & faltam câmera além de pinhole, coerência radiométrica uniforme entre todas as luzes, materiais fisicamente baseados completos e estruturas globais de aceleração \\
+Cobertura integral das referências didáticas e bibliográficas & Não integral & faltam câmera além de pinhole, coerência radiométrica uniforme entre todas as luzes, materiais fisicamente baseados completos e estruturas globais de aceleração \\
 \end{tblr}
 \end{table*}
 
@@ -696,6 +641,65 @@ Há também um ponto metodológico importante: a implementação agora entrega n
 Os artefatos de pesquisa discutidos neste artigo estão disponíveis no repositório do projeto~\citep{inf2608projectrepo}. Em particular, o código-fonte analisado permanece versionado em \path{src/}, as cenas de entrada em \path{inputs/}, as renderizações e seus metadados persistidos em \path{outputs/} e os diagramas utilizados nesta discussão foram mantidos em formato renderizado junto ao repositório. Essa organização torna reprodutíveis tanto os resultados visuais quanto os parâmetros de execução usados na avaliação final.
 
 \traceability{\path{src/ray_tracing_2/cli.py} (\texttt{CommonRenderOptions}; \texttt{add\_common\_render\_arguments()}), \path{src/ray_tracing_2/film.py} (\texttt{SamplingMode}; \texttt{get\_samples\_for\_pixel()}), \path{src/ray_tracing_2/light.py} (\texttt{AreaLight}; \texttt{AreaLightSamplingMode}; \texttt{sample\_radiance()}), \path{src/ray_tracing_2/render.py} (\texttt{Render.render()}), \path{src/ray_tracing_2/render_snapshot.py} (\texttt{RenderSnapshot.from\_runtime()}; \texttt{to\_markdown()}), \path{src/ray_tracing_2/shape.py} (\texttt{Triangle}; \texttt{TriangleMesh}; \texttt{Instance}), \path{src/ray_tracing_2/triangle_bvh.py} (\texttt{AABB}; \texttt{TriangleBVH}).}
+
+\section{Quadros Consolidados de Aderência entre Referência e Implementação}
+\label{sec:quadros-aderencia}
+
+Esta seção reúne, em formato sintético, os quadros de aderência deslocados das seções analíticas anteriores. Eles devem ser lidos como consolidação comparativa do que já foi discutido no corpo do artigo, em articulação com os slides da disciplina e com as referências selecionadas de \pbrtbook.
+
+\subsection{Núcleo geométrico e fotométrico}
+
+\begin{table*}[!ht]
+\caption{Quadro consolidado de aderência entre o núcleo geométrico-fotométrico de referência e a implementação atual.}
+\label{tab:slide4-aderencia}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.24\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t}
+}
+Conceito de referência & Situação no repositório & Evidência \\
+Raio paramétrico e registro de hit & Implementado & \texttt{Ray}; \texttt{Hit}; \texttt{Scene.compute\_intersection()} \\
+Interseção raio-plano & Implementado & \texttt{Plane.intersect()} \\
+Interseção raio-esfera & Implementado & \texttt{Sphere.intersect()} \\
+Tolerância numérica para evitar auto-interseção & Implementado & \texttt{Scene.offset\_point()}; limiar positivo nas interseções \\
+Câmera pinhole e geração de raios primários & Implementado & \texttt{Camera.\_\_init\_\_()}; \texttt{Camera.generate\_ray()} \\
+Mudança de base entre espaço da câmera e espaço global & Implementado & \texttt{glm.lookAt()} + \texttt{inv\_view} em \texttt{Camera} \\
+Modelo local de Phong com ambiente, difusa e especular & Implementado & \texttt{PhongMaterial.direct\_lighting()}; \texttt{PhongMaterial.eval()} \\
+Sombra dura por teste de visibilidade & Implementado com generalização & \texttt{Scene.transmittance()} reduz-se ao caso binário para opacos e estende o slide para transparentes \\
+Luz pontual com síntese radiométrica do slide & Implementado com simplificação & \texttt{PointLight.radiance()} usa a convenção do enunciado sem queda explícita por $1/r^2$ \\
+Estrutura algorítmica básica câmera-hit-sombreamento & Implementado & \texttt{Film.render()}; \texttt{Camera.generate\_ray()}; \texttt{Scene.trace\_ray()} \\
+\end{tblr}
+\end{table*}
+
+\subsection{Extensões ópticas e amostrais}
+
+\begin{table*}[!ht]
+\caption{Quadro consolidado de aderência entre as extensões ópticas e amostrais de referência e a implementação atual.}
+\label{tab:slide5-aderencia}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.25\textwidth] Q[l,wd=0.17\textwidth] Q[l,wd=0.50\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t}
+}
+Conceito de referência & Situação no repositório & Evidência \\
+Antialiasing por múltiplas amostras por pixel & Implementado com extensão & \texttt{sampling.uniform\_samples\_2d()}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()}; \texttt{Film.render()} \\
+Jitter subpixel aleatório & Implementado & \texttt{SamplingMode.JITTERED}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
+Amostragem estratificada & Implementado como extensão & \texttt{SamplingMode.STRATIFIED}; \texttt{sampling.stratified\_grid\_samples\_2d()}; \texttt{Film.get\_samples\_for\_pixel()} \\
+Instanciação por transformações afins em coordenadas homogêneas & Implementado & \texttt{Instance.intersect()}; \texttt{main\_ellipse.py}; \texttt{main\_box.py} \\
+Transformação correta de normais por inversa transposta & Implementado & \texttt{m\_inv\_t} em \texttt{Instance.intersect()} \\
+Luz de área com integração discreta e penumbra & Implementado com aproximação & \texttt{AreaLight.sample\_radiance()}; \texttt{AreaLight.radiance()}; \texttt{main\_area\_light.py} \\
+Padrões regular e uniforme puros para amostragem da luz & Implementado com modos explícitos & \texttt{AreaLightSamplingMode.REGULAR}; \texttt{AreaLightSamplingMode.UNIFORM}; \texttt{sampling.regular\_grid\_samples\_2d()}; \texttt{sampling.uniform\_samples\_2d()}; \texttt{AreaLight.\_iter\_sample\_uvs()} \\
+Caixa/AABB e método de slabs & Implementado & \texttt{Box.intersect()}; \texttt{AABB.intersects()} \\
+Traçador recursivo com profundidade finita & Implementado & \texttt{Scene.can\_spawn\_ray()}; \texttt{Scene.trace\_ray()} \\
+Reflexão especular com Fresnel-Schlick & Implementado com aproximação & \texttt{ReflectiveMaterial.eval()} \\
+Refração dielétrica com Snell, TIR e Beer-Lambert & Implementado com simplificação & \texttt{TransparentMaterial.eval()}; \texttt{TransparentMaterial.shadow\_transmittance()} \\
+Generalização do shadow ray para transmitância acumulada & Implementado & \texttt{Scene.transmittance()} \\
+\end{tblr}
+\end{table*}
 
 \begin{declarations}
 
