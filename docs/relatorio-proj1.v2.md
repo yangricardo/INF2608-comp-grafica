@@ -219,6 +219,35 @@ _800×600, spp=1, center, ~20.7 s. Executar spp=4 para comparar AA._
 | R3: Phong + sombras          | OK     | `proj1_req3_phong_shadows.py` |
 | R4: multiplas amostras/pixel | OK     | `proj1_req4_sampling.py`      |
 
+### 4.6. Requisitos de extensão
+
+| Requisito                                     | Status | Módulo                        | Pontos | Tempo (spp=1) |
+| --------------------------------------------- | ------ | ----------------------------- | ------ | ------------- |
+| Transformações de modelagem na instanciação   | OK     | coberto por R1 via `Instance` | 1.0pt  | —             |
+| Triângulos sem acelerador                     | OK     | `proj1_rext_triangles.py`     | 1.0pt  | ~19.5 s       |
+| Estrutura de aceleração BVH local             | OK     | `proj1_rext_bvh.py`           | 2.0pt  | ~15.6 s       |
+| Luz retangular com distribuição de amostras   | OK     | `proj1_rext_area_light.py`    | 1.0pt  | ~76 s         |
+| Comparação de distribuições na luz retangular | OK     | `proj1_rext_area_light.py`    | 1.0pt  | —             |
+| Objetos reflexivos                            | OK     | `proj1_rext_reflective.py`    | 1.0pt  | ~18.5 s       |
+| Objetos refratários                           | OK     | `proj1_rext_refractive.py`    | 2.0pt  | ~22.9 s       |
+
+Evidências visuais dos módulos de extensão:
+
+![Rext triângulos sem BVH](../outputs/proj1_rext_triangles_20260502_131732/render.png)
+_`proj1_rext_triangles` — duas TriangleMesh (Phong + reflexiva), ~19.5 s._
+
+![Rext BVH](../outputs/proj1_rext_bvh_20260502_131902/render.png)
+_`proj1_rext_bvh` — mesma geometria com accelerator='bvh', ~15.6 s (ganho ~3.9 s)._
+
+![Rext luz de área](../outputs/proj1_rext_area_light_20260502_131928/render.png)
+_`proj1_rext_area_light` — AreaLight no teto, 16 amostras por pixel, stratified, ~76 s._
+
+![Rext reflexivo](../outputs/proj1_rext_reflective_20260502_132223/render.png)
+_`proj1_rext_reflective` — ReflectiveMaterial com max_depth=6, ~18.5 s._
+
+![Rext refrativo](../outputs/proj1_rext_refractive_20260502_132340/render.png)
+_`proj1_rext_refractive` — TransparentMaterial ior=1.5 + Beer-Lambert, max_depth=8, ~22.9 s._
+
 ---
 
 ## 5. Critérios Atendidos e Não Atendidos Integralmente

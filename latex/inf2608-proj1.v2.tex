@@ -151,15 +151,69 @@ Geometria com arestas finas (caixa delgada) e esferas branca/preta para tornar a
   \label{fig:req4}
 \end{figure}
 
-\section{Limites e Requisitos Adicionais}
+\section{Limites e Requisitos de Extensao}
 \label{sec:limites-v2}
 
-Triangulos, BVH local e luz de area permanecem como extensoes adicionais e nao substituem as evidencias principais dos requisitos 1--4.
+\subsection{Requisitos de extensao implementados}
+
+\begin{tblr}{|l|l|c|l|}
+\hline
+\textbf{Requisito} & \textbf{Modulo} & \textbf{Pontos} & \textbf{Tempo (spp=1)} \\
+\hline
+Transformacoes de modelagem & coberto por R1 via \texttt{Instance} & 1.0 & -- \\
+\hline
+Triangulos sem acelerador & \path{proj1_rext_triangles.py} & 1.0 & \textasciitilde19.5\,s \\
+\hline
+Estrutura de aceleracao BVH local & \path{proj1_rext_bvh.py} & 2.0 & \textasciitilde15.6\,s \\
+\hline
+Luz retangular & \path{proj1_rext_area_light.py} & 1.0 & \textasciitilde76\,s \\
+\hline
+Comparacao de distribuicoes & \path{proj1_rext_area_light.py} & 1.0 & -- \\
+\hline
+Objetos reflexivos & \path{proj1_rext_reflective.py} & 1.0 & \textasciitilde18.5\,s \\
+\hline
+Objetos refratarios & \path{proj1_rext_refractive.py} & 2.0 & \textasciitilde22.9\,s \\
+\hline
+\end{tblr}
+
+\traceability{\path{src/ray_tracing_2/proj1_rext_triangles.py}, \path{src/ray_tracing_2/proj1_rext_bvh.py}, \path{src/ray_tracing_2/proj1_rext_area_light.py}, \path{src/ray_tracing_2/proj1_rext_reflective.py}, \path{src/ray_tracing_2/proj1_rext_refractive.py}.}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_triangles_20260502_131732/render.png}\hfill
+  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_bvh_20260502_131902/render.png}
+  \caption{Esquerda: \texttt{proj1\_rext\_triangles} sem BVH (\textasciitilde19.5\,s). Direita: \texttt{proj1\_rext\_bvh} com BVH local (\textasciitilde15.6\,s). Imagens identicas; a diferenca e de desempenho.}
+  \label{fig:rext-triangles-bvh}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_area_light_20260502_131928/render.png}
+  \caption{\texttt{proj1\_rext\_area\_light}: \texttt{AreaLight} no teto, 16 amostras (4x4) modo \texttt{stratified} (\textasciitilde76\,s). Penumbra visivel nas bordas dos objetos.}
+  \label{fig:rext-area-light}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_reflective_20260502_132223/render.png}\hfill
+  \includegraphics[width=0.46\linewidth]{../outputs/proj1_rext_refractive_20260502_132340/render.png}
+  \caption{Esquerda: \texttt{proj1\_rext\_reflective} -- \texttt{ReflectiveMaterial}, max\_depth=6 (\textasciitilde18.5\,s). Direita: \texttt{proj1\_rext\_refractive} -- \texttt{TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde22.9\,s).}
+  \label{fig:rext-refl-refr}
+\end{figure}
+
+\subsection{Limites atuais}
+
+\begin{itemize}
+  \item Sem acelerador global de cena: o loop de intersecao e linear em \texttt{Scene.compute\_intersection}.
+  \item Camera estritamente pinhole (sem depth-of-field).
+  \item \texttt{PointLight} sem decaimento $1/r^2$ por convencao do enunciado.
+  \item BVH usa median split sem SAH; nao ha hierarquia global entre objetos.
+\end{itemize}
 
 \section{Conclusao}
 \label{sec:conclusao-v2}
 
-A estrutura v2 melhora a rastreabilidade requisito-a-requisito, mantendo custo de reproducao baixo e coerencia de camera entre cenas.
+A estrutura \texttt{proj1\_req*} + \texttt{proj1\_rext*} cobre todos os itens do enunciado. Os requisitos principais (7.0\,pt) sao atendidos por quatro cenas dedicadas com camera invariante e comandos reproduziveis. Os requisitos de extensao (estimativa $\geq$3.0\,pt) sao cobertos por cinco modulos adicionais, cada um com evidencia visual e tempo de renderizacao registrado.
 
 \bibliographystyle{apalike-sol}
 \bibliography{refs}

@@ -18,8 +18,6 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces R1: geometria instanciada -- dois \texttt  {Instance(Box)} e uma \texttt  {Sphere} (800x600, spp=1, center, \textasciitilde 9.4\,s).}}{1}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:req1}{{1}{1}{R1: geometria instanciada -- dois \texttt {Instance(Box)} e uma \texttt {Sphere} (800x600, spp=1, center, \textasciitilde 9.4\,s)}{figure.caption.1}{}}
-\bibstyle{apalike-sol}
-\bibdata{refs}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}R2 -- Fontes de luz pontuais}{2}{subsection.4.2}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces R2: tres \texttt  {PointLight} e esferas com shininess diferente (800x600, spp=1, center, \textasciitilde 19.7\,s).}}{2}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:req2}{{2}{2}{R2: tres \texttt {PointLight} e esferas com shininess diferente (800x600, spp=1, center, \textasciitilde 19.7\,s)}{figure.caption.2}{}}
@@ -27,10 +25,20 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces R3: sombras duras e resposta Phong com materiais de shininess distinto (800x600, spp=1, center, \textasciitilde 20.1\,s).}}{2}{figure.caption.3}\protected@file@percent }
 \newlabel{fig:req3}{{3}{2}{R3: sombras duras e resposta Phong com materiais de shininess distinto (800x600, spp=1, center, \textasciitilde 20.1\,s)}{figure.caption.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}R4 -- Multiplas amostras por pixel}{2}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Limites e Requisitos Adicionais}{2}{section.5}\protected@file@percent }
-\newlabel{sec:limites-v2}{{5}{2}{Limites e Requisitos Adicionais}{section.5}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces R4: baseline \texttt  {center} (spp=1). Executar spp=4 com \texttt  {jittered} ou \texttt  {stratified} para comparar AA (800x600, spp=1, center, \textasciitilde 20.7\,s).}}{2}{figure.caption.4}\protected@file@percent }
 \newlabel{fig:req4}{{4}{2}{R4: baseline \texttt {center} (spp=1). Executar spp=4 com \texttt {jittered} ou \texttt {stratified} para comparar AA (800x600, spp=1, center, \textasciitilde 20.7\,s)}{figure.caption.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusao}{2}{section.6}\protected@file@percent }
-\newlabel{sec:conclusao-v2}{{6}{2}{Conclusao}{section.6}{}}
-\gdef \@abspage@last{2}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Limites e Requisitos de Extensao}{2}{section.5}\protected@file@percent }
+\newlabel{sec:limites-v2}{{5}{2}{Limites e Requisitos de Extensao}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Requisitos de extensao implementados}{2}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Esquerda: \texttt  {proj1\_rext\_triangles} sem BVH (\textasciitilde 19.5\,s). Direita: \texttt  {proj1\_rext\_bvh} com BVH local (\textasciitilde 15.6\,s). Imagens identicas; a diferenca e de desempenho.}}{2}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:rext-triangles-bvh}{{5}{2}{Esquerda: \texttt {proj1\_rext\_triangles} sem BVH (\textasciitilde 19.5\,s). Direita: \texttt {proj1\_rext\_bvh} com BVH local (\textasciitilde 15.6\,s). Imagens identicas; a diferenca e de desempenho}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Limites atuais}{2}{subsection.5.2}\protected@file@percent }
+\bibstyle{apalike-sol}
+\bibdata{refs}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \texttt  {proj1\_rext\_area\_light}: \texttt  {AreaLight} no teto, 16 amostras (4x4) modo \texttt  {stratified} (\textasciitilde 76\,s). Penumbra visivel nas bordas dos objetos.}}{3}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:rext-area-light}{{6}{3}{\texttt {proj1\_rext\_area\_light}: \texttt {AreaLight} no teto, 16 amostras (4x4) modo \texttt {stratified} (\textasciitilde 76\,s). Penumbra visivel nas bordas dos objetos}{figure.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Esquerda: \texttt  {proj1\_rext\_reflective} -- \texttt  {ReflectiveMaterial}, max\_depth=6 (\textasciitilde 18.5\,s). Direita: \texttt  {proj1\_rext\_refractive} -- \texttt  {TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde 22.9\,s).}}{3}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:rext-refl-refr}{{7}{3}{Esquerda: \texttt {proj1\_rext\_reflective} -- \texttt {ReflectiveMaterial}, max\_depth=6 (\textasciitilde 18.5\,s). Direita: \texttt {proj1\_rext\_refractive} -- \texttt {TransparentMaterial} ior=1.5 + Beer-Lambert, max\_depth=8 (\textasciitilde 22.9\,s)}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusao}{3}{section.6}\protected@file@percent }
+\newlabel{sec:conclusao-v2}{{6}{3}{Conclusao}{section.6}{}}
+\gdef \@abspage@last{3}

@@ -14,12 +14,26 @@ Decisoes metodologicas desta versao:
 
 ## 2. Mapeamento requisito -> modulo
 
+### Requisitos principais (7.0 pt)
+
 | Requisito                                  | Modulo                                          | Objetivo de validacao                                              |
 | ------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------ |
 | R1: instanciacao de esferas e caixas       | `src/ray_tracing_2/proj1_req1_geometry.py`      | validar composicao geometrica basica sem depender de extras        |
 | R2: uma ou mais fontes pontuais            | `src/ray_tracing_2/proj1_req2_point_lights.py`  | isolar contribuicao de multiplas `PointLight`                      |
 | R3: iluminacao direta em Phong com sombras | `src/ray_tracing_2/proj1_req3_phong_shadows.py` | validar difusa/especular e sombras duras                           |
 | R4: multiplas amostras por pixel           | `src/ray_tracing_2/proj1_req4_sampling.py`      | comparar `center` vs amostragem estocastica no mesmo enquadramento |
+
+### Requisitos de extensao (3.0 pt esperados)
+
+| Requisito                                     | Modulo                                                | Pontos | Tempo (spp=1) |
+| --------------------------------------------- | ----------------------------------------------------- | ------ | ------------- |
+| Transformacoes de modelagem na instanciacao   | coberto por R1 via `Instance` + `_translate_rotate_y` | 1.0pt  | --            |
+| Triangulos sem acelerador                     | `src/ray_tracing_2/proj1_rext_triangles.py`           | 1.0pt  | ~19.5 s       |
+| Estrutura de aceleracao BVH local             | `src/ray_tracing_2/proj1_rext_bvh.py`                 | 2.0pt  | ~15.6 s       |
+| Luz retangular com distribuicao de amostras   | `src/ray_tracing_2/proj1_rext_area_light.py`          | 1.0pt  | ~76 s         |
+| Comparacao de distribuicoes na luz retangular | `src/ray_tracing_2/proj1_rext_area_light.py`          | 1.0pt  | --            |
+| Objetos reflexivos                            | `src/ray_tracing_2/proj1_rext_reflective.py`          | 1.0pt  | ~18.5 s       |
+| Objetos refratarios                           | `src/ray_tracing_2/proj1_rext_refractive.py`          | 2.0pt  | ~22.9 s       |
 
 ## 3. Requisito 1: instanciacao de esferas e caixas
 
@@ -117,20 +131,110 @@ publico `jittered`.
 pixel e materializada internamente por `uniform_samples_2d()` e exposta no modo
 publico `jittered`.
 
-## 7. Requisitos adicionais e limites atuais
+## 7. Requisitos de extensao
 
-Itens como triangulos, BVH local de malha e luz de area ficam no bloco de
-requisitos adicionais. Eles sao importantes para a analise tecnica, mas nao
-substituem a evidencia principal dos requisitos 1-4.
+### 7.1 Triangulos sem acelerador
 
-Limitacoes relevantes mantidas da versao anterior:
+Cena ancora: `proj1_rext_triangles.py`.
 
-- sem acelerador global de cena;
-- camera estritamente pinhole;
-- convencoes radiometricas simplificadas para `PointLight`.
+Duas `TriangleMesh` (piramide Phong + piramide reflexiva) renderizadas sem BVH.
+O teste Moller-Trumbore e aplicado a todos os triangulos por raio.
 
-## 8. Conclusao da rodada de implementacao
+```bash
+python -m ray_tracing_2.proj1_rext_triangles --width 800 --height 600 --spp 1 --sampling_mode center
+```
 
-A estrutura `proj1_*` permite uma leitura 1:1 dos requisitos principais com
-mesma camera e variacao controlada da cena. Essa organizacao melhora tanto a
-clareza do relatorio quanto a reproducao experimental no workspace.
+Evidencia (800x600, spp=1, center, ~19.5 s):
+
+![Rext triangulos](../outputs/proj1_rext_triangles_20260502_131732/render.png)
+
+### 7.2 Estrutura de aceleracao BVH local
+
+Cena ancora: `proj1_rext_bvh.py`.
+
+Mesma geometria de 7.1 com `accelerator='bvh'` habilitado em cada `TriangleMesh`.
+A BVH usa median split no eixo dominante da AABB; o ganho de tempo e observavel
+diretamente (~3.9 s a menos que sem BVH com a mesma geometria).
+
+```bash
+python -m ray_tracing_2.proj1_rext_bvh --width 800 --height 600 --spp 1 --sampling_mode center
+```
+
+Evidencia (800x600, spp=1, center, ~15.6 s):
+
+![Rext BVH](../outputs/proj1_rext_bvh_20260502_131902/render.png)
+
+Resultado identico a 7.1 (mesma imagem); a diferenca e de desempenho.
+
+### 7.3 Luz retangular com comparacao de distribuicoes
+
+Cena ancora: `proj1_rext_area_light.py`.
+
+Um retangulo `AreaLight` no teto com `samples_u=4, samples_v=4` (16 amostras por
+pixel na luz). O modo e selecionavel por `--light_sampling_mode`:
+
+```bash
+python -m ray_tracing_2.proj1_rext_area_light --width 800 --height 600 --spp 1 --light_sampling_mode regular
+python -m ray_tracing_2.proj1_rext_area_light --width 800 --height 600 --spp 1 --light_sampling_mode uniform --seed 42
+python -m ray_tracing_2.proj1_rext_area_light --width 800 --height 600 --spp 1 --light_sampling_mode stratified --seed 42
+```
+
+Evidencia baseline (800x600, spp=1, stratified, ~76 s):
+
+![Rext area light](../outputs/proj1_rext_area_light_20260502_131928/render.png)
+
+O tempo elevado resulta de 16 raios de sombra por pixel para a luz de area.
+Comparar `regular` vs `uniform` vs `stratified` mostra variacao no padrao de
+amostras do penumbra sem alterar a geometria ou a camera.
+
+### 7.4 Objetos reflexivos
+
+Cena ancora: `proj1_rext_reflective.py`.
+
+Caixa instanciada e esfera com `ReflectiveMaterial` (Fresnel-Schlick simplificado,
+`max_depth=6` para multiplos saltos). O raio refletido e calculado em
+`Scene.trace_ray` por recursao.
+
+```bash
+python -m ray_tracing_2.proj1_rext_reflective --width 800 --height 600 --spp 1 --sampling_mode center
+```
+
+Evidencia (800x600, spp=1, center, ~18.5 s):
+
+![Rext reflexivo](../outputs/proj1_rext_reflective_20260502_132223/render.png)
+
+### 7.5 Objetos refratarios
+
+Cena ancora: `proj1_rext_refractive.py`.
+
+Esfera e piramide triangular com `TransparentMaterial` (ior=1.5, Snell, reflexao
+interna total, Beer-Lambert por transmitancia acumulada). `max_depth=8` para
+permitir multiplas refraxoes.
+
+```bash
+python -m ray_tracing_2.proj1_rext_refractive --width 800 --height 600 --spp 1 --sampling_mode center
+```
+
+Evidencia (800x600, spp=1, center, ~22.9 s):
+
+![Rext refrativo](../outputs/proj1_rext_refractive_20260502_132340/render.png)
+
+## 8. Limites atuais
+
+- Sem acelerador global de cena: o loop de intersecao percorre todos os objetos
+  linearmente; a BVH e local a cada `TriangleMesh`.
+- Camera estritamente pinhole: sem depth-of-field nem motion blur.
+- Convencoes radiometricas simplificadas: `PointLight` nao usa decaimento 1/r^2;
+  `power` e tratada como intensidade constante (convencao do enunciado).
+- A BVH usa median split sem SAH; nao ha estrutura de aceleracao hierarquica
+  global para a cena inteira.
+
+## 9. Conclusao
+
+A estrutura `proj1_req*` + `proj1_rext*` cobre todos os itens do enunciado:
+
+- Requisitos principais (7.0 pt): R1-R4 com camera invariante, comandos
+  reproduziveis e evidencias visuais.
+- Requisitos de extensao (>=3.0 pt esperados): triangulos, BVH local, luz de
+  area com tres distribuicoes, reflexao e refracao -- cada um com modulo
+  dedicado, render validado e tempo registrado.
