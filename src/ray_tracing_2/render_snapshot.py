@@ -10,7 +10,7 @@ from pyglm import glm
 
 from ray_tracing_2.camera import Camera
 from ray_tracing_2.light import AreaLight, PointLight
-from ray_tracing_2.material import PhongMaterial, ReflectiveMaterial, TransparentMaterial
+from ray_tracing_2.material import EmissiveMaterial, PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from ray_tracing_2.scene import Scene
 from ray_tracing_2.shape import Box, Instance, Plane, Rotate, Sphere, Translate, Triangle, TriangleMesh
 
@@ -93,6 +93,8 @@ def _extract_attr(obj: Any, attr_name: str):
 @dataclass(slots=True)
 class MaterialSnapshot:
   type: str
+  emission: Vec3Data | None = None
+  shadow_passthrough: bool | None = None
   ambient: Vec3Data | None = None
   diffuse: Vec3Data | None = None
   specular: Vec3Data | None = None
@@ -108,6 +110,8 @@ class MaterialSnapshot:
   def from_runtime(cls, material: Any) -> MaterialSnapshot:
     return cls(
       type=type(material).__name__,
+      emission=_vec3_to_list(getattr(material, 'emission', None)),
+      shadow_passthrough=bool(getattr(material, 'shadow_passthrough')) if hasattr(material, 'shadow_passthrough') else None,
       ambient=_vec3_to_list(getattr(material, 'm_amb', None)),
       diffuse=_vec3_to_list(getattr(material, 'm_dif', None)),
       specular=_vec3_to_list(getattr(material, 'm_spe', None)),
@@ -124,6 +128,8 @@ class MaterialSnapshot:
   def from_dict(cls, data: dict[str, Any]) -> MaterialSnapshot:
     return cls(
       type=str(data['type']),
+      emission=data.get('emission'),
+      shadow_passthrough=bool(data['shadow_passthrough']) if data.get('shadow_passthrough') is not None else None,
       ambient=data.get('ambient'),
       diffuse=data.get('diffuse'),
       specular=data.get('specular'),
@@ -139,6 +145,8 @@ class MaterialSnapshot:
   def to_dict(self) -> dict[str, Any]:
     data: dict[str, Any] = {'type': self.type}
     for key in (
+      'emission',
+      'shadow_passthrough',
       'ambient',
       'diffuse',
       'specular',
@@ -160,6 +168,13 @@ class MaterialSnapshot:
     diffuse = _list_to_vec3(self.diffuse or [0.0, 0.0, 0.0], field_name='material.diffuse')
     specular = _list_to_vec3(self.specular or [0.0, 0.0, 0.0], field_name='material.specular')
     shininess = 1.0 if self.shininess is None else float(self.shininess)
+
+    if self.type == 'EmissiveMaterial':
+      emission = _list_to_vec3(self.emission or [0.0, 0.0, 0.0], field_name='material.emission')
+      return EmissiveMaterial(
+        emission=emission,
+        shadow_passthrough=True if self.shadow_passthrough is None else bool(self.shadow_passthrough),
+      )
 
     if self.type == 'ReflectiveMaterial':
       reflectivity = _list_to_vec3(self.reflectivity or [0.5, 0.5, 0.5], field_name='material.reflectivity')
