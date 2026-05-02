@@ -376,6 +376,12 @@ INPUT ../outputs/proj1_rext_bvh_20260502_131902/render.png
 INPUT ../outputs/proj1_rext_area_light_20260502_150206/render.png
 INPUT ../outputs/proj1_rext_area_light_20260502_150206/render.png
 INPUT ../outputs/proj1_rext_area_light_20260502_150206/render.png
+INPUT ../outputs/proj1_rext_point_light_lowered_20260502_154025/render.png
+INPUT ../outputs/proj1_rext_point_light_lowered_20260502_154025/render.png
+INPUT ../outputs/proj1_rext_point_light_lowered_20260502_154025/render.png
+INPUT ../outputs/proj1_rext_point_light_ceiling_cutout_20260502_154041/render.png
+INPUT ../outputs/proj1_rext_point_light_ceiling_cutout_20260502_154041/render.png
+INPUT ../outputs/proj1_rext_point_light_ceiling_cutout_20260502_154041/render.png
 INPUT ../outputs/proj1_rext_reflective_20260502_132223/render.png
 INPUT ../outputs/proj1_rext_reflective_20260502_132223/render.png
 INPUT ../outputs/proj1_rext_reflective_20260502_132223/render.png

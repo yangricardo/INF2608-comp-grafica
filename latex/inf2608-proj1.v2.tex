@@ -208,6 +208,27 @@ Essa camada visual nao substitui a fonte luminosa fisica. A iluminacao dos demai
 
 Essa extensao nao aparece de forma explicita nos slides-base da disciplina, que tratam materiais locais e luzes como entidades separadas. A justificativa teorica mais proxima vem da discussao de emissao em fontes de area no PBRT, onde uma superficie emissiva pode devolver radiancia quando vista diretamente, enquanto a contribuicao luminosa sobre outros pontos e tratada pela amostragem da fonte de luz.
 
+\paragraph{PointLight com luminaria esferica: dois caminhos de correcao.}
+Foi criado um exemplo adicional para reproduzir a configuracao textual mais simples do enunciado, com uma \texttt{PointLight(vec3(0.7,0.7,0.7), vec3(2.775,5.55,2.775))} e uma esfera visivel \texttt{Sphere(vec3(2.775,5.55,2.775), 0.1)} na mesma posicao. O problema pratico e que a coordenada \texttt{y=5.55} coincide exatamente com a face inferior do teto da Cornell box; assim, a fonte fica na fronteira da geometria do ambiente e pode ser parcialmente bloqueada pelo proprio teto.
+
+Para documentar a correcao, foram implementadas duas variantes em \path{src/ray_tracing_2/proj1_rext_point_light_two_paths.py}. A primeira, \texttt{lowered}, mantem o teto original e apenas rebaixa a luminaria para \texttt{y=5.40}, eliminando a coincidencia geometrica com a caixa do teto. A segunda, \texttt{ceiling\_cutout}, preserva a posicao original \texttt{y=5.55}, mas substitui o teto unico por quatro caixas que deixam uma abertura ao redor da luminaria.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_point_light_lowered_20260502_154025/render.png}
+  \caption{\texttt{proj1\_rext\_point\_light\_lowered}: a fonte e a esfera emissiva foram rebaixadas para dentro da sala, preservando o teto fechado (800x600, spp=1, jittered, \textasciitilde16.2\,s).}
+  \label{fig:rext-point-light-lowered}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_point_light_ceiling_cutout_20260502_154041/render.png}
+  \caption{\texttt{proj1\_rext\_point\_light\_ceiling\_cutout}: a fonte permanece em \texttt{y=5.55}, mas o teto recebe um recorte local para evitar sobreposicao geometrica com a luminaria (800x600, spp=1, jittered, \textasciitilde21.7\,s).}
+  \label{fig:rext-point-light-cutout}
+\end{figure}
+
+Em termos de modelagem, o caso \texttt{lowered} e a alternativa menos intrusiva quando o objetivo e apenas remover a auto-oclusao. Ja o caso \texttt{ceiling\_cutout} e o mais fiel ao posicionamento literal do exemplo, pois preserva a altura original da fonte e desloca a compatibilizacao para a arquitetura do ambiente.
+
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_reflective_20260502_132223/render.png}

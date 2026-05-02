@@ -257,6 +257,62 @@ superficie emissiva pode devolver radiancia diretamente ao ser vista pela
 camera, enquanto a iluminacao sobre outros pontos continua sendo tratada pela
 amostragem da fonte luminosa.
 
+### 7.3.2 PointLight com luminaria esferica: dois caminhos de correcao
+
+Para reproduzir mais fielmente o exemplo classico do enunciado,
+
+```text
+PointLight(vec3(0.7,0.7,0.7), vec3(2.775,5.55,2.775))
+Sphere(vec3(2.775,5.55,2.775), 0.1)
+```
+
+foi criado um experimento adicional com `PointLight` coincidente com uma esfera
+visivel. A dificuldade pratica e que a coordenada `y=5.55` coincide exatamente
+com a face inferior do teto da Cornell box, de modo que a fonte fica na
+fronteira geometrica do volume e tende a produzir auto-oclusao numerica ou
+bloqueio pelo proprio teto.
+
+Para investigar esse problema, foram implementados dois casos em
+`src/ray_tracing_2/proj1_rext_point_light_two_paths.py`.
+
+Caso A: fonte rebaixada (`lowered`)
+
+- Mantem o teto original da sala.
+- Reposiciona a `PointLight` e a esfera emissiva para `y=5.40`, alguns
+  centimetros abaixo do teto.
+- Preserva a topologia fechada da Cornell box e elimina a coincidencia exata
+  entre a fonte e a geometria do teto.
+
+Caso B: abertura no teto (`ceiling_cutout`)
+
+- Mantem a fonte na coordenada original `y=5.55`.
+- Substitui o teto por quatro caixas, deixando uma abertura quadrada ao redor
+  da luminaria.
+- Preserva a posicao do exemplo original, mas evita que o teto fechado ocupe o
+  mesmo volume da fonte/luminaria.
+
+Comando para renderizar os dois casos:
+
+```bash
+PYTHONPATH=/Users/yang/projects/INF2608-comp-grafica/src /Users/yang/projects/INF2608-comp-grafica/.venv/bin/python /Users/yang/projects/INF2608-comp-grafica/src/ray_tracing_2/proj1_rext_point_light_two_paths.py --width 800 --height 600 --spp 1 --variant both
+```
+
+Evidencias validadas (800x600, spp=1, jittered):
+
+![Point light lowered](../outputs/proj1_rext_point_light_lowered_20260502_154025/render.png)
+
+![Point light ceiling cutout](../outputs/proj1_rext_point_light_ceiling_cutout_20260502_154041/render.png)
+
+Leitura tecnica dos resultados:
+
+- O caso `lowered` e a correcao menos intrusiva quando o objetivo e apenas
+  evitar o conflito entre fonte e teto.
+- O caso `ceiling_cutout` e mais fiel ao posicionamento textual do exemplo,
+  porque preserva `y=5.55`, mas faz a compatibilizacao geometricamente pela
+  abertura na arquitetura da sala.
+- Em ambos os casos, a esfera emissiva resolve o problema visual de mostrar a
+  luminaria, enquanto a iluminacao direta continua vindo da `PointLight`.
+
 ### 7.4 Objetos reflexivos
 
 Cena ancora: `proj1_rext_reflective.py`.
