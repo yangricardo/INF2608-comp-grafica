@@ -1,0 +1,470 @@
+{
+  "schema_version": "1.0",
+  "render": {
+    "name": "proj1_req1_geometry",
+    "width": 800,
+    "height": 600,
+    "samples_per_pixel": 25,
+    "sampling_mode": "stratified",
+    "seed": null,
+    "gamma_fix": false,
+    "render_time_seconds": 231.85866158299905,
+    "ray_estimation": {
+      "primary_rays": 12000000,
+      "secondary_rays": 0,
+      "shadow_rays": 0,
+      "total_rays": 12000000,
+      "estimated_time_seconds": 237.1872656271989,
+      "estimated_time_minutes": 3.9531210937866486,
+      "formatted_time": "237.187s (3.953 min)",
+      "throughput_rays_per_second": 50592,
+      "primary_hit_ratio": 0.05,
+      "recursive_surface_ratio": 0.0,
+      "shadow_samples_per_hit": 0,
+      "estimated_intersection_tests": 96000000,
+      "measured_intersection_throughput": 404743.48294435337,
+      "estimated_time_by_intersections_seconds": 237.1872656271989,
+      "estimated_time_by_intersections_minutes": 3.9531210937866486,
+      "avg_intersections_per_ray": 8.0,
+      "calibration": {
+        "calibration_elapsed_seconds": 0.12649987500117277,
+        "calibration_samples_tested": 6400,
+        "calibration_rays_traced": 6400,
+        "calibration_intersection_tests": 51200,
+        "calibration_shadow_rays": 0,
+        "measured_throughput_rays_per_second": 50592.93536804417
+      }
+    },
+    "estimation_quality": {
+      "rays_model_estimated_seconds": 237.1872656271989,
+      "rays_model_actual_seconds": 231.85866158299905,
+      "rays_model_absolute_error_seconds": 5.328604044199864,
+      "rays_model_relative_error": 0.022982121986813805,
+      "rays_model_accuracy_percent": 97.70178780131862,
+      "rays_model_actual_over_estimated": 0.9775341899991581,
+      "intersection_model_estimated_seconds": 237.1872656271989,
+      "intersection_model_actual_seconds": 231.85866158299905,
+      "intersection_model_absolute_error_seconds": 5.328604044199864,
+      "intersection_model_relative_error": 0.022982121986813805,
+      "intersection_model_accuracy_percent": 97.70178780131862,
+      "intersection_model_actual_over_estimated": 0.9775341899991581
+    }
+  },
+  "scene": {
+    "ambient_light": [
+      3.0,
+      3.0,
+      3.0
+    ],
+    "background_color": [
+      0.019999999552965164,
+      0.019999999552965164,
+      0.05000000074505806
+    ],
+    "max_depth": 2,
+    "ray_epsilon": 0.001
+  },
+  "camera": {
+    "eye": [
+      2.7750000953674316,
+      3.200000047683716,
+      12.774999618530273
+    ],
+    "center": [
+      2.7750000953674316,
+      2.7750000953674316,
+      2.7750000953674316
+    ],
+    "up": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "fov": 50.0,
+    "focal_distance": 1.0,
+    "aspect": 1.3333333333333333
+  },
+  "objects": [
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.07999999821186066,
+          0.07999999821186066
+        ],
+        "diffuse": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        -0.10000000149011612
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.650000095367432,
+        0.0
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.0,
+          0.07999999821186066,
+          0.0
+        ],
+        "diffuse": [
+          0.05000000074505806,
+          0.75,
+          0.05000000074505806
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        0.0,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.0,
+          0.0
+        ],
+        "diffuse": [
+          0.75,
+          0.05000000074505806,
+          0.05000000074505806
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        5.550000190734863,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.07999999821186066,
+          0.07999999821186066
+        ],
+        "diffuse": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        0.0,
+        5.550000190734863,
+        0.0
+      ],
+      "p_max": [
+        5.550000190734863,
+        5.650000095367432,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.07999999821186066,
+          0.07999999821186066,
+          0.07999999821186066
+        ],
+        "diffuse": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        0.0,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Instance",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.10000000149011612,
+          0.10000000149011612,
+          0.10000000149011612
+        ],
+        "diffuse": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape": {
+        "type": "Box",
+        "material": {
+          "type": "PhongMaterial",
+          "ambient": [
+            0.10000000149011612,
+            0.10000000149011612,
+            0.10000000149011612
+          ],
+          "diffuse": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "specular": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shininess": 1.0
+        },
+        "shape_chain": [
+          "Box"
+        ],
+        "p_min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_max": [
+          1.649999976158142,
+          3.299999952316284,
+          1.649999976158142
+        ]
+      },
+      "shape_chain": [
+        "Instance",
+        "Box"
+      ],
+      "matrix": [
+        [
+          0.9238795042037964,
+          0.0,
+          0.3826834261417389,
+          0.6499999761581421
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.3826834261417389,
+          0.0,
+          0.9238795042037964,
+          1.2999999523162842
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "type": "Instance",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.10000000149011612,
+          0.10000000149011612,
+          0.10000000149011612
+        ],
+        "diffuse": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape": {
+        "type": "Box",
+        "material": {
+          "type": "PhongMaterial",
+          "ambient": [
+            0.10000000149011612,
+            0.10000000149011612,
+            0.10000000149011612
+          ],
+          "diffuse": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "specular": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shininess": 1.0
+        },
+        "shape_chain": [
+          "Box"
+        ],
+        "p_min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_max": [
+          1.649999976158142,
+          1.649999976158142,
+          0.30000001192092896
+        ]
+      },
+      "shape_chain": [
+        "Instance",
+        "Box"
+      ],
+      "matrix": [
+        [
+          0.9510565400123596,
+          0.0,
+          -0.30901700258255005,
+          3.4000000953674316
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.30901700258255005,
+          0.0,
+          0.9510565400123596,
+          3.6500000953674316
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "type": "Sphere",
+      "material": {
+        "type": "PhongMaterial",
+        "ambient": [
+          0.10000000149011612,
+          0.10000000149011612,
+          0.10000000149011612
+        ],
+        "diffuse": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "specular": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shininess": 1.0
+      },
+      "shape_chain": [
+        "Sphere"
+      ],
+      "center": [
+        3.950000047683716,
+        0.6499999761581421,
+        4.650000095367432
+      ],
+      "radius": 0.65
+    }
+  ],
+  "lights": []
+}
