@@ -339,12 +339,16 @@ def add_rext_area_light(
   samples_v: int = 4,
 ) -> None:
   """R_ext luz de area: retângulo no teto centrado na sala Cornell."""
+  # A AreaLight usa decaimento 1/r^2, ao contrário da PointLight do enunciado.
+  # Com o teto a y≈5.5 e objetos a y≈0, dist²≈25. Para obter iluminação
+  # equivalente a uma PointLight(power=0.70) sem falloff, a potência precisa
+  # compensar: power ≈ 0.70 × dist² × fator_área ≈ 100.
   scene.lights.append(
     AreaLight(
       p=glm.vec3(0.555, 5.54, 0.555),
       e_u=glm.vec3(4.44, 0.0, 0.0),
       e_v=glm.vec3(0.0, 0.0, 4.44),
-      power=glm.vec3(0.70, 0.70, 0.70),
+      power=glm.vec3(100.0, 100.0, 100.0),
       samples_u=samples_u,
       samples_v=samples_v,
       sampling_mode=sampling_mode,

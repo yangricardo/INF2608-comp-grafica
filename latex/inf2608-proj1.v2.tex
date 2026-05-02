@@ -41,11 +41,11 @@
 \maketitle
 
 \begin{abstract-pt}
-Este texto apresenta a versao v2 do relatorio do Projeto 1 com organizacao por requisitos do enunciado. O objetivo e tornar a validacao mais direta, mapeando cada requisito principal para uma cena dedicada, um comando de execucao reproduzivel e uma evidencia visual associada, mantendo a mesma configuracao de camera entre os experimentos. A analise preserva a rastreabilidade com o codigo em \path{src/ray_tracing_2/}, destaca aderencia e limites da implementacao atual e separa requisitos principais de extensoes adicionais.
+Este texto apresenta a versao v2 do relatorio do Projeto 1 com organizacao por requisitos do enunciado. O objetivo e tornar a validacao mais direta, mapeando cada requisito principal para uma cena dedicada, um comando de execucao reproduzivel e uma evidencia visual associada, mantendo a mesma configuracao de camera entre os experimentos. A analise preserva a rastreabilidade com o codigo em \texttt{ray\_tracing\_2}, destaca aderencia e limites da implementacao atual e separa requisitos principais de extensoes adicionais.
 \end{abstract-pt}
 
 \begin{abstract-en}
-This v2 report reorganizes the Project 1 analysis around statement requirements. The goal is to provide direct validation by mapping each main requirement to a dedicated scene, a reproducible command-line execution, and associated visual evidence, while keeping camera configuration fixed across experiments. The text preserves code traceability in \path{src/ray_tracing_2/}, highlights adherence and current limitations, and separates core requirements from additional extensions.
+This v2 report reorganizes the Project 1 analysis around statement requirements. The goal is to provide direct validation by mapping each main requirement to a dedicated scene, a reproducible command-line execution, and associated visual evidence, while keeping camera configuration fixed across experiments. The text preserves code traceability in \texttt{ray\_tracing\_2}, highlights adherence and current limitations, and separates core requirements from additional extensions.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -65,12 +65,12 @@ ray tracing, computer graphics, requirements, Phong, sampling
 \section{Introducao}
 \label{sec:introducao-v2}
 
-Esta versao reorganiza o relatorio por requisitos principais de \path{materiais/proj1.pdf}. O principio metodologico e simples: cada requisito deve ser respondido por uma cena principal, um comando reproduzivel e uma interpretacao objetiva do resultado.
+Esta versao reorganiza o relatorio por requisitos principais de \path{proj1.pdf}. O principio metodologico e simples: cada requisito deve ser respondido por uma cena principal, um comando reproduzivel e uma interpretacao objetiva do resultado.
 
 \section{Requisitos e Aderencia}
 \label{sec:aderencia-v2}
 
-\begin{tblr}{|l|l|l|}
+\begin{tblr}{width=\linewidth, colspec={|X[2]|X[3]|l|}}
 \hline
 \textbf{Requisito} & \textbf{Cena principal} & \textbf{Status} \\
 \hline
@@ -84,7 +84,7 @@ R4: multiplas amostras por pixel & \path{proj1_req4_sampling.py} & Implementado 
 \hline
 \end{tblr}
 
-\traceability{\path{src/ray_tracing_2/proj1_scene_common.py}, \path{src/ray_tracing_2/proj1_req1_geometry.py}, \path{src/ray_tracing_2/proj1_req2_point_lights.py}, \path{src/ray_tracing_2/proj1_req3_phong_shadows.py}, \path{src/ray_tracing_2/proj1_req4_sampling.py}.}
+\traceability{\texttt{proj1\_scene\_common.py}, \texttt{proj1\_req1\_geometry.py}, \texttt{proj1\_req2\_point\_lights.py}, \texttt{proj1\_req3\_phong\_shadows.py}, \texttt{proj1\_req4\_sampling.py} em \path{src/ray_tracing_2/}.}
 
 \section{Procedimento Experimental Padrao}
 \label{sec:procedimento-v2}
@@ -96,13 +96,15 @@ Os testes de validacao rapida desta versao usam:
     \item baseline em \texttt{--spp 1}.
 \end{itemize}
 
-Comandos-base:
+Comandos-base (\texttt{800x600}, \texttt{spp=1}):
+\begingroup\small
 \begin{verbatim}
-python -m ray_tracing_2.proj1_req1_geometry --width 800 --height 600 --spp 1 --sampling_mode center
-python -m ray_tracing_2.proj1_req2_point_lights --width 800 --height 600 --spp 1 --sampling_mode center
-python -m ray_tracing_2.proj1_req3_phong_shadows --width 800 --height 600 --spp 1 --sampling_mode center
-python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --spp 1 --sampling_mode center
+python -m ray_tracing_2.proj1_req1_geometry
+python -m ray_tracing_2.proj1_req2_point_lights
+python -m ray_tracing_2.proj1_req3_phong_shadows
+python -m ray_tracing_2.proj1_req4_sampling
 \end{verbatim}
+\endgroup
 
 \section{Discussao Tecnica e Evidencias}
 \label{sec:discussao-v2}
@@ -156,9 +158,9 @@ Geometria com arestas finas (caixa delgada) e esferas branca/preta para tornar a
 
 \subsection{Requisitos de extensao implementados}
 
-\begin{tblr}{|l|l|c|l|}
+\begin{tblr}{width=\linewidth, colspec={|X[3]|X[3]|c|X[2]|}}
 \hline
-\textbf{Requisito} & \textbf{Modulo} & \textbf{Pontos} & \textbf{Tempo (spp=1)} \\
+\textbf{Requisito} & \textbf{Modulo} & \textbf{Pts} & \textbf{Tempo (spp=1)} \\
 \hline
 Transformacoes de modelagem & coberto por R1 via \texttt{Instance} & 1.0 & -- \\
 \hline
@@ -166,9 +168,7 @@ Triangulos sem acelerador & \path{proj1_rext_triangles.py} & 1.0 & \textasciitil
 \hline
 Estrutura de aceleracao BVH local & \path{proj1_rext_bvh.py} & 2.0 & \textasciitilde15.6\,s \\
 \hline
-Luz retangular & \path{proj1_rext_area_light.py} & 1.0 & \textasciitilde76\,s \\
-\hline
-Comparacao de distribuicoes & \path{proj1_rext_area_light.py} & 1.0 & -- \\
+Luz retangular + distribuicoes & \path{proj1_rext_area_light.py} & 2.0 & \textasciitilde78\,s \\
 \hline
 Objetos reflexivos & \path{proj1_rext_reflective.py} & 1.0 & \textasciitilde18.5\,s \\
 \hline
@@ -176,7 +176,7 @@ Objetos refratarios & \path{proj1_rext_refractive.py} & 2.0 & \textasciitilde22.
 \hline
 \end{tblr}
 
-\traceability{\path{src/ray_tracing_2/proj1_rext_triangles.py}, \path{src/ray_tracing_2/proj1_rext_bvh.py}, \path{src/ray_tracing_2/proj1_rext_area_light.py}, \path{src/ray_tracing_2/proj1_rext_reflective.py}, \path{src/ray_tracing_2/proj1_rext_refractive.py}.}
+\traceability{Modulos \texttt{proj1\_rext\_*.py} em \path{src/ray_tracing_2/}.}
 
 \begin{figure}[h]
   \centering
@@ -188,8 +188,8 @@ Objetos refratarios & \path{proj1_rext_refractive.py} & 2.0 & \textasciitilde22.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_area_light_20260502_131928/render.png}
-  \caption{\texttt{proj1\_rext\_area\_light}: \texttt{AreaLight} no teto, 16 amostras (4x4) modo \texttt{stratified} (\textasciitilde76\,s). Penumbra visivel nas bordas dos objetos.}
+  \includegraphics[width=0.92\linewidth]{../outputs/proj1_rext_area_light_20260502_133736/render.png}
+  \caption{\texttt{proj1\_rext\_area\_light}: \texttt{AreaLight} no teto (power=100), 16 amostras (4x4) modo \texttt{stratified} (\textasciitilde78\,s). Penumbra visivel e iluminacao de area adequada.}
   \label{fig:rext-area-light}
 \end{figure}
 
