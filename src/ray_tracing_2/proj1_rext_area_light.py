@@ -30,7 +30,7 @@ def render(
   light_sampling_mode: str = AreaLightSamplingMode.STRATIFIED.value,
   seed: int | None = None,
   gamma_fix: bool = False,
-  calibrate: bool = False,
+  calibrate: bool = True,
   calibrate_only: bool = False,
   calibrate_grid: int = 16,
   calibrate_max_seconds: float = 5.0,
