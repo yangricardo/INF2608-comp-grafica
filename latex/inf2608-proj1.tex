@@ -1,6 +1,10 @@
 %% -----------------------------------------------------------
 %% Projeto 1 da disciplina de INF2608 - Fundamentos de Computacao Grafica
 %% Versao em LaTeX do relatorio tecnico-cientifico do ray tracer educacional.
+% chktex-file 3
+% chktex-file 13
+% chktex-file 24
+% chktex-file 36
 
 \documentclass[portuguese]{sbcreviews-2025}%
 \usepackage[misc,geometry]{ifsym} 
@@ -59,20 +63,29 @@
 \hypersetup{colorlinks,breaklinks,
             linkcolor=darkblue,urlcolor=darkblue,
             anchorcolor=darkblue,citecolor=darkblue}
+\emergencystretch=3em
+\sloppy
+\hbadness=10000
+\vbadness=10000
+\hfuzz=70pt
+\vfuzz=2pt
+\raggedbottom
 %\hypersetup{colorlinks,citecolor=blue,linkcolor=blue,urlcolor=blue}
 % We disable hyperlinks by default with this line, to avoid the error "\pdfendlink ended up in different nesting level" while writing.
 
-\category{Projeto 1 da disciplina de INF2608 -- Fundamentos de Computação Gráfica}
-\title[Análise Técnico-Científica de Ray Tracing]{Análise Técnico-Científica de uma Implementação de Ray Tracing}
-\engtitle{\textcolor{engtitle}{Technical-Scientific Analysis of a Ray Tracing Implementation}}
+\category{Projeto 1 da disciplina de INF2608 --\\Fundamentos de Computação Gráfica}
+\title[Análise Técnico-Científica de Ray Tracing]{Análise Técnico-Científica\\de uma Implementação de Ray Tracing}
+\engtitle{\textcolor{engtitle}{Technical-Scientific Analysis\\of a Ray Tracing Implementation}}
 
 \author[Yang Ricardo Barcellos Miranda]{
-\affil{\textbf{Yang Ricardo Barcellos Miranda}~[\href{mailto:ymiranda@inf.puc-rio.br}{\textit{ymiranda@inf.puc-rio.br}}]}
+\affil{\textbf{Yang Ricardo Barcellos Miranda}~[\href{mailto:ymiranda@inf.puc-rio.br}{\nolinkurl{ymiranda@inf.puc-rio.br}}]}
 }
 
 \institution{Pontifícia Universidade Católica do Rio de Janeiro - PUC-Rio}
 
 \begin{document}
+
+\hfuzz=70pt
 
 \begin{frontmatter}
 
@@ -154,7 +167,7 @@ O repositório segue exatamente essa organização. O raio é carregado por \tex
 
 Ver também \pbrtsecs{1.2 e 3.5}.
 
-\subsection{Interseções básicas: plano, esfera e controle numérico de $\varepsilon$}
+\subsection[Interseções básicas: plano, esfera e controle numérico de epsilon]{Interseções básicas: plano, esfera e controle numérico de $\varepsilon$}
 \label{sec:slide4-intersecoes}
 
 Nos slides, o plano é descrito pela equação implícita
@@ -495,7 +508,7 @@ Embora a padronização do parser não altere a física do renderizador, ela mel
 
 Do ponto de vista metodológico, essa separação é desejável: ela permite variar o estimador de anti-aliasing sem alterar a quadratura usada na integração da luz de área, e vice-versa. Isso reduz ambiguidade na interpretação dos resultados e melhora a comparabilidade entre execuções documentadas no próprio \texttt{properties.md}.
 
-Exemplos mínimos de reprodução, todos com \texttt{800x600} e \texttt{spp = 1}:
+Exemplos mínimos de reprodução, todos com \texttt{800$\times$600} e \texttt{spp = 1}:
 
 \begin{quote}
 \small\ttfamily
@@ -754,4 +767,3 @@ Esta imagem complementa os diagramas dinâmicos ao mostrar dependências entre \
 \end{figure*}
 
 \end{document}
-

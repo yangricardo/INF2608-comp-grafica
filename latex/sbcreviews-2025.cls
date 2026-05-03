@@ -198,7 +198,7 @@
 \newcommand{\copyrightstatement}[1]{\gdef\@copyrightstatement{#1}}
 
 \RequirePackage{environ}
-\NewEnviron{frontmatter}{\twocolumn[\BODY]\saythanks}
+\NewEnviron{frontmatter}{\twocolumn[\begingroup\hfuzz=70pt\BODY\endgroup]\saythanks}
 
 \def\categoryfont{\fontsize{8}{12}\bfseries\selectfont\sffamily\vskip5.5pt\raggedright\mathversion{normal}}
 
