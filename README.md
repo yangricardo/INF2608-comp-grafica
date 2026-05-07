@@ -4,37 +4,22 @@
 
 ## Visão Geral
 
-Este repositório concentra a implementação do projeto de traçado de raios em `src/ray_tracing_2`. O renderer segue a progressão dos slides de aula: começa com câmera pinhole, interseções geométricas e sombreamento local de Phong, e depois adiciona anti-aliasing, instanciação, luz de área, reflexão, refração, transmitância em raios de sombra, malhas triangulares e uma BVH local para `TriangleMesh`.
+Este repositório concentra a implementação do projeto de traçado de raios em `src/ray_tracing_2`. O renderer cobre o núcleo do projeto com câmera pinhole, interseções geométricas, sombreamento local de Phong, anti-aliasing, instanciação, luz de área, reflexão, refração, malhas triangulares e uma BVH local para `TriangleMesh`.
 
-O pipeline principal é:
+Cada execução gera uma pasta timestamped em `outputs/` com pelo menos:
 
-1. gerar amostras no pixel;
-2. converter cada amostra em um raio primário pela câmera;
-3. encontrar o `closest hit` na cena;
-4. delegar a cor ao material atingido;
-5. salvar a imagem e um `properties.md` em uma pasta timestamped dentro de `outputs/`.
+- `render.png`
+- `properties.json`
+- `properties.md`
 
-O material teórico principal do projeto está em `4.tracado_de_raios.pdf`, `5.tracado_de_raios2.pdf` e `6.estrutura_aceleracao.pdf`. O relatório técnico mais recente está em `docs/relatorio-proj1.v5.md`.
+## Informações Técnicas
 
-## Funcionalidades Atuais
+Para detalhes técnicos, decisões de modelagem, referências teóricas e rastreabilidade, consulte:
 
-- câmera pinhole com base derivada de `eye`, `center` e `up`
-- interseções com esfera, plano, caixa alinhada aos eixos e triângulo
-- materiais `PhongMaterial`, `ReflectiveMaterial` e `TransparentMaterial`
-- sombras duras e transmitância acumulada para materiais transparentes
-- anti-aliasing por `jittered` e `stratified`
-- luz pontual e luz de área retangular amostrada
-- instanciação por transformação afim com normal por inversa transposta
-- malhas triangulares com `TriangleMesh`
-- BVH estática local a `TriangleMesh`, com poda por AABB
-- geração automática de `render.png` e `properties.md` em `outputs/`
-
-## Convenções Importantes
-
-- `PointLight` **não** aplica queda explícita de $1/r^2$ no próprio modelo da fonte. Nesta base, `power` é tratado como radiância constante da luz, conforme a convenção adotada no projeto.
-- `AreaLight` já usa amostragem sobre um emissor retangular com decaimento geométrico explícito por distância.
-- A aceleração por BVH é **local à malha triangular**. O nível superior da cena ainda percorre `scene.objects` linearmente.
-- `focal_distance` em `Camera` controla apenas a distância geométrica do plano de projeção no modelo pinhole; não há lente fina nem profundidade de campo.
+- `latex/inf2608-proj1.v3.pdf`
+- `materiais/traçado_de_raios/4.tracado_de_raios.pdf`
+- `materiais/traçado_de_raios/5.tracado_de_raios2.pdf`
+- `materiais/traçado_de_raios/6.estrutura_aceleracao.pdf`
 
 ## Setup
 
@@ -65,17 +50,147 @@ Depois de ativar o ambiente e instalar o pacote em modo editável, execute como 
 python -m ray_tracing_2
 ```
 
-Ou escolha explicitamente uma cena. Para uma validação rápida e reprodutível, os exemplos abaixo usam `800x600` e `--spp 1`:
+## Cenas de Referência
+
+Os exemplos abaixo refletem as cenas usadas no relatório. Cada comando gera uma nova pasta em `outputs/`; ao lado de cada cena há um artefato real já existente no repositório, que pode ser usado como referência visual rápida.
+
+### Núcleo do projeto
+
+`proj1_req1_geometry` mostra geometria básica, instanciação e câmera canônica.
 
 ```bash
-python -m ray_tracing_2.main --width 800 --height 600 --spp 1
-python -m ray_tracing_2.main_area_light --width 800 --height 600 --spp 1 --sampling_mode stratified --light_sampling_mode regular
-python -m ray_tracing_2.cornell_box --width 800 --height 600 --spp 1 --sampling_mode jittered --light_sampling_mode uniform
-python -m ray_tracing_2.main_triangles --width 800 --height 600 --spp 1 --scene inputs/triangle_pyramid.json --accelerator bvh
-python -m ray_tracing_2.generate_scene --input inputs/example_scene.json --width 800 --height 600 --spp 1
+python -m ray_tracing_2.proj1_req1_geometry --width 800 --height 600 --sampling_mode center --spp 1
 ```
 
-Nos entrypoints com `AreaLight`, os controles públicos de amostragem permanecem separados:
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_req1_geometry_20260502_121509/render.png)
+- [properties.md](outputs/proj1_req1_geometry_20260502_121509/properties.md)
+
+![proj1_req1_geometry](outputs/proj1_req1_geometry_20260502_121509/render.png)
+
+`proj1_req2_point_lights` destaca múltiplas luzes pontuais e resposta especular dos materiais.
+
+```bash
+python -m ray_tracing_2.proj1_req2_point_lights --width 800 --height 600 --sampling_mode center --spp 1
+```
+
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_req2_point_lights_20260502_121731/render.png)
+- [properties.md](outputs/proj1_req2_point_lights_20260502_121731/properties.md)
+
+![proj1_req2_point_lights](outputs/proj1_req2_point_lights_20260502_121731/render.png)
+
+`proj1_req3_phong_shadows` cobre o shading local de Phong com sombras diretas.
+
+```bash
+python -m ray_tracing_2.proj1_req3_phong_shadows --width 800 --height 600 --sampling_mode center --spp 1
+```
+
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_req3_phong_shadows_20260502_121809/render.png)
+- [properties.md](outputs/proj1_req3_phong_shadows_20260502_121809/properties.md)
+
+![proj1_req3_phong_shadows](outputs/proj1_req3_phong_shadows_20260502_121809/render.png)
+
+`proj1_req4_sampling` compara anti-aliasing no mesmo enquadramento.
+
+```bash
+python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --sampling_mode center --spp 1
+python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --sampling_mode jittered --spp 4 --seed 42
+python -m ray_tracing_2.proj1_req4_sampling --width 800 --height 600 --sampling_mode stratified --spp 4 --seed 42
+```
+
+Exemplos de saída já gerados:
+
+- [center render.png](outputs/proj1_req4_sampling_20260502_122009/render.png)
+- [center properties.md](outputs/proj1_req4_sampling_20260502_122009/properties.md)
+- [jittered render.png](outputs/proj1_req4_sampling_20260506_211723/render.png)
+- [stratified render.png](outputs/proj1_req4_sampling_20260506_211923/render.png)
+
+![proj1_req4_sampling_center](outputs/proj1_req4_sampling_20260502_122009/render.png)
+
+![proj1_req4_sampling_jittered](outputs/proj1_req4_sampling_20260506_211723/render.png)
+
+![proj1_req4_sampling_stratified](outputs/proj1_req4_sampling_20260506_211923/render.png)
+
+### Extensões
+
+`proj1_rext_area_light` mostra penumbra com emissor retangular amostrado.
+
+```bash
+python -m ray_tracing_2.proj1_rext_area_light --width 800 --height 600 --sampling_mode center --spp 1 --light_sampling_mode stratified
+```
+
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_rext_area_light_20260502_150206/render.png)
+- [properties.md](outputs/proj1_rext_area_light_20260502_150206/properties.md)
+
+![proj1_rext_area_light](outputs/proj1_rext_area_light_20260502_150206/render.png)
+
+`proj1_rext_bvh` mostra malha triangular com BVH local.
+
+```bash
+python -m ray_tracing_2.proj1_rext_bvh --width 800 --height 600 --sampling_mode center --spp 1
+```
+
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_rext_bvh_20260502_131902/render.png)
+- [properties.md](outputs/proj1_rext_bvh_20260502_131902/properties.md)
+
+![proj1_rext_bvh](outputs/proj1_rext_bvh_20260502_131902/render.png)
+
+`proj1_rext_refractive` mostra refração com Snell, TIR e Beer-Lambert.
+
+```bash
+python -m ray_tracing_2.proj1_rext_refractive --width 800 --height 600 --sampling_mode center --spp 1
+```
+
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_rext_refractive_20260502_132340/render.png)
+- [properties.md](outputs/proj1_rext_refractive_20260502_132340/properties.md)
+
+![proj1_rext_refractive](outputs/proj1_rext_refractive_20260502_132340/render.png)
+
+### Cenas integradas
+
+`proj1_final` e `proj1_final_v2` combinam materiais recursivos, malhas e iluminação em cenas finais maiores.
+
+```bash
+python -m ray_tracing_2.proj1_final --width 800 --height 600 --spp 1
+python -m ray_tracing_2.proj1_final_v2 --width 800 --height 600 --spp 1
+```
+
+Exemplos de saída já gerados:
+
+- [proj1_final render.png](outputs/proj1_final_20260502_201946/render.png)
+- [proj1_final properties.md](outputs/proj1_final_20260502_201946/properties.md)
+- [proj1_final_v2 render.png](outputs/proj1_final_v2_20260502_202707/render.png)
+- [proj1_final_v2 properties.md](outputs/proj1_final_v2_20260502_202707/properties.md)
+
+![proj1_final](outputs/proj1_final_20260502_201946/render.png)
+
+![proj1_final_v2](outputs/proj1_final_v2_20260502_202707/render.png)
+
+`proj1_heart_trianglemesh` destaca a malha cardíaca triangulada com BVH local.
+
+```bash
+python -m ray_tracing_2.proj1_heart_trianglemesh --width 800 --height 600 --spp 25 --sampling_mode jittered
+```
+
+Exemplo de saída já gerada:
+
+- [render.png](outputs/proj1_heart_trianglemesh_20260502_205136/render.png)
+- [properties.md](outputs/proj1_heart_trianglemesh_20260502_205136/properties.md)
+
+![proj1_heart_trianglemesh](outputs/proj1_heart_trianglemesh_20260502_205136/render.png)
+
+Nos entrypoints com `AreaLight`:
 
 - `--sampling_mode` controla apenas o anti-aliasing do filme
 - `--light_sampling_mode` controla apenas o padrão 2D usado na integração sobre a fonte de área
@@ -86,50 +201,51 @@ Se preferir não instalar o pacote, use `PYTHONPATH=src` na raiz do repositório
 PYTHONPATH=src python -m ray_tracing_2.main_area_light --width 800 --height 600 --spp 1 --sampling_mode jittered --light_sampling_mode stratified
 ```
 
-Cada execução produz uma nova pasta em `outputs/` contendo pelo menos:
+## Fluxo
 
-- `render.png`
-- `properties.md`
+O fluxo atual do renderer pode ser lido assim:
 
-## Estrutura Relevante
+1. o entrypoint monta o parser em `cli.py` e converte os argumentos em `CommonRenderOptions`;
+2. a cena e a câmera canônicas são construídas em `proj1_scene_common.py` e nos módulos de cena;
+3. `Render` cria a pasta timestamped em `outputs/` e inicializa `Film`;
+4. `Film` gera amostras subpixel conforme `sampling_mode` e chama `Camera.generate_ray()`;
+5. `Scene.trace_ray()` resolve interseção, visibilidade, materiais, recursão e iluminação;
+6. ao final, `Render` salva `render.png`, `properties.json` e `properties.md`.
 
-| Caminho                             | Papel                                                          |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `src/ray_tracing_2/camera.py`       | câmera pinhole e geração de raios primários                    |
-| `src/ray_tracing_2/film.py`         | amostragem por pixel, buffer e gravação da imagem              |
-| `src/ray_tracing_2/scene.py`        | interseção global, offset, transmitância e recursão            |
-| `src/ray_tracing_2/material.py`     | Phong local, reflexão e refração                               |
-| `src/ray_tracing_2/light.py`        | `PointLight`, `AreaLight` e `AmbientLight`                     |
-| `src/ray_tracing_2/shape.py`        | primitivas analíticas, triângulos, `TriangleMesh` e `Instance` |
-| `src/ray_tracing_2/triangle_bvh.py` | BVH local para malhas triangulares                             |
-| `src/ray_tracing_2/render.py`       | criação de pasta de saída e serialização de metadados          |
-| `docs/relatorio-proj1.v5.md`        | relatório técnico-científico consolidado                       |
-| `docs/AA_IMPLEMENTATION.md`         | nota específica sobre anti-aliasing                            |
-| `docs/UNDOCUMENTED_FEATURES.md`     | nuances e limitações não expandidas no README                  |
+Os dois modos de amostragem do projeto continuam separados:
 
-## Scripts de Cena
+- `sampling_mode`: anti-aliasing do filme por pixel
+- `light_sampling_mode`: amostragem 2D da `AreaLight`
 
-| Módulo                              | Uso principal                                 |
-| ----------------------------------- | --------------------------------------------- |
-| `ray_tracing_2.main`                | cena mínima para o núcleo do Slide 4          |
-| `ray_tracing_2.main_area_light`     | penumbra com `AreaLight`                      |
-| `ray_tracing_2.main_ellipse`        | instanciação com escala não uniforme          |
-| `ray_tracing_2.main_box`            | cena tipo Cornell com blocos instanciados     |
-| `ray_tracing_2.main_triangles`      | malha triangular e BVH local                  |
-| `ray_tracing_2.cornell_box_pyramid` | integração de triângulos, reflexão e refração |
-| `ray_tracing_2.generate_scene`      | cena dirigida por JSON                        |
-| `ray_tracing_2.random_scene`        | geração de cenas aleatórias com documentação  |
+Para detalhes técnicos mais completos sobre esse fluxo, consulte `latex/inf2608-proj1.v3.pdf`.
 
-## Referências do Curso
+## Diagramas
 
-- `materiais/traçado_de_raios/4.tracado_de_raios.pdf`
-- `materiais/traçado_de_raios/5.tracado_de_raios2.pdf`
-- `materiais/traçado_de_raios/6.estrutura_aceleracao.pdf`
-- `docs/relatorio-proj1.v5.md`
+Arquivos-fonte e imagens renderizadas disponíveis no repositório:
 
-## Limitações Atuais
+- `ray_tracing_render_overview_v1.puml` e `ray_tracing_render_overview_v1.puml.png`
+- `ray_tracing_trace_flow_v1.puml` e `ray_tracing_trace_flow_v1.puml.png`
+- `ray_tracing_bvh_flow_v1.puml` e `ray_tracing_bvh_flow_v1.puml.png`
+- `ray_tracing_classes_v3.puml` e `ray_tracing_classes_v3.png`
 
-- não há lente fina, profundidade de campo nem path tracing global
-- `PointLight` e `AreaLight` seguem convenções radiométricas diferentes nesta base
-- não há grade regular, SAH, BVH linearizada ou acelerador global da cena
-- algumas cenas auxiliares antigas ainda servem mais como laboratório do que como interface final do projeto
+### Visão geral do pipeline
+
+![Visão geral do pipeline](ray_tracing_render_overview_v1.puml.png)
+
+### Fluxo de `trace_ray()` e shading recursivo
+
+![Fluxo de trace ray](ray_tracing_trace_flow_v1.puml.png)
+
+### Arquitetura principal atual
+
+![Arquitetura principal](ray_tracing_classes_v3.png)
+
+## Estrutura Principal
+
+- `src/ray_tracing_2/camera.py`: câmera pinhole e geração de raios primários
+- `src/ray_tracing_2/film.py`: amostragem por pixel e gravação da imagem
+- `src/ray_tracing_2/scene.py`: interseção global, transmitância e recursão
+- `src/ray_tracing_2/material.py`: materiais locais, reflexivos e refratários
+- `src/ray_tracing_2/light.py`: luzes pontuais, ambiente e luz de área
+- `src/ray_tracing_2/shape.py`: primitivas analíticas, triângulos, `TriangleMesh` e `Instance`
+- `src/ray_tracing_2/triangle_bvh.py`: BVH local para malhas triangulares
