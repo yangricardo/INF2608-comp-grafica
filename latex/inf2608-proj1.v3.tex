@@ -452,6 +452,37 @@ Uma segunda comparação, agora em uma cena mais rica, ajuda a verificar se a le
 \figcmd{python -m ray_tracing_2.cornell_box_pyramid --width 800 --height 600 --sampling_mode stratified --spp 4 --seed 42}
 \end{figure}
 
+\subsection{Cenas integradas recuperadas por snapshots}
+\label{sec:fig-recuperadas-v3}
+
+Os exemplos anexados de cenas finais merecem aparecer também como evidência visual, e não apenas como números citados na subseção de infraestrutura experimental. As Figuras~\ref{fig:proj1-final-v3}, \ref{fig:proj1-final-v2} e \ref{fig:heart-triangle-v3} mostram três casos em que os snapshots preservam não só a imagem, mas o contexto técnico necessário para interpretá-la: nas duas cenas finais, a câmera e o regime básico de render permanecem estáveis, o que torna comparável a diferença entre \(144{,}2\,s\) e \(172{,}0\,s\); na cena da malha cardíaca, o snapshot registra explicitamente \texttt{spp=25}, \texttt{sampling\_mode=jittered} e acelerador \texttt{bvh}, o que explica por que o custo sobe para \(1008{,}0\,s\) sem transformar a imagem em um caso opaco de alto tempo de render.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.98\linewidth]{../outputs/proj1_final_20260502_201946/render.png}
+\caption{Cena final integrada \texttt{proj1\_final}: combinação de materiais reflexivos, refratários e malhas triangulares em um caso no qual o estimador prevê \(63{,}6\,s\), mas o render observado chega a \(144{,}2\,s\).}
+\label{fig:proj1-final-v3}
+\figcmd{python -m ray_tracing_2.proj1_final --width 800 --height 600 --spp 1}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.98\linewidth]{../outputs/proj1_final_v2_20260502_202707/render.png}
+\caption{Variante \texttt{proj1\_final\_v2}: mesma leitura de cena integrada sob câmera equivalente, agora com tempo real de \(172{,}0\,s\) para uma previsão de \(74{,}3\,s\), reforçando a sensibilidade do custo à composição geométrica e material.}
+\label{fig:proj1-final-v2}
+\figcmd{python -m ray_tracing_2.proj1_final_v2 --width 800 --height 600 --spp 1}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.98\linewidth]{../outputs/proj1_heart_trianglemesh_20260502_205136/render.png}
+\caption{Cena \texttt{proj1\_heart\_trianglemesh}: malha triangulada com \texttt{bvh} e \(25\) amostras por pixel, em um caso onde a estimativa \(1122{,}4\,s\) permanece relativamente próxima do tempo observado \(1008{,}0\,s\).}
+\label{fig:heart-triangle-v3}
+\figcmd{python -m ray_tracing_2.proj1_heart_trianglemesh --width 800 --height 600 --spp 25 --sampling_mode jittered}
+\end{figure}
+
+Os demais artefatos exploratórios recuperados via snapshot -- da cena mínima \texttt{main\_scene} a variações sucessivas de \texttt{cornell\_box} e a uma versão adicional de \texttt{cornell\_box\_pyramid} -- ficam reunidos no Anexo C. Eles não são centrais para a progressão teórica do corpo principal, mas ajudam a mostrar que a instrumentação do projeto preservou evidência útil também fora do conjunto canônico de cenas escolhido para a narrativa principal.
+
 \section{Decisões de Modelagem e Limites}
 \label{sec:limites-v3}
 
@@ -667,6 +698,70 @@ As figuras a seguir reproduzem, em escala ampliada, as principais evidências vi
 \centering
 \includegraphics[width=0.92\textwidth]{../outputs/cornell_box_pyramid_20260502_191034/render.png}
 \caption{Versão ampliada da Figura~\ref{fig:cornell-stratified-v3}: cena integrada com \texttt{stratified}.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/proj1_final_20260502_201946/render.png}
+\caption{Versão ampliada da Figura~\ref{fig:proj1-final-v3}: composição final integrada \texttt{proj1\_final}.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/proj1_final_v2_20260502_202707/render.png}
+\caption{Versão ampliada da Figura~\ref{fig:proj1-final-v2}: variante integrada \texttt{proj1\_final\_v2}.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/proj1_heart_trianglemesh_20260502_205136/render.png}
+\caption{Versão ampliada da Figura~\ref{fig:heart-triangle-v3}: malha cardíaca triangulada com \texttt{bvh}.}
+\end{figure}
+
+\subsection*{Exemplos exploratórios recuperados por snapshot}
+
+As figuras a seguir reúnem artefatos exploratórios anexados pelo autor e preservados pelas saídas \texttt{properties.md}/\texttt{properties.json}. Elas complementam o corpo do texto ao mostrar como a camada de snapshots permite recuperar cenas intermediárias e variações de modelagem que não entraram na espinha principal do relatório, mas continuam úteis como evidência de exploração técnica.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/main_scene_20260405_171334/render.png}
+\caption{Artefato inicial de \texttt{main\_scene}: cena mínima com esfera sobre plano e \texttt{properties.md} em formato explicativo.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/cornell_box_20260412_233524/render.png}
+\caption{Variação exploratória de \texttt{cornell\_box}: esfera transparente frontal e composição interna preservadas por snapshot.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/cornell_box_20260412_233959/render.png}
+\caption{Outra variação de \texttt{cornell\_box}: esfera refletiva em destaque e plano transparente interno.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/cornell_box_20260412_234221/render.png}
+\caption{Variação de \texttt{cornell\_box} com esfera vermelha deslocada para a região frontal da cena.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/cornell_box_20260413_195851/render.png}
+\caption{Variação de \texttt{cornell\_box} com \(25\) amostras em \texttt{jittered} e múltiplas luzes pontuais.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/cornell_box_20260413_214356/render.png}
+\caption{Variação de \texttt{cornell\_box} com \(25\) amostras em \texttt{stratified} e paredes refletivas.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\textwidth]{../outputs/cornell_box_pyramid_20260501_214225/render.png}
+\caption{Variação adicional de \texttt{cornell\_box\_pyramid}: \(10\) amostras em \texttt{jittered}, malhas triangulares e luz de área estratificada.}
 \end{figure}
 
 \end{document}

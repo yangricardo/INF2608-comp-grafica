@@ -1,20 +1,30 @@
 # Fdb version 4
-["bibtex inf2608-proj1.v3"] 1778115729.41536 "inf2608-proj1.v3.aux" "inf2608-proj1.v3.bbl" "inf2608-proj1.v3" 1778115737.1297 0
+["bibtex inf2608-proj1.v3"] 1778116768.11226 "inf2608-proj1.v3.aux" "inf2608-proj1.v3.bbl" "inf2608-proj1.v3" 1778116781.19242 0
   "./apalike-sol.bst" 1777689754.7587 24928 269dedab788b7f84af88c155ecb45872 ""
   "./refs.bib" 1777693149.2336 2237 c1ee44621df296dfffb837951dad8011 ""
-  "inf2608-proj1.v3.aux" 1778115731.83228 19714 7bc6b0669c82bb7a9adaeac39afb3e61 "xelatex"
+  "inf2608-proj1.v3.aux" 1778116770.4975 24121 6a03a92457c13fac045eab676d038a4c "xelatex"
   (generated)
   "inf2608-proj1.v3.bbl"
   "inf2608-proj1.v3.blg"
   (rewritten before read)
-["xdvipdfmx"] 1778115732.35653 "inf2608-proj1.v3.xdv" "inf2608-proj1.v3.pdf" "inf2608-proj1.v3" 1778115737.13253 0
-  "inf2608-proj1.v3.xdv" 1778115731.83517 493888 3d51c2c183cabae07b6f392aeae4a35f "xelatex"
+["xdvipdfmx"] 1778116770.97577 "inf2608-proj1.v3.xdv" "inf2608-proj1.v3.pdf" "inf2608-proj1.v3" 1778116781.1953 0
+  "inf2608-proj1.v3.xdv" 1778116770.50018 540172 da50fab48971906558a77cc162c0e4e2 "xelatex"
   (generated)
   "inf2608-proj1.v3.pdf"
   (rewritten before read)
-["xelatex"] 1778115729.60199 "inf2608-proj1.v3.tex" "inf2608-proj1.v3.xdv" "inf2608-proj1.v3" 1778115737.12981 0
+["xelatex"] 1778116768.29227 "inf2608-proj1.v3.tex" "inf2608-proj1.v3.xdv" "inf2608-proj1.v3" 1778116781.19256 0
+  "../outputs/cornell_box_20260412_233524/render.png" 1776047771.97744 83520 2268d48a6071e0a18de56a664b1142c7 ""
+  "../outputs/cornell_box_20260412_233959/render.png" 1776048031.36149 75419 e49eec54157bbc7e035a3b11366c1c72 ""
+  "../outputs/cornell_box_20260412_234221/render.png" 1776048173.48812 77002 c315aa3b8b0539ca035952fd92ea7e58 ""
+  "../outputs/cornell_box_20260413_195851/render.png" 1776123118.02829 152453 bf77de32cc7ea0314c595f1c1bb14393 ""
+  "../outputs/cornell_box_20260413_214356/render.png" 1776130360.35209 153275 3ac1dd67fdb0d70268034250364b8f51 ""
+  "../outputs/cornell_box_pyramid_20260501_214225/render.png" 1777689754.79872 188584 bc50c1c399697558319f7e2227f93896 ""
   "../outputs/cornell_box_pyramid_20260502_190902/render.png" 1777759792.15169 46414 5e2919741c4a7b9fe13a0dc2907c787c ""
   "../outputs/cornell_box_pyramid_20260502_191034/render.png" 1777760035.708 66529 e3d9ab59e1a6c511ec150ff2f3888cdc ""
+  "../outputs/main_scene_20260405_171334/render.png" 1775420024.79924 8165 f91f2f0154af03c2152f054efd5bc935 ""
+  "../outputs/proj1_final_20260502_201946/render.png" 1777764130.8872 115065 d63ff8c4fa92d428934d98da83421f58 ""
+  "../outputs/proj1_final_v2_20260502_202707/render.png" 1777764599.35478 116279 ceaec04a2e991d0e08da3a32dd11e722 ""
+  "../outputs/proj1_heart_trianglemesh_20260502_205136/render.png" 1777766904.7825 107412 b38a93db1175977390010fd919065b62 ""
   "../outputs/proj1_req1_geometry_20260502_121509/render.png" 1777734919.16952 4591 fe3d4a64a58b4914cc8b862aaf1f8bf7 ""
   "../outputs/proj1_req2_point_lights_20260502_121731/render.png" 1777735070.84189 80929 87bdd01ee344a093a69f5f421a03be51 ""
   "../outputs/proj1_req2_point_lights_20260502_192411/render.png" 1777761153.17941 97722 130fab3a7fa0ee72d32630d32de78cb6 ""
@@ -224,10 +234,10 @@
   "/usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt" 1777678477 5948570 505f2e03eedaee2f38c2252a747843a3 ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "aas_macros.sty" 1777689754.75839 4967 cf45ff75f433e372cec5993ac08f4363 ""
-  "inf2608-proj1.v3.aux" 1778115731.83228 19714 7bc6b0669c82bb7a9adaeac39afb3e61 "xelatex"
-  "inf2608-proj1.v3.bbl" 1778115729.59764 2164 5d4427b4282c76e83445673992fbb047 "bibtex inf2608-proj1.v3"
-  "inf2608-proj1.v3.out" 1778115731.83456 9191 da4d3a655b3e2eeb33ef36df782306fe "xelatex"
-  "inf2608-proj1.v3.tex" 1778115717.10176 54438 7ec245293d19cbdca70c1d16b249cc75 ""
+  "inf2608-proj1.v3.aux" 1778116770.4975 24121 6a03a92457c13fac045eab676d038a4c "xelatex"
+  "inf2608-proj1.v3.bbl" 1778116768.2878 2164 5d4427b4282c76e83445673992fbb047 "bibtex inf2608-proj1.v3"
+  "inf2608-proj1.v3.out" 1778116770.49974 9472 a956003dac9d550d4fa53cf11845f60e "xelatex"
+  "inf2608-proj1.v3.tex" 1778116753.74596 60364 bc30f0224374b4f40ab20c242ef9ded6 ""
   "sbcreviews-2025.cls" 1777768907.51392 15053 3dba078b96610c60e27548cae34bb323 ""
   (generated)
   "inf2608-proj1.v3.aux"
