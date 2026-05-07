@@ -303,6 +303,15 @@ O ponto mais importante aqui é o alcance da aceleração. A base reúne uma BVH
 
 As figuras desta seção usam cenas dedicadas do projeto e algumas extensões selecionadas. O objetivo não é substituir a análise teórica desenvolvida nas seções precedentes, mas oferecer evidência visual organizada do que ela descreve. Em cada caso, a pergunta orientadora é a mesma: o que exatamente a figura mostra, qual comando a reproduz e que hipótese técnica ela ajuda a sustentar. Para preservar a legibilidade no corpo em duas colunas, as imagens ficam contidas na largura da coluna; as versões ampliadas das mesmas evidências aparecem no Anexo C.
 
+\subsection{CLI, snapshots e estimativa como infraestrutura experimental}
+\label{sec:infra-exp-v3}
+
+Antes da leitura figura a figura, vale explicitar que os comandos impressos sob cada imagem não são ornamentos editoriais. A camada de CLI centraliza, em \texttt{CommonRenderOptions}, os parâmetros que realmente controlam o experimento -- resolução, \texttt{spp}, \texttt{sampling\_mode}, semente e opções de calibração -- e os redistribui tanto para os \emph{entrypoints} quanto para o estimador. Isso impede que cada script de cena redefina sua própria interface e garante que comparações como as de \texttt{req2}, \texttt{req4}, \texttt{proj1\_final} e \texttt{proj1\_final\_v2} diferenciem a cena ou o regime de amostragem, e não o contrato de execução.
+
+Essa padronização só se torna metodologicamente útil porque cada render também gera um snapshot persistente. Em \texttt{RenderSnapshot.from\_runtime()}, o estado do render é serializado em termos de configuração de imagem, câmera, cena, objetos e luzes, e depois gravado em \texttt{properties.json} e \texttt{properties.md}. Com isso, exemplos potencialmente dispersos voltam a ser legíveis como evidência comparável: \texttt{proj1\_final} e \texttt{proj1\_final\_v2} preservam \(800\times 600\), \texttt{sampling\_mode=jittered}, \texttt{spp=1}, \texttt{max\_depth=8} e a mesma câmera, de modo que a diferença de custo entre \(144{,}2\,s\) e \(172{,}0\,s\) não pode ser atribuída a uma configuração acidental. No extremo oposto, \texttt{proj1\_heart\_trianglemesh} registra explicitamente \texttt{spp=25}, \texttt{sampling\_mode=jittered}, acelerador \texttt{bvh} e tempo real de \(1008{,}0\,s\), o que preserva o contexto técnico de uma imagem custosa que, isolada, seria difícil de interpretar.
+
+A terceira peça é o estimador. \texttt{RenderEstimator.maybe\_calibrate()} mede rapidamente o throughput em uma grade reduzida, ajusta o modelo de raios e, ao final de \texttt{run()}, grava no snapshot o comparativo entre tempo estimado e tempo real. Isso transforma tempo de render em evidência analisável, não apenas em conveniência de linha de comando. Os artefatos mostram que a aproximação é boa em \texttt{proj1\_heart\_trianglemesh}, com estimativa de \(1122{,}4\,s\) para um tempo observado de \(1008{,}0\,s\) e erro relativo de \(11{,}36\%\). Já nas cenas integradas \texttt{proj1\_final} e \texttt{proj1\_final\_v2}, o estimador prevê \(63{,}6\,s\) e \(74{,}3\,s\), mas o render efetivo consome \(144{,}2\,s\) e \(172{,}0\,s\), isto é, cerca de \(2{,}3\times\) mais. Longe de enfraquecer a análise, essa diferença explicita que o custo cresce rapidamente quando a cena combina sombras, superfícies recursivas e maior densidade de interseções, e mostra por que os snapshots e o estimator são parte do argumento técnico do relatório, e não material periférico.
+
 \subsection{Geometria, câmera e instanciação}
 \label{sec:fig-geometria-v3}
 
@@ -471,7 +480,7 @@ Os materiais reflexivos e refratários ampliam bastante o escopo do projeto, mas
 
 Tomando o estado atual do repositório como objeto de análise, o projeto reúne um núcleo geométrico e fotométrico sólido: raio paramétrico, interseções analíticas, câmera pinhole, filme com suporte a supersampling, sombreamento local de Phong e sombras diretas. Sobre esse núcleo, a base acrescenta extensões relevantes do conteúdo da disciplina, como instanciação afim, luz de área, reflexão especular com Fresnel-Schlick, refração dielétrica com Lei de Snell, Beer-Lambert e uma BVH local para malhas triangulares.
 
-O mérito principal do relatório é tornar essa leitura tecnicamente defensável sem perder fluidez. A parte teórica permanece como corpo do texto, as imagens ocupam um espaço próprio de interpretação acompanhado por comandos reproduzíveis, e a rastreabilidade é consolidada em quadros finais que ligam conceitos de referência, evidência concreta e notas com páginas dos slides e linhas de código. Assim, o documento mantém densidade analítica sem fragmentar cada subseção com blocos locais de rastreabilidade.
+O mérito principal do relatório é tornar essa leitura tecnicamente defensável sem perder fluidez. A parte teórica permanece como corpo do texto, as imagens ocupam um espaço próprio de interpretação acompanhado por comandos reproduzíveis, snapshots persistentes e estimativas de custo, e a rastreabilidade é consolidada em quadros finais que ligam conceitos de referência, evidência concreta e notas com páginas dos slides e linhas de código. Assim, o documento mantém densidade analítica sem fragmentar cada subseção com blocos locais de rastreabilidade.
 
 Em síntese, o repositório entrega um ray tracer educacional reprodutível, com fronteiras de escopo relativamente bem definidas. O que falta está concentrado em modelagem física mais rigorosa e em estruturas globais de aceleração, e não em inconsistência do pipeline principal. Essa distinção é importante porque permite avaliar o trabalho com precisão: não como cobertura integral do arco teórico das aulas, mas como realização coerente, incremental e tecnicamente bem localizada de uma parcela significativa desse arco.
 
@@ -526,6 +535,25 @@ Traçador recursivo com profundidade finita & \texttt{Scene.can\_spawn\_ray()}, 
 Reflexão especular com Fresnel-Schlick & \texttt{ReflectiveMaterial.eval()} & Slides 05, pp.~26--28; PBRT 4e, cap.~9.3; \texttt{material.py:118, 136}. \\
 Refração dielétrica, TIR e Beer-Lambert & \texttt{TransparentMaterial.eval()}, \texttt{shadow\_transmittance()} & Slides 05, pp.~29--35; PBRT 4e, caps.~9.5 e 11.2; \texttt{material.py:176, 206, 227}. \\
 Transmitância acumulada em raios de sombra & \texttt{Scene.transmittance()} e delegação para \texttt{shadow\_transmittance()} & Slides 05, pp.~33--35; \texttt{scene.py:66}; \texttt{material.py:30, 61, 206}. \\
+\end{tblr}
+\end{table*}
+
+\subsection*{Infraestrutura experimental e reprodutibilidade}
+
+\begin{table*}[!ht]
+\caption{Quadro consolidado da infraestrutura experimental e da reprodutibilidade.}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.25\textwidth] Q[l,wd=0.33\textwidth] Q[l,wd=0.34\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Conceito de referência & Evidência principal & Nota \\
+CLI padronizada para execuções comparáveis & \texttt{CommonRenderOptions} e conversão uniforme de parâmetros para \emph{entrypoints} e estimador & Camada de engenharia que estabiliza resolução, \texttt{spp}, \texttt{sampling\_mode}, semente e calibração; \texttt{cli.py:16, 50, 64, 96, 174}. \\
+Snapshot persistente do estado do render & \texttt{RenderSnapshot.from\_runtime()} e serialização em \texttt{properties.json}/\texttt{properties.md} & Registra render, câmera, cena, objetos e luzes em artefatos auditáveis; \texttt{render\_snapshot.py:524, 605, 656, 665, 770, 773}. \\
+Estimativa, calibração e comparação com o tempo real & \texttt{RayCountEstimator} e execução coordenada por \texttt{RenderEstimator} & Mede throughput, atualiza o modelo e persiste o comparativo estimado/real ao fim do render; \texttt{render\_estimator.py:34, 189, 277, 368, 389, 492}. \\
 \end{tblr}
 \end{table*}
 
