@@ -87,7 +87,7 @@ Este artigo analisa a implementação de ray tracing disponível no repositório
 
 A organização do texto privilegia a leitura do pipeline do traçador, do núcleo geométrico e fotométrico, das extensões ópticas e amostrais, da geometria triangular e das estruturas de aceleração. As imagens principais ficam reunidas em uma seção específica de evidências visuais, na qual cada figura é acompanhada por uma leitura do que ela comprova, pelos metadados mais relevantes do render e pelo comando gerador correspondente.
 
-Para preservar a fluidez do corpo principal, a rastreabilidade detalhada aparece nos anexos finais. O Anexo A reúne quadros consolidados de \emph{conceitos de referência}, \emph{evidência principal} e \emph{nota}, em que as notas sintetizam as páginas dos slides, as seções mais próximas em PBRT e as linhas de código mais relevantes. O Anexo B mantém o diagrama de classes como apoio estrutural à leitura da arquitetura.
+Para preservar a fluidez do corpo principal, a rastreabilidade detalhada aparece nos anexos finais. O Anexo A reúne quadros consolidados de \emph{conceitos de referência}, \emph{evidência principal} e \emph{nota}, em que as notas sintetizam as páginas dos slides, as seções mais próximas em PBRT e as linhas de código mais relevantes. O Anexo B mantém duas vistas complementares do diagrama de classes: uma versão inicial, mais sintética, e uma versão estendida que incorpora a infraestrutura experimental hoje presente na base.
 
 \section{Núcleo Geométrico e Fotométrico do Traçador}
 \label{sec:nucleo-v3}
@@ -611,14 +611,25 @@ Percurso sequencial no topo da cena & \texttt{Scene.compute\_intersection()} com
 \end{table*}
 
 \clearpage
-\section*{Anexo B: Diagrama de Classes}
+\section*{Anexo B: Diagramas de Classes}
 
-O diagrama de classes abaixo resume a arquitetura principal do pacote \texttt{ray\_tracing\_2}. Ele complementa os quadros de referência e evidência ao mostrar, em uma única vista estrutural, as dependências entre \texttt{Render}, \texttt{Scene}, \texttt{Film}, \texttt{Camera}, \texttt{Light}, \texttt{Material}, \texttt{TriangleMesh} e \texttt{TriangleBVH}. O diagrama é mantido como apoio de leitura arquitetural, e não como substituto da análise textual.
+Este anexo passa a reunir duas leituras complementares da arquitetura principal do pacote \texttt{ray\_tracing\_2}. A primeira preserva a versão inicial do diagrama, mais compacta e centrada no pipeline geométrico e fotométrico. A segunda, \texttt{v3}, estende essa base para incluir a camada de CLI, estimativa/calibração e snapshots, que hoje participa diretamente da reprodutibilidade experimental discutida no corpo do texto.
+
+\subsection*{Versão inicial}
 
 \begin{figure*}[!ht]
 \centering
-\includegraphics[width=0.95\textwidth]{../ray_tracing_2_class-diagram.puml.png}
-\caption{Diagrama de classes da arquitetura principal de \texttt{ray\_tracing\_2}.}
+\includegraphics[width=0.95\textwidth]{../ray_tracing_classes_v1.png}
+\caption{Versão inicial do diagrama de classes de \texttt{ray\_tracing\_2}, focada no pipeline principal de câmera, filme, cena, materiais, luzes e geometria.}
+\label{fig:diagram-class-v1}
+\end{figure*}
+
+\subsection*{Versão complementar estendida (v3)}
+
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../ray_tracing_classes_v3.png}
+\caption{Versão \texttt{v3} do diagrama de classes de \texttt{ray\_tracing\_2}, adicionando a infraestrutura experimental de CLI, estimativa e snapshots como extensão da leitura inicial.}
 \label{fig:diagram-class-v3}
 \end{figure*}
 

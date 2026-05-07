@@ -1,0 +1,276 @@
+@startuml ray_tracing_classes_v3
+title Arquitetura Atual do ray_tracing_2
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+hide circle
+hide empty members
+
+enum SamplingMode {
+  CENTER
+  JITTERED
+  STRATIFIED
+}
+
+enum AreaLightSamplingMode {
+  REGULAR
+  UNIFORM
+  STRATIFIED
+}
+
+package "Pipeline de Render" {
+  class Camera {
+    +generate_ray(xn, yn): Ray
+  }
+
+  class Ray {
+    +o: vec3
+    +d: vec3
+  }
+
+  class Hit {
+    +t: float
+    +pos: vec3
+    +normal: vec3
+    +geo_normal: vec3
+    +material: Material
+    +light: Light
+    +front_face: bool
+    +backfacing: bool
+    +set_face_normal(ray, outward_normal)
+  }
+
+  class Scene {
+    +objects: list[Shape]
+    +lights: list[Light]
+    +background_color: vec3
+    +max_depth: int
+    +ray_epsilon: float
+    +compute_intersection(ray)
+    +offset_point(...)
+    +transmittance(...)
+    +trace_ray(ray, depth)
+    +profile_stats(): dict
+  }
+
+  class Film {
+    +samples_per_pixel: int
+    +sampling_mode: SamplingMode
+    +get_sample(i, j)
+    +get_samples_for_pixel(i, j)
+    +render(scene, camera, filename, ...)
+  }
+
+  class Render {
+    +out_root: str
+    +last_result: dict
+    +render_core(scene, cam, width, height, ...): dict
+    +render(scene, cam, width, height, ...): str
+  }
+
+  class Proj1CameraConfig
+}
+
+package "Geometria e Aceleracao" {
+  abstract class Shape {
+    +intersect(ray, hit)
+  }
+
+  class Sphere
+  class Plane
+  class Box
+  class Triangle
+
+  class TriangleMesh {
+    +accelerator: str
+    +bvh_leaf_size: int
+  }
+
+  class Instance {
+    +m: mat4
+    +shape: Shape
+  }
+
+  class Translate
+  class Rotate
+
+  class AABB
+  class TriangleBVHNode
+  class TriangleBVH
+}
+
+package "Luzes e Materiais" {
+  abstract class Light {
+    +radiance(scene, hit)
+    +sample_radiance(scene, hit)
+  }
+
+  class AmbientLight {
+    +color: vec3
+  }
+
+  class PointLight
+
+  class AreaLight {
+    +samples_u: int
+    +samples_v: int
+    +sampling_mode: AreaLightSamplingMode
+    +_iter_sample_uvs()
+    +sample_radiance(scene, hit)
+  }
+
+  abstract class Material {
+    +eval(scene, hit, ray, depth)
+    +shadow_transmittance(scene, hit, ray)
+  }
+
+  class EmissiveMaterial
+
+  class PhongMaterial {
+    +direct_lighting(scene, hit, ray)
+  }
+
+  class ReflectiveMaterial
+  class TransparentMaterial
+}
+
+package "Infraestrutura Experimental" {
+  class CommonRenderOptions {
+    +from_namespace(args): CommonRenderOptions
+    +to_entrypoint_kwargs(...): dict
+    +to_render_kwargs(name): dict
+    +to_estimator_options(): EstimatorOptions
+  }
+
+  class CLIHelpFormatter
+
+  class EstimatorOptions
+
+  class RayCountEstimator {
+    +estimate_total_rays(): int
+    +estimate_render_time_seconds(): float
+    +estimate_total_intersection_tests(): int
+    +to_dict(): dict
+  }
+
+  class RenderEstimator {
+    +maybe_calibrate(film): None
+    +estimation_dict(): dict
+    +run(): str
+  }
+
+  class MaterialSnapshot
+  class ShapeSnapshot
+  class LightSnapshot
+  class RenderSettingsSnapshot
+  class SceneSettingsSnapshot
+  class CameraSnapshot
+
+  class RenderSnapshot {
+    +from_runtime(...): RenderSnapshot
+    +from_json(payload): RenderSnapshot
+    +to_json(...): str
+    +to_markdown(...): str
+  }
+}
+
+class "cli.py" as CLI <<module>> {
+  +build_parser()
+  +add_common_render_arguments()
+  +add_light_sampling_argument()
+  +add_max_depth_argument()
+  +add_block_material_arguments()
+}
+
+class "sampling.py" as Sampling2D <<module>> {
+  +uniform_samples_2d()
+  +regular_grid_samples_2d()
+  +stratified_grid_samples_2d()
+}
+
+class "proj1_scene_common.py" as Proj1SceneCommon <<module>> {
+  +build_proj1_camera()
+  +build_proj1_scene()
+  +build_cornell_room()
+}
+
+Shape <|-- Sphere
+Shape <|-- Plane
+Shape <|-- Box
+Shape <|-- Triangle
+Shape <|-- TriangleMesh
+Shape <|-- Instance
+Instance <|-- Translate
+Instance <|-- Rotate
+
+Light <|-- PointLight
+Light <|-- AreaLight
+
+Material <|-- EmissiveMaterial
+Material <|-- PhongMaterial
+PhongMaterial <|-- ReflectiveMaterial
+PhongMaterial <|-- TransparentMaterial
+
+Scene "1" o-- "*" Shape
+Scene "1" o-- "*" Light
+Render --> Scene
+Render --> Camera
+Render --> Film
+Camera --> Ray
+Scene --> Hit
+Hit --> Material
+Hit --> Light
+Film --> SamplingMode
+AreaLight --> AreaLightSamplingMode
+TriangleMesh o-- "*" Triangle
+TriangleMesh *-- "0..1" TriangleBVH
+TriangleBVH *-- TriangleBVHNode
+TriangleBVHNode *-- AABB
+Instance o-- "1" Shape : wraps
+
+Film ..> Sampling2D : usa amostras 2D
+AreaLight ..> Sampling2D : usa amostras 2D
+
+CLI --> CLIHelpFormatter
+CLI ..> CommonRenderOptions
+CLI ..> SamplingMode
+CLI ..> AreaLightSamplingMode
+CommonRenderOptions ..> EstimatorOptions
+CommonRenderOptions ..> Render : to_render_kwargs()
+
+RenderEstimator *-- RayCountEstimator
+RenderEstimator ..> EstimatorOptions
+RenderEstimator --> Render
+RenderEstimator --> Scene
+RenderEstimator --> Camera
+RenderEstimator --> Film
+RenderEstimator --> RenderSnapshot
+
+RenderSnapshot *-- RenderSettingsSnapshot
+RenderSnapshot *-- SceneSettingsSnapshot
+RenderSnapshot *-- CameraSnapshot
+RenderSnapshot *-- "*" ShapeSnapshot
+RenderSnapshot *-- "*" LightSnapshot
+ShapeSnapshot *-- "0..1" MaterialSnapshot
+ShapeSnapshot *-- "0..1" ShapeSnapshot : nested shape
+RenderSnapshot ..> Scene : from_runtime()
+RenderSnapshot ..> Camera : from_runtime()
+LightSnapshot ..> PointLight
+LightSnapshot ..> AreaLight
+MaterialSnapshot ..> Material
+
+Proj1SceneCommon ..> Proj1CameraConfig
+Proj1SceneCommon ..> Camera
+Proj1SceneCommon ..> Scene
+Proj1SceneCommon ..> Shape
+Proj1SceneCommon ..> Light
+
+note right of AmbientLight
+Classe utilitaria usada apenas
+para configurar a iluminacao ambiente
+inicial da Scene; nao herda de Light.
+end note
+
+@enduml

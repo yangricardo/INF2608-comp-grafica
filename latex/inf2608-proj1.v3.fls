@@ -421,9 +421,12 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex9
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmr9.tfm
-INPUT ../ray_tracing_2_class-diagram.puml.png
-INPUT ../ray_tracing_2_class-diagram.puml.png
-INPUT ../ray_tracing_2_class-diagram.puml.png
+INPUT ../ray_tracing_classes_v1.png
+INPUT ../ray_tracing_classes_v1.png
+INPUT ../ray_tracing_classes_v1.png
+INPUT ../ray_tracing_classes_v3.png
+INPUT ../ray_tracing_classes_v3.png
+INPUT ../ray_tracing_classes_v3.png
 INPUT ../outputs/proj1_req1_geometry_20260502_121509/render.png
 INPUT ../outputs/proj1_req1_geometry_20260502_121509/render.png
 INPUT ../outputs/proj1_req1_geometry_20260502_121509/render.png
