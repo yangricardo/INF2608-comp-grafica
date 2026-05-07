@@ -14,7 +14,30 @@
 \setcitestyle{square}
 \captionsetup[figure]{hypcap=false}
 \newcommand{\slidescite}[2]{\citep[pp.~#2]{#1}}
+\newcommand{\pbrtcontentsurl}{https://pbr-book.org/4ed/contents.html}
+\newcommand{\DeclarePBRTSectionURL}[2]{\expandafter\def\csname pbrturl@#1\endcsname{#2}}
+\newcommand{\pbrtsectionurl}[1]{%
+    \ifcsname pbrturl@#1\endcsname
+        \csname pbrturl@#1\endcsname
+    \else
+        \pbrtcontentsurl
+    \fi
+}
+\DeclarePBRTSectionURL{1.2}{https://pbr-book.org/4ed/Introduction/Photorealistic_Rendering_and_the_Ray-Tracing_Algorithm.html}
+\DeclarePBRTSectionURL{3.5}{https://pbr-book.org/4ed/Geometry_and_Transformations/Normals.html}
+\DeclarePBRTSectionURL{3.7}{https://pbr-book.org/4ed/Geometry_and_Transformations/Bounding_Boxes.html}
+\DeclarePBRTSectionURL{5.2}{https://pbr-book.org/4ed/Cameras_and_Film/Projective_Camera_Models.html}
+\DeclarePBRTSectionURL{7.3}{https://pbr-book.org/4ed/Primitives_and_Intersection_Acceleration/Bounding_Volume_Hierarchies.html}
+\DeclarePBRTSectionURL{8.1}{https://pbr-book.org/4ed/Sampling_and_Reconstruction/Sampling_Theory.html}
+\DeclarePBRTSectionURL{8.5}{https://pbr-book.org/4ed/Sampling_and_Reconstruction/Stratified_Sampler.html}
+\DeclarePBRTSectionURL{9.3}{https://pbr-book.org/4ed/Reflection_Models/Specular_Reflection_and_Transmission.html}
+\DeclarePBRTSectionURL{9.5}{https://pbr-book.org/4ed/Reflection_Models/Dielectric_BSDF.html}
+\DeclarePBRTSectionURL{11.2}{https://pbr-book.org/4ed/Volume_Scattering/Transmittance.html}
+\DeclarePBRTSectionURL{12.4}{https://pbr-book.org/4ed/Light_Sources/Area_Lights.html}
 \newcommand{\pbrtbook}{\emph{Physically Based Rendering} (PBRT 4e)}
+\newcommand{\pbrtsec}[1]{\citep[\href{\pbrtsectionurl{#1}}{Se\c{c}\~ao~#1}]{pharr2023pbrt}}
+\newcommand{\pbrtsecpair}[2]{\citep[\href{\pbrtsectionurl{#1}}{Se\c{c}\~ao~#1} e \href{\pbrtsectionurl{#2}}{Se\c{c}\~ao~#2}]{pharr2023pbrt}}
+\newcommand{\pbrtsecs}[1]{\citep[\href{\pbrtcontentsurl}{Se\c{c}\~oes~#1}]{pharr2023pbrt}}
 \newcommand{\figcmd}[1]{%
     \par\medskip
     \begingroup
@@ -83,7 +106,7 @@ ray tracing, computer graphics, PBRT, sampling, BVH, rendering
 \section{Introdução}
 \label{sec:introducao-v3}
 
-Este artigo analisa a implementação de ray tracing disponível no repositório do Projeto 1~\citep{inf2608projectrepo}. O foco principal é o código em \path{src/ray_tracing_2/}, lido em conjunto com os slides da disciplina, de autoria de Waldemar Celes~\citep{inf2608slides04,inf2608slides05,inf2608slides06}, e com referências selecionadas de \pbrtbook~\citep{pharr2023pbrt}. A intenção não é recontar genericamente o que um ray tracer deveria fazer, mas entender o que esta base realmente entrega, quais escolhas de implementação sustentam cada efeito visual e em que pontos a teoria exigida pelo tema é maior do que a base atual tenta cobrir.
+Este artigo analisa a implementação de ray tracing disponível no repositório do Projeto 1~\citep{inf2608projectrepo}. O foco principal é o código em \path{src/ray_tracing_2/}, lido em conjunto com os slides da disciplina, de autoria de Waldemar Celes~\citep{inf2608slides04,inf2608slides05,inf2608slides06}, e com referências selecionadas de \pbrtbook, em especial \pbrtsecs{1.2, 3.5, 3.7, 5.2, 7.3, 8.1, 8.5, 9.3, 9.5, 11.2 e 12.4}. A intenção não é recontar genericamente o que um ray tracer deveria fazer, mas entender o que esta base realmente entrega, quais escolhas de implementação sustentam cada efeito visual e em que pontos a teoria exigida pelo tema é maior do que a base atual tenta cobrir.
 
 A organização do texto segue uma leitura mais próxima de engenharia de software do que de reconstrução teórica completa. Primeiro, o relatório observa o pipeline do traçador e a divisão de responsabilidades entre filme, câmera, cena, materiais e luzes. Depois, discute as extensões ópticas e amostrais, a geometria triangular e as estruturas de aceleração. As imagens principais ficam reunidas em uma seção específica de evidências visuais, na qual cada figura é acompanhada por uma leitura do que ela comprova, pelos metadados mais relevantes do render e pelo comando gerador correspondente.
 
@@ -534,9 +557,9 @@ rows={valign=t},
 cells={font=\small}
 }
 Conceito de referência & Evidência principal & Nota \\
-Raio paramétrico, visibilidade e registro de hit & \texttt{Ray}, \texttt{Hit}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & Slides 04, pp.~7--9; PBRT 4e, caps.~1.2 e 3.5; \texttt{hit.py:11, 25}; \texttt{scene.py:33, 137}. \\
+Raio paramétrico, visibilidade e registro de hit & \texttt{Ray}, \texttt{Hit}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & Slides 04, pp.~7--9; \pbrtsecpair{1.2}{3.5}; \texttt{hit.py:11, 25}; \texttt{scene.py:33, 137}. \\
 Interseções raio-plano e raio-esfera & \texttt{Sphere.intersect()}, \texttt{Plane.intersect()}, deslocamento por \(\varepsilon\) em \texttt{offset\_point()} & Slides 04, pp.~10--18; \texttt{shape.py:17, 23, 54, 60}; \texttt{scene.py:50}. \\
-Câmera pinhole, filme e geração de raios primários & \texttt{Camera.generate\_ray()}, \texttt{Film.get\_sample()}, \texttt{Film.get\_samples\_for\_pixel()}, \texttt{Film.render()} & Slides 04, pp.~19--39; PBRT 4e, cap.~5.2; \texttt{camera.py:6, 28}; \texttt{film.py:74, 98, 104, 156}. \\
+Câmera pinhole, filme e geração de raios primários & \texttt{Camera.generate\_ray()}, \texttt{Film.get\_sample()}, \texttt{Film.get\_samples\_for\_pixel()}, \texttt{Film.render()} & Slides 04, pp.~19--39; \pbrtsec{5.2}; \texttt{camera.py:6, 28}; \texttt{film.py:74, 98, 104, 156}. \\
 Modelo local de Phong, ambiente e sombras diretas & \texttt{PhongMaterial.direct\_lighting()}, \texttt{PhongMaterial.eval()}, \texttt{PointLight.radiance()}, \texttt{Scene.transmittance()} & Slides 04, pp.~40--55; \texttt{material.py:70, 79, 106}; \texttt{light.py:51, 55}; \texttt{scene.py:66}. \\
 Convenção simplificada para fonte pontual & \texttt{PointLight.radiance()} sem fator explícito de \(1/r^2\) & Slides 04, pp.~40--55; escolha didática coerente com o enunciado; \texttt{light.py:51, 55}. \\
 Pipeline câmera--interseção--material & \texttt{Film.render()}, \texttt{Camera.generate\_ray()}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & Slides 04, pp.~44--55; \texttt{film.py:156}; \texttt{camera.py:28}; \texttt{scene.py:33, 137}. \\
@@ -556,13 +579,13 @@ rows={valign=t},
 cells={font=\small}
 }
 Conceito de referência & Evidência principal & Nota \\
-Antialiasing por múltiplas amostras no pixel & \texttt{uniform\_samples\_2d()}, \texttt{stratified\_grid\_samples\_2d()}, \texttt{Film.get\_samples\_for\_pixel()} & Slides 05, pp.~4--8; PBRT 4e, cap.~8; \texttt{sampling.py:15, 27, 43}; \texttt{film.py:104, 156}. \\
-Instanciação afim e transformação correta de normais & \texttt{Instance.intersect()} com uso de inversa e inversa transposta & Slides 05, pp.~9--13; PBRT 4e, cap.~3.5; \texttt{shape.py:253, 262}. \\
-Luz de área, amostragem do emissor, penumbra e emissor visível & \texttt{AreaLight.sample\_radiance()}, \texttt{AreaLight.radiance()}, \texttt{EmissiveMaterial.eval()} & Slides 05, pp.~14--23; PBRT 4e, cap.~12.4; \texttt{light.py:80, 135, 195}; \texttt{material.py:37, 50}. \\
-Caixa, AABB e método de slabs & \texttt{Box.intersect()}, \texttt{AABB.intersects()} & Slides 05, pp.~24--25; PBRT 4e, cap.~3.7; \texttt{shape.py:74, 88}; \texttt{triangle\_bvh.py:50, 65}. \\
+Antialiasing por múltiplas amostras no pixel & \texttt{uniform\_samples\_2d()}, \texttt{stratified\_grid\_samples\_2d()}, \texttt{Film.get\_samples\_for\_pixel()} & Slides 05, pp.~4--8; \pbrtsecpair{8.1}{8.5}; \texttt{sampling.py:15, 27, 43}; \texttt{film.py:104, 156}. \\
+Instanciação afim e transformação correta de normais & \texttt{Instance.intersect()} com uso de inversa e inversa transposta & Slides 05, pp.~9--13; \pbrtsec{3.5}; \texttt{shape.py:253, 262}. \\
+Luz de área, amostragem do emissor, penumbra e emissor visível & \texttt{AreaLight.sample\_radiance()}, \texttt{AreaLight.radiance()}, \texttt{EmissiveMaterial.eval()} & Slides 05, pp.~14--23; \pbrtsec{12.4}; \texttt{light.py:80, 135, 195}; \texttt{material.py:37, 50}. \\
+Caixa, AABB e método de slabs & \texttt{Box.intersect()}, \texttt{AABB.intersects()} & Slides 05, pp.~24--25; \pbrtsec{3.7}; \texttt{shape.py:74, 88}; \texttt{triangle\_bvh.py:50, 65}. \\
 Traçador recursivo com profundidade finita & \texttt{Scene.can\_spawn\_ray()}, \texttt{Scene.trace\_ray()} & Slides 05, pp.~26--35; \texttt{scene.py:59, 137}. \\
-Reflexão especular com Fresnel-Schlick & \texttt{ReflectiveMaterial.eval()} & Slides 05, pp.~26--28; PBRT 4e, cap.~9.3; \texttt{material.py:118, 136}. \\
-Refração dielétrica, TIR e Beer-Lambert & \texttt{TransparentMaterial.eval()}, \texttt{shadow\_transmittance()} & Slides 05, pp.~29--35; PBRT 4e, caps.~9.5 e 11.2; \texttt{material.py:176, 206, 227}. \\
+Reflexão especular com Fresnel-Schlick & \texttt{ReflectiveMaterial.eval()} & Slides 05, pp.~26--28; \pbrtsec{9.3}; \texttt{material.py:118, 136}. \\
+Refração dielétrica, TIR e Beer-Lambert & \texttt{TransparentMaterial.eval()}, \texttt{shadow\_transmittance()} & Slides 05, pp.~29--35; \pbrtsecpair{9.5}{11.2}; \texttt{material.py:176, 206, 227}. \\
 Transmitância acumulada em raios de sombra & \texttt{Scene.transmittance()} e delegação para \texttt{shadow\_transmittance()} & Slides 05, pp.~33--35; \texttt{scene.py:66}; \texttt{material.py:30, 61, 206}. \\
 \end{tblr}
 \end{table*}
@@ -602,7 +625,7 @@ Conceito de referência & Evidência principal & Nota \\
 Triângulo como primitiva elementar e normal orientada & \texttt{Triangle}, vetores de aresta \texttt{e1}/\texttt{e2}, normal geométrica & Slides 06, pp.~3--4; \texttt{shape.py:144}. \\
 Interseção raio-triângulo por Möller--Trumbore & \texttt{Triangle.intersect()} & Slides 06, pp.~5--12; \texttt{shape.py:158}. \\
 Malha triangulada integrada ao pipeline geral & \texttt{TriangleMesh}, \texttt{TriangleMesh.intersect()}, \texttt{Scene.compute\_intersection()} & Slides 06, pp.~13--14; \texttt{shape.py:188, 241}; \texttt{scene.py:33}. \\
-BVH local para malhas trianguladas & \texttt{TriangleBVH}, \texttt{TriangleBVHNode.intersect()}, \texttt{TriangleBVH.\_build()} & Slides 06, pp.~22--36; PBRT 4e, cap.~7.3; \texttt{triangle\_bvh.py:104, 115, 146, 160, 198}. \\
+BVH local para malhas trianguladas & \texttt{TriangleBVH}, \texttt{TriangleBVHNode.intersect()}, \texttt{TriangleBVH.\_build()} & Slides 06, pp.~22--36; \pbrtsec{7.3}; \texttt{triangle\_bvh.py:104, 115, 146, 160, 198}. \\
 AABB como volume de contenção & \texttt{AABB}, \texttt{AABB.intersects()} & Slides 06, pp.~22--36; \texttt{triangle\_bvh.py:50, 65}. \\
 Percurso sequencial no topo da cena & \texttt{Scene.compute\_intersection()} como evidência da ausência de agregador global & Slides 06, pp.~22--36; \texttt{scene.py:33}. \\
 \end{tblr}
