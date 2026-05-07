@@ -13,7 +13,19 @@
 
 \setcitestyle{square}
 \captionsetup[figure]{hypcap=false}
-\newcommand{\slidescite}[2]{\citep[pp.~#2]{#1}}
+\newcommand{\DeclareSlideURL}[2]{\expandafter\def\csname slideurl@#1\endcsname{#2}}
+\newcommand{\slideurl}[1]{%
+    \ifcsname slideurl@#1\endcsname
+        \csname slideurl@#1\endcsname
+    \else
+        #1
+    \fi
+}
+\DeclareSlideURL{inf2608slides04}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_raios/4.tracado_de_raios.pdf}
+\DeclareSlideURL{inf2608slides05}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_raios/5.tracado_de_raios2.pdf}
+\DeclareSlideURL{inf2608slides06}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_raios/6.estrutura_aceleracao.pdf}
+\newcommand{\slidescite}[2]{\citep[\href{\slideurl{#1}}{pp.~#2}]{#1}}
+\newcommand{\slidesref}[3]{\href{\slideurl{#1}}{Slides #2}, pp.~#3}
 \newcommand{\pbrtcontentsurl}{https://pbr-book.org/4ed/contents.html}
 \newcommand{\DeclarePBRTSectionURL}[2]{\expandafter\def\csname pbrturl@#1\endcsname{#2}}
 \newcommand{\pbrtsectionurl}[1]{%
@@ -572,12 +584,12 @@ rows={valign=t},
 cells={font=\small}
 }
 Conceito de referência & Evidência principal & Nota \\
-Raio paramétrico, visibilidade e registro de hit & \texttt{Ray}, \texttt{Hit}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & Slides 04, pp.~7--9; \pbrtsecpair{1.2}{3.5}; \ghsrclines{hit.py}{11,25}; \ghsrclines{scene.py}{33,137}. \\
-Interseções raio-plano e raio-esfera & \texttt{Sphere.intersect()}, \texttt{Plane.intersect()}, deslocamento por \(\varepsilon\) em \texttt{offset\_point()} & Slides 04, pp.~10--18; \ghsrclines{shape.py}{17,23,54,60}; \ghsrclines{scene.py}{50}. \\
-Câmera pinhole, filme e geração de raios primários & \texttt{Camera.generate\_ray()}, \texttt{Film.get\_sample()}, \texttt{Film.get\_samples\_for\_pixel()}, \texttt{Film.render()} & Slides 04, pp.~19--39; \pbrtsec{5.2}; \ghsrclines{camera.py}{6,28}; \ghsrclines{film.py}{74,98,104,156}. \\
-Modelo local de Phong, ambiente e sombras diretas & \texttt{PhongMaterial.direct\_lighting()}, \texttt{PhongMaterial.eval()}, \texttt{PointLight.radiance()}, \texttt{Scene.transmittance()} & Slides 04, pp.~40--55; \ghsrclines{material.py}{70,79,106}; \ghsrclines{light.py}{51,55}; \ghsrclines{scene.py}{66}. \\
-Convenção simplificada para fonte pontual & \texttt{PointLight.radiance()} sem fator explícito de \(1/r^2\) & Slides 04, pp.~40--55; escolha didática coerente com o enunciado; \ghsrclines{light.py}{51,55}. \\
-Pipeline câmera--interseção--material & \texttt{Film.render()}, \texttt{Camera.generate\_ray()}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & Slides 04, pp.~44--55; \ghsrclines{film.py}{156}; \ghsrclines{camera.py}{28}; \ghsrclines{scene.py}{33,137}. \\
+Raio paramétrico, visibilidade e registro de hit & \texttt{Ray}, \texttt{Hit}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & \slidesref{inf2608slides04}{04}{7--9}; \pbrtsecpair{1.2}{3.5}; \ghsrclines{hit.py}{11,25}; \ghsrclines{scene.py}{33,137}. \\
+Interseções raio-plano e raio-esfera & \texttt{Sphere.intersect()}, \texttt{Plane.intersect()}, deslocamento por \(\varepsilon\) em \texttt{offset\_point()} & \slidesref{inf2608slides04}{04}{10--18}; \ghsrclines{shape.py}{17,23,54,60}; \ghsrclines{scene.py}{50}. \\
+Câmera pinhole, filme e geração de raios primários & \texttt{Camera.generate\_ray()}, \texttt{Film.get\_sample()}, \texttt{Film.get\_samples\_for\_pixel()}, \texttt{Film.render()} & \slidesref{inf2608slides04}{04}{19--39}; \pbrtsec{5.2}; \ghsrclines{camera.py}{6,28}; \ghsrclines{film.py}{74,98,104,156}. \\
+Modelo local de Phong, ambiente e sombras diretas & \texttt{PhongMaterial.direct\_lighting()}, \texttt{PhongMaterial.eval()}, \texttt{PointLight.radiance()}, \texttt{Scene.transmittance()} & \slidesref{inf2608slides04}{04}{40--55}; \ghsrclines{material.py}{70,79,106}; \ghsrclines{light.py}{51,55}; \ghsrclines{scene.py}{66}. \\
+Convenção simplificada para fonte pontual & \texttt{PointLight.radiance()} sem fator explícito de \(1/r^2\) & \slidesref{inf2608slides04}{04}{40--55}; escolha didática coerente com o enunciado; \ghsrclines{light.py}{51,55}. \\
+Pipeline câmera--interseção--material & \texttt{Film.render()}, \texttt{Camera.generate\_ray()}, \texttt{Scene.compute\_intersection()}, \texttt{Scene.trace\_ray()} & \slidesref{inf2608slides04}{04}{44--55}; \ghsrclines{film.py}{156}; \ghsrclines{camera.py}{28}; \ghsrclines{scene.py}{33,137}. \\
 \end{tblr}
 \end{table*}
 
@@ -594,14 +606,14 @@ rows={valign=t},
 cells={font=\small}
 }
 Conceito de referência & Evidência principal & Nota \\
-Antialiasing por múltiplas amostras no pixel & \texttt{uniform\_samples\_2d()}, \texttt{stratified\_grid\_samples\_2d()}, \texttt{Film.get\_samples\_for\_pixel()} & Slides 05, pp.~4--8; \pbrtsecpair{8.1}{8.5}; \ghsrclines{sampling.py}{15,27,43}; \ghsrclines{film.py}{104,156}. \\
-Instanciação afim e transformação correta de normais & \texttt{Instance.intersect()} com uso de inversa e inversa transposta & Slides 05, pp.~9--13; \pbrtsec{3.5}; \ghsrclines{shape.py}{253,262}. \\
-Luz de área, amostragem do emissor, penumbra e emissor visível & \texttt{AreaLight.sample\_radiance()}, \texttt{AreaLight.radiance()}, \texttt{EmissiveMaterial.eval()} & Slides 05, pp.~14--23; \pbrtsec{12.4}; \ghsrclines{light.py}{80,135,195}; \ghsrclines{material.py}{37,50}. \\
-Caixa, AABB e método de slabs & \texttt{Box.intersect()}, \texttt{AABB.intersects()} & Slides 05, pp.~24--25; \pbrtsec{3.7}; \ghsrclines{shape.py}{74,88}; \ghsrclines{triangle_bvh.py}{50,65}. \\
-Traçador recursivo com profundidade finita & \texttt{Scene.can\_spawn\_ray()}, \texttt{Scene.trace\_ray()} & Slides 05, pp.~26--35; \ghsrclines{scene.py}{59,137}. \\
-Reflexão especular com Fresnel-Schlick & \texttt{ReflectiveMaterial.eval()} & Slides 05, pp.~26--28; \pbrtsec{9.3}; \ghsrclines{material.py}{118,136}. \\
-Refração dielétrica, TIR e Beer-Lambert & \texttt{TransparentMaterial.eval()}, \texttt{shadow\_transmittance()} & Slides 05, pp.~29--35; \pbrtsecpair{9.5}{11.2}; \ghsrclines{material.py}{176,206,227}. \\
-Transmitância acumulada em raios de sombra & \texttt{Scene.transmittance()} e delegação para \texttt{shadow\_transmittance()} & Slides 05, pp.~33--35; \ghsrclines{scene.py}{66}; \ghsrclines{material.py}{30,61,206}. \\
+Antialiasing por múltiplas amostras no pixel & \texttt{uniform\_samples\_2d()}, \texttt{stratified\_grid\_samples\_2d()}, \texttt{Film.get\_samples\_for\_pixel()} & \slidesref{inf2608slides05}{05}{4--8}; \pbrtsecpair{8.1}{8.5}; \ghsrclines{sampling.py}{15,27,43}; \ghsrclines{film.py}{104,156}. \\
+Instanciação afim e transformação correta de normais & \texttt{Instance.intersect()} com uso de inversa e inversa transposta & \slidesref{inf2608slides05}{05}{9--13}; \pbrtsec{3.5}; \ghsrclines{shape.py}{253,262}. \\
+Luz de área, amostragem do emissor, penumbra e emissor visível & \texttt{AreaLight.sample\_radiance()}, \texttt{AreaLight.radiance()}, \texttt{EmissiveMaterial.eval()} & \slidesref{inf2608slides05}{05}{14--23}; \pbrtsec{12.4}; \ghsrclines{light.py}{80,135,195}; \ghsrclines{material.py}{37,50}. \\
+Caixa, AABB e método de slabs & \texttt{Box.intersect()}, \texttt{AABB.intersects()} & \slidesref{inf2608slides05}{05}{24--25}; \pbrtsec{3.7}; \ghsrclines{shape.py}{74,88}; \ghsrclines{triangle_bvh.py}{50,65}. \\
+Traçador recursivo com profundidade finita & \texttt{Scene.can\_spawn\_ray()}, \texttt{Scene.trace\_ray()} & \slidesref{inf2608slides05}{05}{26--35}; \ghsrclines{scene.py}{59,137}. \\
+Reflexão especular com Fresnel-Schlick & \texttt{ReflectiveMaterial.eval()} & \slidesref{inf2608slides05}{05}{26--28}; \pbrtsec{9.3}; \ghsrclines{material.py}{118,136}. \\
+Refração dielétrica, TIR e Beer-Lambert & \texttt{TransparentMaterial.eval()}, \texttt{shadow\_transmittance()} & \slidesref{inf2608slides05}{05}{29--35}; \pbrtsecpair{9.5}{11.2}; \ghsrclines{material.py}{176,206,227}. \\
+Transmitância acumulada em raios de sombra & \texttt{Scene.transmittance()} e delegação para \texttt{shadow\_transmittance()} & \slidesref{inf2608slides05}{05}{33--35}; \ghsrclines{scene.py}{66}; \ghsrclines{material.py}{30,61,206}. \\
 \end{tblr}
 \end{table*}
 
@@ -637,12 +649,12 @@ rows={valign=t},
 cells={font=\small}
 }
 Conceito de referência & Evidência principal & Nota \\
-Triângulo como primitiva elementar e normal orientada & \texttt{Triangle}, vetores de aresta \texttt{e1}/\texttt{e2}, normal geométrica & Slides 06, pp.~3--4; \ghsrclines{shape.py}{144}. \\
-Interseção raio-triângulo por Möller--Trumbore & \texttt{Triangle.intersect()} & Slides 06, pp.~5--12; \ghsrclines{shape.py}{158}. \\
-Malha triangulada integrada ao pipeline geral & \texttt{TriangleMesh}, \texttt{TriangleMesh.intersect()}, \texttt{Scene.compute\_intersection()} & Slides 06, pp.~13--14; \ghsrclines{shape.py}{188,241}; \ghsrclines{scene.py}{33}. \\
-BVH local para malhas trianguladas & \texttt{TriangleBVH}, \texttt{TriangleBVHNode.intersect()}, \texttt{TriangleBVH.\_build()} & Slides 06, pp.~22--36; \pbrtsec{7.3}; \ghsrclines{triangle_bvh.py}{104,115,146,160,198}. \\
-AABB como volume de contenção & \texttt{AABB}, \texttt{AABB.intersects()} & Slides 06, pp.~22--36; \ghsrclines{triangle_bvh.py}{50,65}. \\
-Percurso sequencial no topo da cena & \texttt{Scene.compute\_intersection()} como evidência da ausência de agregador global & Slides 06, pp.~22--36; \ghsrclines{scene.py}{33}. \\
+Triângulo como primitiva elementar e normal orientada & \texttt{Triangle}, vetores de aresta \texttt{e1}/\texttt{e2}, normal geométrica & \slidesref{inf2608slides06}{06}{3--4}; \ghsrclines{shape.py}{144}. \\
+Interseção raio-triângulo por Möller--Trumbore & \texttt{Triangle.intersect()} & \slidesref{inf2608slides06}{06}{5--12}; \ghsrclines{shape.py}{158}. \\
+Malha triangulada integrada ao pipeline geral & \texttt{TriangleMesh}, \texttt{TriangleMesh.intersect()}, \texttt{Scene.compute\_intersection()} & \slidesref{inf2608slides06}{06}{13--14}; \ghsrclines{shape.py}{188,241}; \ghsrclines{scene.py}{33}. \\
+BVH local para malhas trianguladas & \texttt{TriangleBVH}, \texttt{TriangleBVHNode.intersect()}, \texttt{TriangleBVH.\_build()} & \slidesref{inf2608slides06}{06}{22--36}; \pbrtsec{7.3}; \ghsrclines{triangle_bvh.py}{104,115,146,160,198}. \\
+AABB como volume de contenção & \texttt{AABB}, \texttt{AABB.intersects()} & \slidesref{inf2608slides06}{06}{22--36}; \ghsrclines{triangle_bvh.py}{50,65}. \\
+Percurso sequencial no topo da cena & \texttt{Scene.compute\_intersection()} como evidência da ausência de agregador global & \slidesref{inf2608slides06}{06}{22--36}; \ghsrclines{scene.py}{33}. \\
 \end{tblr}
 \end{table*}
 
