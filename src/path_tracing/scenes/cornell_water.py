@@ -16,18 +16,22 @@ from ..bsdf.dielectric import DielectricBSDF
 from ..lights.area_rect import RectAreaLight
 
 
-def build_proj2_cornell_water_scene() -> tuple[Scene, Camera]:
+def build_proj2_cornell_water_scene(absorption: glm.vec3 | None = None) -> tuple[Scene, Camera]:
   """Constrói Cornell Box com cubo de água (IOR=1.33).
-  
+
   Geometria:
   - Cornell Box padrão com paredes em Lambertian
   - Luz: RectAreaLight 3×3 no teto
   - Objeto: cubo de água (1.0×1.0×1.0) no piso, centrado em x,z
-  
+
   Validação:
   - IOR=1.33 mais próximo da realidade que vidro (1.5)
   - Refração notavelmente diferente do vidro
   - Reflexão Fresnel menos pronunciada em ângulos normais
+
+  Args:
+    absorption: coeficiente de absorção Beer-Lambert σ (RGB). None/0 = incolor.
+      Ex.: glm.vec3(0.30, 0.05, 0.10) absorve mais o vermelho → tom azul-esverdeado.
   """
   scene = Scene(
     ambient_light=glm.vec3(0.0),
@@ -66,7 +70,7 @@ def build_proj2_cornell_water_scene() -> tuple[Scene, Camera]:
   ))
 
   # === CUBO DE ÁGUA ===
-  water_bsdf = DielectricBSDF(ior=1.33, absorption=None)
+  water_bsdf = DielectricBSDF(ior=1.33, absorption=absorption)
   water_cube = Box(
     p_min=glm.vec3(2.275, 0.00, 2.275),  # p_min no piso
     p_max=glm.vec3(3.275, 1.00, 3.275),  # cubo 1.0×1.0×1.0
