@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime
 from time import perf_counter
@@ -105,6 +106,23 @@ class Render:
       'height': height,
     }
     self.last_result = result
+
+    # Escrever properties.json com parâmetros do render
+    props_json = paths['properties_json_path']
+    props_md = paths['properties_md_path']
+    serializable = {k: v for k, v in result.items() if isinstance(v, (str, int, float, bool, type(None)))}
+    with open(props_json, 'w', encoding='utf-8') as f:
+      json.dump(serializable, f, indent=2, ensure_ascii=False)
+
+    # Escrever properties.md com imagem e tabela
+    img_rel = os.path.basename(paths['img_path'])
+    with open(props_md, 'w', encoding='utf-8') as f:
+      f.write(f'# Render: {name}\n\n')
+      f.write(f'![]({img_rel})\n\n')
+      f.write('| Parâmetro | Valor |\n|---|---|\n')
+      for k, v in serializable.items():
+        f.write(f'| `{k}` | {v} |\n')
+
     return result
 
   def render(self,
