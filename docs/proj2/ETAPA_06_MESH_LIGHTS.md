@@ -23,20 +23,29 @@ class TriangleMeshLight(Light):
     # - Permite seleção de triângulo proporcional à sua área
 
   def sample_Li(self, ref_point, u):
-    # 1. Seleciona triângulo via u.x (usando CDF)
-    # 2. Amostra ponto uniforme no triângulo via barycentric coords (u.y)
+    # 1. Seleciona triângulo via u.x (CDF por área), guardando o limite do bucket
+    # 2. Remapeia u.x dentro do bucket -> u1 fresco; ponto uniforme via
+    #    uniform_triangle(u1, u.y)  (helper compartilhado em sampling.py)
     # 3. Retorna: wi, Li (radiância), pdf_solid_angle
 
   def pdf_Li(self, ref_point, wi):
-    # Intersection ray-triangle (Möller-Trumbore)
-    # Retorna: pdf_solid_angle para MIS
+    # Intersection ray-triangle (Möller-Trumbore), pulando faces de verso
+    # (emissão unilateral). Retorna: pdf_solid_angle para MIS
 ```
+
+> ⚠️ **Correção de bug:** a versão anterior usava **apenas `u.y`** para as duas
+> coordenadas baricêntricas, colapsando as amostras numa curva 1D dentro do triângulo
+> (não uniforme por área — violava o requisito do enunciado). A correção usa
+> `uniform_triangle(u1, u.y)` com `u1` derivado do remapeamento de `u.x` (duas dimensões
+> independentes). Teste unitário confirma cobertura 2D (std ≈ 0.23 em x e y; centróide
+> ≈ (1/3, 1/3) para o triângulo de referência).
 
 **Características**:
 
 - **Amostragem por Área**: CDF precomputada para seleção de triângulo proporcional à área
-- **Barycentric Sampling**: uniform sampling dentro do triângulo
+- **Barycentric Sampling**: uniforme via `uniform_triangle` (b0=1−√u1, b1=√u1·(1−u2), b2=√u1·u2)
 - **Jacobian Conversion**: pdf_area → pdf_solid_angle
+- **Emissão unilateral**: `pdf_Li` retorna 0 para faces de verso (consistente com `sample_Li`)
 - **MIS Compatible**: retorna pdf_solid_angle para weighting em MIS
 
 #### 2. Cena Cornell Box com Mesh Light
@@ -46,15 +55,21 @@ class TriangleMeshLight(Light):
 Geometria:
 
 - Cornell Box padrão (idêntico a cornell_basic)
-- Luz: **pirâmide com 6 triângulos** (4 laterais + 2 base)
-  - Base: quadrado 3×3 em y=5.50 (idêntico ao RectAreaLight)
-  - Ápice: y=5.60 (0.10 acima da base)
+- Luz: **quad plano com 2 triângulos coplanares**, normal apontando **para baixo (−y)**
+  - Quadrado 3×3 em y=5.50 (mesma área/posição do RectAreaLight)
+  - Ordem dos vértices escolhida para `cross(e1,e2) = (0,−9,0)` → emite para a sala
 - Le = (7.0, 7.0, 7.0) — mesmo que RectAreaLight para convergência
+
+> ⚠️ **Correção de bug:** a versão anterior usava uma **pirâmide** com base voltada para
+> **cima** (+y) e laterais para os lados, de modo que a maioria das amostras caía no lado
+> não-emissor (`cos_at_light ≤ 0`, rejeitada) — a cena ficava subiluminada. O quad plano
+> voltado para baixo ilumina corretamente e mantém o requisito "poliedro/malha de
+> triângulos com amostras uniformes de área".
 
 **Validação**:
 
-- Renders com MIS devem convergir para o mesmo valor que cornell_basic com mesmo SPP/seed
-- Nenhuma diferença visual em alta SPP (ambas as representações convergem para a verdade)
+- Renders com MIS convergem para o mesmo valor que cornell_basic com mesmo SPP/seed.
+- Teste end-to-end: média da imagem > 0 e em faixa de brilho saudável (não mais subiluminada).
 
 #### 3. CLI Script
 
