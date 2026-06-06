@@ -15,6 +15,7 @@ from ..shape import Box, Sphere
 from ..bsdf.lambertian import LambertianBSDF
 from ..bsdf.emissive import EmissiveBSDF
 from ..lights.area_rect import RectAreaLight
+from ..lights.area_mesh import TriangleMeshLight
 
 
 def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
@@ -88,3 +89,12 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
   )
 
   return scene, camera
+
+
+# Re-export cornell_mesh_light scene builder
+from .cornell_mesh_light import build_proj2_cornell_mesh_light_scene
+
+__all__ = [
+  'build_proj2_cornell_basic_scene',
+  'build_proj2_cornell_mesh_light_scene',
+]
