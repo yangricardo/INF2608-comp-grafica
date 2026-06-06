@@ -153,12 +153,19 @@ class Film:
 
     return samples
   
-  def render(self, scene: Scene, camera: Camera, filename: str, gamma_fix: bool = False) -> None:
+  def render(self, scene: Scene, camera: Camera, filename: str, gamma_fix: bool = False, integrator=None) -> None:
     # Slides 4-5: percorre todos os pixels, gera um raio por amostra subpixel e
     # estima a cor média do pixel por média aritmética. Quando há uma única
     # amostra central, o comportamento recai no pipeline básico; com múltiplas
     # amostras, entra a aproximação Monte Carlo do anti-aliasing com
     # c(i,j) = (1/N) * sum_k trace_ray(ray_k).
+    # 
+    # Com integrador (Etapa 02+): usa integrador.Li() para path tracing.
+    # Sem integrador: usa scene.trace_ray() (compatibilidade Projeto 1).
+    
+    import sys
+    use_integrator = integrator is not None
+    
     for j in range(self.height):
       for i in range(self.width):
         # Para cada pixel, gera uma lista de amostras subpixel.
@@ -167,12 +174,29 @@ class Film:
         for xn, yn in samples:
           # Gera o raio primário para a amostra atual (Slide 4, p. 29)
           ray = camera.generate_ray(xn, yn)
-          color = scene.trace_ray(ray)
+          
+          if use_integrator:
+            # Etapa 02+: path tracing via integrador
+            # Ref: PBRT 4e §13; Slide 8 Traçado de Caminhos
+            from .integrators.base import Sampler
+            sampler = Sampler(seed=self.rng.randint(0, 2**31 - 1))
+            color = integrator.Li(ray, scene, sampler, depth=1)
+          else:
+            # Compatibilidade: ray tracing recursivo (Projeto 1)
+            color = scene.trace_ray(ray)
+          
           accum += color
+        
         # Calcula a média Monte Carlo das amostras para o pixel
         final_color = accum / float(len(samples))
         # Armazena a cor no buffer (com clamp interno em set_pixel)
         self.set_pixel(i, j, final_color)
+      
+      # Progresso (a cada linha renderizada)
+      progress = (j + 1) / self.height * 100
+      if (j + 1) % 50 == 0 or j == self.height - 1:
+        print(f"  Renderização: {progress:.1f}%", file=sys.stderr)
+    
     # Correção gama opcional para aproximar a resposta visual exibida na tela.
     if gamma_fix:
       img_data = np.power(self.image, 1/2.2)
