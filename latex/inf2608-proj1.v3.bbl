@@ -28,6 +28,6 @@ Miranda, Y. R.~B. (2026).
 Pharr, M., Jakob, W., and Humphreys, G. (2023).
 \newblock {\em Physically Based Rendering: From Theory to Implementation}.
 \newblock MIT Press, 4 edition.
-\newblock Online edition: \url{https://pbr-book.org/4ed/contents}. Contém capítulos sobre Integração Monte Carlo (\S2), Geometria (\S3), Shapes (\S6), Reflection Models (\S9), Light Sources (\S12), Light Transport (\S13), e Appendices (\SA).
+\newblock Online edition: \url{https://pbr-book.org/4ed/contents}. Contém capítulos sobre Integração Monte Carlo (\S2), Geometria (\S3), Shapes (\S6), Reflection Models (\S9), Light Sources (\S12), Light Transport (\S13), e Appendices (\S{}A).
 
 \end{thebibliography}

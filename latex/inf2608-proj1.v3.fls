@@ -307,8 +307,17 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm
+INPUT ./inf2608-proj1.v3.aux
+INPUT ./inf2608-proj1.v3.aux
+INPUT inf2608-proj1.v3.aux
 OUTPUT inf2608-proj1.v3.aux
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
+INPUT ./inf2608-proj1.v3.out
+INPUT ./inf2608-proj1.v3.out
+INPUT inf2608-proj1.v3.out
+INPUT inf2608-proj1.v3.out
+INPUT ./inf2608-proj1.v3.out
+INPUT ./inf2608-proj1.v3.out
 OUTPUT inf2608-proj1.v3.out
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
