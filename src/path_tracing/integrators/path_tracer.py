@@ -158,8 +158,16 @@ class PathIntegrator(Integrator):
           shadow_ray = type(current_ray)(shadow_orig, wi_nee)
           shadow_hit = scene.compute_intersection(shadow_ray)
           dist_nee = sample['distance']
+          # Se existe hit e é mais perto que a luz, é ocluído
+          # EXCETO se o hit é EmissiveBSDF (o painel de luz, não um oclusor)
           if shadow_hit is not None and shadow_hit.t < dist_nee - 1e-3:
-            continue  # Ocluído
+            # Verificar se hit é emissivo (luz panel é transparente para NEE)
+            is_light_panel = (
+              shadow_hit.material is not None
+              and isinstance(shadow_hit.material, EmissiveBSDF)
+            )
+            if not is_light_panel:
+              continue  # Ocluído por objeto não-emissivo
           # Avaliar BSDF em direção da luz (frame local)
           wi_nee_local = onb.global_to_local(wi_nee)
           cos_nee = max(0.0, wi_nee_local.z)
