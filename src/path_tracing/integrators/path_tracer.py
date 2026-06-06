@@ -25,6 +25,7 @@ from .base import Integrator, Sampler
 from ..onb import ONB
 from ..bsdf.lambertian import LambertianBSDF
 from ..bsdf.emissive import EmissiveBSDF
+from ..mis import power_heuristic
 
 
 class PathIntegrator(Integrator):
@@ -174,7 +175,15 @@ class PathIntegrator(Integrator):
           if cos_nee <= 0.0:
             continue
           f_nee: glm.vec3 = bsdf.eval(wo_local, wi_nee_local)  # type: ignore[call-arg]
-          L += beta * f_nee * Li_nee * cos_nee / pdf_nee
+          
+          # MIS weight (Etapa 04)
+          w_nee = 1.0
+          if self.mode == 'mis':
+            # Calcular PDF dessa direção via BSDF para MIS
+            pdf_bsdf_for_nee = bsdf.pdf(wo_local, wi_nee_local)  # type: ignore[call-arg]
+            w_nee = power_heuristic(1, pdf_nee, 1, pdf_bsdf_for_nee, beta=2.0)
+          
+          L += beta * f_nee * Li_nee * cos_nee / pdf_nee * w_nee
 
       # Amostra BSDF
       u_sample = (self.rng.random(), self.rng.random())
@@ -184,7 +193,7 @@ class PathIntegrator(Integrator):
         break
       
       wi_local = sample_result['wi']
-      pdf = sample_result['pdf']
+      pdf_bsdf = sample_result['pdf']
       f = sample_result['f']
       
       # Verificar cosseno em frame local (normal = z)
@@ -193,9 +202,22 @@ class PathIntegrator(Integrator):
         # Wi aponta para baixo; inválido
         break
       
-      # Acumular throughput
-      # β *= f * |cos θ_i| / pdf
-      beta *= f * cos_theta / pdf
+      # MIS weight (Etapa 04)
+      w_bsdf = 1.0
+      if self.mode == 'mis':
+        # Calcular PDF dessa direção via luz(es) para MIS
+        wi_bsdf_global = onb.local_to_global(wi_local)
+        pdf_light_for_bsdf = 0.0
+        lights = getattr(scene, 'lights', [])
+        for light in lights:
+          if not hasattr(light, 'pdf_Li'):
+            continue
+          pdf_light_for_bsdf += light.pdf_Li(hit.pos, wi_bsdf_global)
+        w_bsdf = power_heuristic(1, pdf_bsdf, 1, pdf_light_for_bsdf, beta=2.0)
+      
+      # Acumular throughput com weight MIS
+      # β *= f * |cos θ_i| / pdf * w_bsdf
+      beta *= f * cos_theta / pdf_bsdf * w_bsdf
       
       # Verificar se beta ficou muito pequeno (evita infinitos)
       if glm.length(beta) < 1e-6:
