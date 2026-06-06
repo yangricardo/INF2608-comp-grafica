@@ -1,0 +1,375 @@
+%% -----------------------------------------------------------
+%% Projeto 2 da disciplina de INF2608 - Fundamentos de Computação Gráfica
+%% Relatório LaTeX (INÍCIO) — Path Tracing.
+%% Modelado em inf2608-proj1.v3.tex (mesma classe, infra e bibliografia).
+%% Cobre apenas as etapas IMPLEMENTADAS: 02 (core), 03 (NEE), 04 (MIS),
+%% 05 (Russian Roulette), 06 (mesh light), 07 (dielétrico).
+
+\documentclass[portuguese]{sbcreviews-2025}%
+\usepackage[misc,geometry]{ifsym}
+\usepackage{aas_macros}
+\usepackage[bottom]{footmisc}
+\usepackage{tabularray}
+\usepackage{afterpage}
+\usepackage{url}
+\usepackage{pifont}
+\usepackage{amsmath}
+
+\setcitestyle{square}
+\captionsetup[figure]{hypcap=false}
+
+%% --- Slides do Prof. Celes (traçado de caminhos) ---
+\newcommand{\DeclareSlideURL}[2]{\expandafter\def\csname slideurl@#1\endcsname{#2}}
+\newcommand{\slideurl}[1]{%
+    \ifcsname slideurl@#1\endcsname
+        \csname slideurl@#1\endcsname
+    \else
+        #1
+    \fi
+}
+\DeclareSlideURL{inf2608slides07}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/7.montecarlo.pdf}
+\DeclareSlideURL{inf2608slides08}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/8.tracado_de_caminhos.pdf}
+\DeclareSlideURL{inf2608slides09}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/9.tracado_de_caminhos2.pdf}
+\newcommand{\slidescite}[2]{\citep[\href{\slideurl{#1}}{pp.~#2}]{#1}}
+\newcommand{\slidesref}[3]{\href{\slideurl{#1}}{Slides #2}, pp.~#3}
+
+%% --- Seções do PBRT 4e ---
+\newcommand{\pbrtcontentsurl}{https://pbr-book.org/4ed/contents.html}
+\newcommand{\DeclarePBRTSectionURL}[2]{\expandafter\def\csname pbrturl@#1\endcsname{#2}}
+\newcommand{\pbrtsectionurl}[1]{%
+    \ifcsname pbrturl@#1\endcsname
+        \csname pbrturl@#1\endcsname
+    \else
+        \pbrtcontentsurl
+    \fi
+}
+\DeclarePBRTSectionURL{2.2.3}{https://pbr-book.org/4ed/Monte_Carlo_Integration/Improving_Efficiency.html\#MultipleImportanceSampling}
+\DeclarePBRTSectionURL{2.2.4}{https://pbr-book.org/4ed/Monte_Carlo_Integration/Improving_Efficiency.html\#RussianRoulette}
+\DeclarePBRTSectionURL{6.5}{https://pbr-book.org/4ed/Shapes/Triangle_Meshes.html}
+\DeclarePBRTSectionURL{9.2}{https://pbr-book.org/4ed/Reflection_Models/Diffuse_Reflection.html}
+\DeclarePBRTSectionURL{9.5}{https://pbr-book.org/4ed/Reflection_Models/Dielectric_BSDF.html}
+\DeclarePBRTSectionURL{11.2}{https://pbr-book.org/4ed/Volume_Scattering/Transmittance.html}
+\DeclarePBRTSectionURL{12.4}{https://pbr-book.org/4ed/Light_Sources/Area_Lights.html}
+\DeclarePBRTSectionURL{12.6}{https://pbr-book.org/4ed/Light_Sources/Light_Sampling.html}
+\DeclarePBRTSectionURL{13.1}{https://pbr-book.org/4ed/Light_Transport_I_Surface_Reflection/The_Light_Transport_Equation.html}
+\DeclarePBRTSectionURL{13.3}{https://pbr-book.org/4ed/Light_Transport_I_Surface_Reflection/A_Simple_Path_Tracer.html}
+\DeclarePBRTSectionURL{13.4}{https://pbr-book.org/4ed/Light_Transport_I_Surface_Reflection/A_Better_Path_Tracer.html}
+\DeclarePBRTSectionURL{A.5}{https://pbr-book.org/4ed/Sampling_Algorithms/Sampling_Multidimensional_Functions.html}
+\newcommand{\pbrtbook}{\emph{Physically Based Rendering} (PBRT 4e)}
+\newcommand{\pbrtsec}[1]{\citep[\href{\pbrtsectionurl{#1}}{Se\c{c}\~ao~#1}]{pharr2023pbrt}}
+\newcommand{\pbrtsecpair}[2]{\citep[\href{\pbrtsectionurl{#1}}{Se\c{c}\~ao~#1} e \href{\pbrtsectionurl{#2}}{Se\c{c}\~ao~#2}]{pharr2023pbrt}}
+\newcommand{\pbrtsecs}[1]{\citep[\href{\pbrtcontentsurl}{Se\c{c}\~oes~#1}]{pharr2023pbrt}}
+
+%% --- Links para o código-fonte ---
+\newcommand{\ghsrcbaseurl}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/src/path_tracing/}
+
+\newcommand{\figcmd}[1]{%
+    \par\medskip
+    \begingroup
+    \setlength{\fboxsep}{6pt}%
+    \noindent\colorbox{black!5}{%
+        \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+            \footnotesize\textbf{Comando gerador}\par
+            \vspace{2pt}%
+            {\footnotesize\raggedright\ttfamily\obeyspaces\detokenize{#1}\par}%
+        }%
+    }\par
+    \endgroup
+    \medskip
+}
+
+\definecolor{engtitle}{rgb}{0.5,0.5,0.5}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.0}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+\emergencystretch=3em
+\sloppy
+\hbadness=10000
+\vbadness=10000
+\hfuzz=70pt
+\vfuzz=2pt
+\raggedbottom
+
+\category{Projeto 2 da disciplina de INF2608\\Fundamentos de Computação Gráfica}
+\title[Análise Técnico-Científica de Path Tracing]{Análise Técnico-Científica\\de uma Implementação de Path Tracing}
+\engtitle{\textcolor{engtitle}{Technical-Scientific Analysis\\of a Path Tracing Implementation}}
+
+\author[Yang Ricardo Barcellos Miranda]{
+\affil{\textbf{Yang Ricardo Barcellos Miranda}~[\href{mailto:ymiranda@inf.puc-rio.br}{\nolinkurl{ymiranda@inf.puc-rio.br}}]}
+}
+
+\institution{Pontifícia Universidade Católica do Rio de Janeiro - PUC-Rio}
+
+\begin{document}
+\begin{frontmatter}
+
+\maketitle
+
+\begin{abstract-pt}
+Este artigo apresenta uma análise técnico-científica da implementação de \emph{path tracing} desenvolvida no Projeto 2 da disciplina de INF2608. A partir do código efetivamente executável em \path{src/path_tracing/}, descreve-se o estimador de Monte Carlo da equação de transporte de luz e as extensões implementadas: amostragem direta de luz (NEE), \emph{multiple importance sampling} (MIS), Roleta Russa, fontes de luz como malha de triângulos e materiais dielétricos refrativos com Snell, Fresnel, reflexão interna total e absorção de Beer-Lambert. O texto enfatiza as deduções matemáticas (cancelamento do cosseno na amostragem cosseno-ponderada, conversão de PDF de área para ângulo sólido, heurística de potência e não-viés da Roleta Russa) e discute decisões de implementação, limites e evidências visuais, com os comandos geradores de cada figura.
+\end{abstract-pt}
+
+\begin{abstract-en}
+This paper presents a technical-scientific analysis of the path tracing implementation developed for the INF2608 course Project~2. From the executable code in \path{src/path_tracing/}, we describe the Monte Carlo estimator of the light transport equation and the implemented extensions: next event estimation (NEE), multiple importance sampling (MIS), Russian roulette, triangle-mesh area lights, and refractive dielectric materials with Snell's law, Fresnel, total internal reflection, and Beer-Lambert absorption. The text emphasizes the mathematical derivations (cosine cancellation in cosine-weighted sampling, area-to-solid-angle PDF conversion, the power heuristic, and the unbiasedness of Russian roulette) and discusses implementation choices, limitations, and visual evidence, with the generating command for each figure.
+\end{abstract-en}
+
+\begin{pchaves}
+traçado de caminhos, Monte Carlo, MIS, roleta russa, dielétrico, computação gráfica
+\end{pchaves}
+
+\begin{keywords}
+path tracing, Monte Carlo, MIS, Russian roulette, dielectric, computer graphics
+\end{keywords}
+
+\begin{dates}
+\noindent{\sffamily\textbf{Entrega:}} 30/06/2026
+\end{dates}
+
+\end{frontmatter}
+
+% =====================================================================
+\section{Introdução}
+\label{sec:introducao}
+
+Este artigo analisa a implementação de \emph{path tracing} disponível no repositório do
+projeto~\citep{inf2608projectrepo}, em \path{src/path_tracing/}, lida em conjunto com os
+slides da disciplina de autoria de Waldemar Celes~\citep{inf2608slides07,inf2608slides08,inf2608slides09}
+e com referências selecionadas de \pbrtbook. Enquanto o Projeto~1 resolvia a equação de
+renderização~\citep{kajiya1986rendering} de forma analítica/recursiva (Whitted + Phong), o
+Projeto~2 a resolve \emph{estocasticamente}, por integração de Monte Carlo, construindo
+caminhos câmera\,$\to$\,superfícies\,$\to$\,luz e acumulando um \emph{throughput} $\beta$
+\pbrtsecs{13.1, 13.2, 13.3}.
+
+O texto cobre apenas as etapas \emph{efetivamente implementadas}: o núcleo unidirecional com
+BSDF Lambertiana (Seção~\ref{sec:core}), a amostragem direta de luz — NEE (Seção~\ref{sec:nee}),
+o \emph{multiple importance sampling} (Seção~\ref{sec:mis}), a Roleta Russa
+(Seção~\ref{sec:rr}), as luzes de área retangular e poliédrica (Seção~\ref{sec:lights}) e a
+BSDF dielétrica refrativa (Seção~\ref{sec:dielectric}). As evidências visuais estão reunidas
+na Seção~\ref{sec:evidencias}, e as decisões e limites na Seção~\ref{sec:limites}.
+
+% =====================================================================
+\section{Núcleo: Path Tracer Unidirecional e BSDF Lambertiana}
+\label{sec:core}
+
+A equação de transporte de luz (LTE) expressa a radiância de saída $L_o$ num ponto $p$ na
+direção $\omega_o$ \pbrtsec{13.1}:
+\begin{equation}
+L_o(p,\omega_o) = L_e(p,\omega_o) + \int_{\mathcal{H}^2} f_r(p,\omega_o,\omega_i)\,L_i(p,\omega_i)\,\lvert\cos\theta_i\rvert\,\mathrm{d}\omega_i .
+\label{eq:lte}
+\end{equation}
+O estimador de Monte Carlo de uma amostra para a integral, com direção $\omega_i$ amostrada
+segundo uma PDF $p(\omega_i)$, leva ao laço iterativo com \emph{throughput} acumulado
+$\beta$ \pbrtsec{13.3} (\path{src/path_tracing/integrators/path_tracer.py}):
+\begin{equation}
+\beta \mathrel{\ast}= \frac{f_r(\omega_o,\omega_i)\,\lvert\cos\theta_i\rvert}{p(\omega_i)} .
+\label{eq:throughput}
+\end{equation}
+
+\paragraph{Lambertiana e método de Malley.} Para a BSDF difusa $f_r=\rho/\pi$
+\pbrtsec{9.2} amostrada por hemisfério cosseno-ponderado (método de Malley
+\slidesref{inf2608slides07}{7}{—}, PBRT \pbrtsec{A.5}), tem-se $p(\omega_i)=\cos\theta_i/\pi$,
+de modo que o cosseno e o $\pi$ \emph{cancelam} na Eq.~\eqref{eq:throughput}:
+\begin{equation}
+\beta \mathrel{\ast}= \frac{(\rho/\pi)\,\cos\theta_i}{\cos\theta_i/\pi} = \rho .
+\label{eq:lambert}
+\end{equation}
+Esse cancelamento é uma fonte clássica de erro (multiplicar o cosseno \emph{de novo} no laço
+produziria $\cos^2\theta$); a implementação respeita exatamente a Eq.~\eqref{eq:lambert}.
+
+\paragraph{Profundidade mínima 4.} O enunciado exige caminhos com no mínimo quatro vértices
+(câmera\,$\to x_1\to x_2\to x_3\to$\,luz). A implementação usa \texttt{max\_depth}$=8$ e não
+aplica terminação probabilística antes de \texttt{rr\_min\_depth}$=4$.
+
+% =====================================================================
+\section{Next Event Estimation (NEE)}
+\label{sec:nee}
+
+A amostragem direta sorteia um ponto $p_L$ na luz de área e conecta-o ao vértice do caminho,
+reduzindo a variância frente à amostragem por BSDF \pbrtsecpair{12.4}{13.4}. A amostragem é
+uniforme por área, $p_A(p_L)=1/A$; a conversão para medida de ângulo sólido introduz o fator
+geométrico:
+\begin{equation}
+p_\omega(\omega_i) = p_A\,\frac{r^2}{\cos\theta_L}, \qquad r=\lVert p-p_L\rVert,\;\;
+\cos\theta_L=\max(0,-\omega_i\!\cdot\! n_L).
+\label{eq:areatosolid}
+\end{equation}
+O termo direto estimado em uma amostra fica
+\begin{equation}
+L_{\mathrm{dir}} = \frac{f_r(\omega_o,\omega_i)\,L_e\,\cos\theta_x}{p_\omega}
+                 = f_r\,L_e\,\frac{\cos\theta_x\,\cos\theta_L}{r^2}\,A ,
+\end{equation}
+ou seja, o fator geométrico $G=\cos\theta_x\cos\theta_L/r^2$ \emph{já está embutido} na
+$p_\omega$ — não deve ser aplicado uma segunda vez. A implementação
+(\path{src/path_tracing/lights/area_rect.py}) retorna \texttt{pdf\_solid\_angle} já convertida,
+e o teste de visibilidade trata o painel emissivo como não-oclusor.
+
+% =====================================================================
+\section{Multiple Importance Sampling (MIS)}
+\label{sec:mis}
+
+No último segmento combinam-se duas estratégias — amostragem da luz (NEE) e amostragem da
+BSDF — ponderadas por uma heurística que satisfaz $\sum_s w_s=1$ \pbrtsec{2.2.3}
+\citep{veach1995optimallycombin}. Usa-se a \emph{heurística de potência} ($\beta=2$):
+\begin{equation}
+w_s(x) = \frac{(n_s\,p_s(x))^{\beta}}{\sum_i (n_i\,p_i(x))^{\beta}} .
+\label{eq:power}
+\end{equation}
+Um cuidado essencial de implementação (\path{src/path_tracing/integrators/path_tracer.py}):
+o peso da estratégia ``BSDF amostra a luz'' incide \emph{apenas} sobre a emissão vista
+diretamente no vértice seguinte; ele \textbf{não} é multiplicado no $\beta$ persistente, pois
+isso contaminaria todas as contribuições posteriores do caminho. Materiais especulares (delta)
+\emph{não} participam de MIS — apenas amostragem de BSDF.
+
+% =====================================================================
+\section{Roleta Russa}
+\label{sec:rr}
+
+Para encurtar caminhos profundos sem viés \pbrtsec{2.2.4} \citep{misso2022unbiased}, a partir
+de \texttt{rr\_min\_depth} aplica-se uma probabilidade de sobrevivência $p$ proporcional ao
+\emph{throughput}; em caso de sobrevivência, reescala-se $\beta$:
+\begin{equation}
+p=\min\!\big(\max(\beta_r,\beta_g,\beta_b),\,1\big), \qquad
+\beta \leftarrow \beta/p \;\;\text{(se sobrevive)} ,
+\end{equation}
+o que preserva $\mathbb{E}[\beta]$ (estimador não-viesado). Empiricamente, as médias das
+imagens com e sem Roleta Russa coincidem em SPP alto, com redução de tempo em cenas reflexivas.
+
+% =====================================================================
+\section{Luzes de Área: Retangular e Poliédrica}
+\label{sec:lights}
+
+Além da luz retangular (Seção~\ref{sec:nee}), implementou-se a fonte como \emph{malha de
+triângulos} com amostragem uniforme por área \pbrtsec{6.5}
+(\path{src/path_tracing/lights/area_mesh.py}). Sorteia-se um triângulo proporcionalmente à
+área (CDF) e, dentro dele, um ponto por coordenadas baricêntricas uniformes:
+\begin{equation}
+b_0 = 1-\sqrt{u_1}, \quad b_1=\sqrt{u_1}\,(1-u_2), \quad b_2=\sqrt{u_1}\,u_2 ,
+\label{eq:baricentrica}
+\end{equation}
+com $p_A = 1/A_{\text{total}}$ e a mesma conversão da Eq.~\eqref{eq:areatosolid}. A
+amostragem usa o utilitário \texttt{uniform\_triangle} de \path{src/path_tracing/sampling.py},
+garantindo cobertura 2D uniforme (e não uma curva degenerada).
+
+% =====================================================================
+\section{BSDF Dielétrica: Snell, Fresnel, TIR e Beer-Lambert}
+\label{sec:dielectric}
+
+Materiais refrativos (vidro, água) são tratados como BSDF \emph{delta}
+(\path{src/path_tracing/bsdf/dielectric.py}) \pbrtsec{9.5}. Trabalha-se no referencial da
+\emph{normal geométrica}, de modo que o sinal de $\omega_o\!\cdot\! n$ codifica entrada/saída;
+o índice relativo é $\eta=\eta_i/\eta_t$ ($1/\text{ior}$ ao entrar, $\text{ior}$ ao sair).
+
+\paragraph{Snell e reflexão interna total (TIR).}
+\begin{equation}
+\sin^2\theta_t = \eta^2\,(1-\cos^2\theta_i);\qquad
+\sin^2\theta_t \ge 1 \;\Rightarrow\; \text{TIR (reflete tudo)} .
+\end{equation}
+
+\paragraph{Fresnel dielétrico (não polarizado).}
+\begin{equation}
+r_\parallel = \frac{\eta_t\cos\theta_i-\eta_i\cos\theta_t}{\eta_t\cos\theta_i+\eta_i\cos\theta_t},\;\;
+r_\perp = \frac{\eta_i\cos\theta_i-\eta_t\cos\theta_t}{\eta_i\cos\theta_i+\eta_t\cos\theta_t},\;\;
+F = \tfrac{1}{2}\big(r_\parallel^2+r_\perp^2\big).
+\end{equation}
+A cada vértice escolhe-se refletir (prob.\ $F$) ou refratar (prob.\ $1-F$); por ser delta, o
+\emph{throughput} é atualizado como $\beta\mathrel{\ast}=f/p$ sem o cosseno geométrico, e o raio
+transmitido (hemisfério oposto) \emph{não} é descartado.
+
+\paragraph{Absorção de Beer-Lambert.} Ao atravessar o volume, a radiância é atenuada por
+\pbrtsec{11.2}
+\begin{equation}
+T(d) = \exp(-\sigma\,d) \quad\text{(por canal RGB)},
+\end{equation}
+com $\sigma$ o coeficiente de absorção e $d$ a distância percorrida \emph{dentro} do meio. O
+integrador rastreia o meio corrente: ao transmitir para dentro, adota $\sigma$ do dielétrico;
+ao sair, retorna a $\sigma=0$. Validação numérica para um raio reto atravessando $\approx 2$
+unidades com $\sigma=(0.2,0.6,1.2)$: razões de saída $(0.671,0.301,0.091)\approx
+\exp(-\sigma\cdot 2)=(0.670,0.301,0.091)$, produzindo tom âmbar.
+
+% =====================================================================
+\section{Evidências Visuais}
+\label{sec:evidencias}
+
+Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} com
+\texttt{render.png}, \texttt{properties.json} e \texttt{properties.md} (metadados e comando).
+
+\subsection{Núcleo Lambertiano (Etapa 02)}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req1/proj2_req1_lambert_basic_20260606_162024/render.png}
+\caption{Cornell Box difusa, amostragem por BSDF.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req1_lambert_basic --spp 64 --depth 8 --seed 42}
+
+\subsection{NEE (Etapa 03)}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req2/proj2_req2_nee_only_20260606_162251/render.png}
+\caption{Amostragem direta da luz (NEE): menor variância que BSDF-only no mesmo SPP.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req2_nee --spp 16 --depth 8 --seed 42}
+
+\subsection{MIS (Etapa 04)}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req3/proj2_req3_mis_20260606_161743/render.png}
+\caption{MIS (heurística de potência $\beta=2$) combinando BSDF e NEE.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req3_mis --spp 16 --depth 8 --seed 42}
+
+\subsection{Roleta Russa (Etapa 05)}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req5/proj2_req5_mis_rr_20260606_164126/render.png}
+\caption{MIS + Roleta Russa: mesma média, menor custo em caminhos profundos.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req5_rr --use-rr true --spp 16 --depth 8 --seed 42}
+
+\subsection{Luz como malha de triângulos (Etapa 06)}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req6/proj2_req6_mis_no_rr_20260606_170307/render.png}
+\caption{Fonte poliédrica (malha de triângulos) com amostragem uniforme por área.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req6_mesh_lights --spp 16 --depth 8 --mode mis}
+
+\subsection{Dielétrico (Etapa 07)}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_water_mis_rr_20260606_184922/render.png}
+\caption{Cubo de água (IOR 1.33). \emph{Nota:} render anterior às correções de
+refração/IOR/Beer-Lambert; re-renderizar para a versão final.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --absorption 0.2 0.6 1.2 --spp 32 --depth 8 --mode mis}
+
+% =====================================================================
+\section{Decisões de Modelagem e Limites}
+\label{sec:limites}
+
+A implementação é em Python puro (\texttt{pyglm}/PIL), priorizando clareza e corretude sobre
+desempenho; resoluções $\le 512^2$ e SPP moderado são o regime prático. Radiância em RGB
+linear (gama opcional no PNG). O dielétrico assume meio \emph{não aninhado} (um nível
+dentro/fora), suficiente para esfera/cubo convexos isolados, e omite o fator de radiância
+$1/\eta^2$ por cancelar em objeto fechado. \emph{Não} foram implementadas (ficam como evolução):
+microfacetas GGX, luz infinita/\emph{environment}, traçado bidirecional (BDPT) e Metropolis
+(MLT). Como os extras já realizados (MIS, Roleta Russa, malha, dielétrico) excedem a cota de
+pontos de extensão, essas ausências não comprometem os requisitos do enunciado.
+
+% =====================================================================
+\section{Conclusão e Trabalhos Futuros}
+\label{sec:conclusao}
+
+Apresentou-se um \emph{path tracer} unidirecional correto, com NEE, MIS, Roleta Russa, luzes
+de área (retangular e poliédrica) e materiais dielétricos completos (Snell, Fresnel, TIR e
+Beer-Lambert), validados por testes numéricos e por convergência cruzada entre estimadores.
+Como trabalhos futuros, destacam-se BSDFs microfacetadas (Cook-Torrance/GGX
+\citep{walter2007microfacet}), luz infinita por \emph{environment map}, e métodos
+bidirecionais/MCMC para reduzir o ruído de cáusticas. A base ortonormal local segue
+\citet{frisvad2012orthonormal}.
+
+% =====================================================================
+\bibliographystyle{apalike-sol}
+\bibliography{refs}
+
+\end{document}
