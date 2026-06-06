@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from pyglm import glm
 from .hit import Hit
-from .light import AmbientLight, Light
+from .light import AmbientLight
+from .lights import Light
 from .ray import Ray
 from .shape import Shape
 
