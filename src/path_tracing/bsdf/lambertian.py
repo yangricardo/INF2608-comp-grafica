@@ -40,7 +40,7 @@ class LambertianBSDF(BSDF):
     Ref: PBRT 4e §9.2, Eq. 9.1
     """
     # Ref: PBRT 4e §9.2 Diffuse Reflection
-    return self.rho / glm.pi
+    return self.rho / math.pi
   
   def sample(self, wo: glm.vec3, u: glm.vec2) -> dict:
     """Amostra hemisfério cosseno-ponderado via Malley.
@@ -53,7 +53,7 @@ class LambertianBSDF(BSDF):
     Ref: PBRT 4e §A.5 "Malley Method"; Slide 7
     """
     # Ref: PBRT 4e §A.5 Malley Method; Slide 7 "Método de Malley"
-    phi = 2.0 * glm.pi * u.x
+    phi = 2.0 * math.pi * u.x
     r = glm.sqrt(u.y)
     
     x = r * glm.cos(phi)
@@ -78,4 +78,4 @@ class LambertianBSDF(BSDF):
     # Ref: PBRT 4e §9.2 Diffuse Reflection, Eq. 9.2
     # Frame local: normal = z, portanto cosθ_i = wi.z
     cos_theta = glm.max(0.0, wi.z)
-    return cos_theta / glm.pi
+    return cos_theta / math.pi
