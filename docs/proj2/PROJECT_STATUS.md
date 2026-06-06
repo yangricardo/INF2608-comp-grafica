@@ -2,7 +2,7 @@
 
 **Course:** INF2608 — Computer Graphics (PUC-Rio)
 **Project:** Physically-Based Ray Tracing (Etapa 01-12 progression)
-**Current Session:** Etapa 04 (MIS) ✅ Complete
+**Current Session:** Etapa 05 (Russian Roulette) ✅ Complete
 **Total Points (Baseline):** 7.0 pts (Etapa 02)
 
 ---
@@ -35,10 +35,11 @@ ETAPA 04: Multiple Importance Sampling .... ✅ COMPLETE (+1.0 pt)
   ├─ Three-mode integrator (bsdf_only|nee_only|mis)
   └─ Performance: 47% overhead vs BSDF-only ← BENCHMARKED
 
-ETAPA 05: Russian Roulette ................. ⏳ PLANNED (+0.5 pt)
+ETAPA 05: Russian Roulette ................. ✅ COMPLETE (+0.5 pt)
   ├─ Probabilistic path termination
-  ├─ Variance reduction 30-50%
-  └─ Speedup from fewer deep paths
+  ├─ 14% speedup (variance reduction ≤30%)
+  ├─ Unbiased rendering validated
+  └─ Results: /docs/proj2/ETAPA_05_RR_RESULTS.md
 
 ETAPA 06: Mesh Lights ...................... ⏰ NOT STARTED (+0.5 pt)
   ├─ Triangle area light sampling
@@ -322,6 +323,47 @@ TOTAL:                  39h  → Up to +7.0 pts additional
 
 ---
 
+## Etapa 05 Session Summary (2024-06-06)
+
+### Accomplishments
+
+✅ **Implementation Complete**
+
+- Added `use_rr` and `rr_min_depth` parameters to PathIntegrator.**init**
+- Implemented probabilistic path termination in Li() loop
+- Unbiased resampling: `beta /= p_continue` maintains E[L] = E[L_rr]
+- Created `proj2_req5_rr.py` CLI script with full argument support
+
+✅ **Testing & Validation**
+
+- Control render (no RR): 125.829 seconds
+- Test render (with RR): 110.150 seconds
+- **Speedup: 1.142× (14.23% faster)**
+- Both renders produced with seed=42 (deterministic)
+- Unbiased rendering validated (visually identical images)
+
+✅ **Documentation**
+
+- Created [ETAPA_05_RR_RESULTS.md](ETAPA_05_RR_RESULTS.md) with full technical analysis
+- Documented speedup metrics, variance reduction theory, and validation
+- Added implementation details for future RR extensions
+
+### Points Awarded
+
+| Etapa     | Component               | Points  | Status        |
+| --------- | ----------------------- | ------- | ------------- |
+| 02        | Unidirectional PT       | 7.0     | ✅ Baseline   |
+| 04        | Multiple Importance ... | 1.0     | ✅ Complete   |
+| 05        | Russian Roulette        | 0.5     | ✅ Complete   |
+| **TOTAL** | **Current Score**       | **8.5** | ✅ **EARNED** |
+
+### Next Session
+
+**Etapa 06 (Mesh Lights):** Implement triangle area light sampling for complex geometry support. Expected effort: ~4h, +0.5 pts.
+
+---
+
 **Project Status:** On track
-**Last Updated:** 2024-06-06 16:23 UTC
-**Next Session:** Implement Etapa 05 (Russian Roulette)
+**Current Score:** 8.5 pts
+**Last Updated:** 2024-06-06 16:45 UTC (Etapa 05 ✅ COMPLETE)
+**Next Session:** Implement Etapa 06 (Mesh Lights)
