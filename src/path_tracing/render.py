@@ -50,7 +50,8 @@ class Render:
                   samples_per_pixel: int = 16,
                   sampling_mode: str = 'jittered',
                   seed: Optional[int] = None,
-                  gamma_fix: bool = False) -> dict:
+                  gamma_fix: bool = False,
+                  integrator=None) -> dict:
     paths = self._build_output_paths(name)
 
     requested_samples_per_pixel = max(1, int(samples_per_pixel))
@@ -78,7 +79,7 @@ class Render:
     )
 
     render_start = perf_counter()
-    film.render(scene=scene, camera=cam, filename=paths['img_path'], gamma_fix=gamma_fix)
+    film.render(scene=scene, camera=cam, filename=paths['img_path'], gamma_fix=gamma_fix, integrator=integrator)
     render_time_seconds = perf_counter() - render_start
 
     render_time_minutes = render_time_seconds / 60.0
@@ -115,7 +116,8 @@ class Render:
              samples_per_pixel: int = 16,
              sampling_mode: str = 'jittered',
              seed: Optional[int] = None,
-             gamma_fix: bool = False) -> str:
+             gamma_fix: bool = False,
+             integrator=None) -> str:
     """Wrapper de compatibilidade: renderiza e retorna o diretório de saída."""
     result = self.render_core(
       scene=scene,
@@ -127,5 +129,6 @@ class Render:
       sampling_mode=sampling_mode,
       seed=seed,
       gamma_fix=gamma_fix,
+      integrator=integrator,
     )
     return str(result['sim_dir'])
