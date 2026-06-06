@@ -95,6 +95,11 @@ class PathIntegrator(Integrator):
     beta = glm.vec3(1.0)
     current_ray = ray
     current_depth = depth
+    # Peso MIS pendente para a emissão vista no PRÓXIMO vértice via amostragem
+    # de BSDF (Etapa 04). Inicia em 1.0 (raio primário vê a luz com peso pleno);
+    # após bounce difuso em modo MIS recebe power_heuristic; após bounce especular
+    # volta a 1.0 (NEE não consegue amostrar a direção delta).
+    pending_mis_weight = 1.0
     
     # Loop iterativo de path tracing
     for iter_depth in range(1, self.max_depth + 1):
@@ -121,7 +126,11 @@ class PathIntegrator(Integrator):
         if self.mode == 'nee_only' and iter_depth > 1:
           break  # Le já foi contado via NEE no vértice anterior
         le_val = getattr(hit_material, 'Le', glm.vec3(0.0))
-        L += beta * le_val
+        # MIS (Etapa 04): o peso da estratégia "BSDF amostrou a luz" incide SÓ
+        # aqui, sobre a emissão direta — não é dobrado em beta (que permanece
+        # throughput puro). pending_mis_weight = 1.0 para raio primário e para
+        # bounces especulares; power_heuristic após bounce difuso.
+        L += beta * le_val * pending_mis_weight
         break
       
       # Se profundidade < min_depth obrigatória, não termina aqui
@@ -139,14 +148,22 @@ class PathIntegrator(Integrator):
         # Material antigo sem sample() — usar Lambertiana
         bsdf = LambertianBSDF(glm.vec3(0.5))
       
-      # Construir ONB local (normal como z)
-      onb = ONB(hit.normal)
+      # Material especular (delta): vidro/espelho. Define o frame local e o
+      # tratamento de NEE/MIS/throughput (Etapa 07).
+      is_specular = bool(getattr(bsdf, 'is_specular', lambda: False)())
+
+      # Construir ONB local. Para BSDFs especulares usamos a normal GEOMÉTRICA
+      # (outward, sem flip), pois o sinal de wo.z precisa codificar entrada/saída
+      # do meio (Snell). Para BSDFs difusas usamos hit.normal (virada para o raio).
+      onb_normal = hit.geo_normal if (is_specular and glm.dot(hit.geo_normal, hit.geo_normal) > 0.0) else hit.normal
+      onb = ONB(onb_normal)
       wo_global = -current_ray.d
       wo_local = onb.global_to_local(wo_global)
-      
+
       # NEE: amostragem direta das luzes em scene.lights (Etapa 03)
       # Ref: PBRT 4e §13.4 "A Better Path Tracer"; Slide 9 (NEE).
-      if self.mode in ('nee_only', 'mis'):
+      # Especular é delta: NEE não consegue amostrar a direção → pular.
+      if (not is_specular) and self.mode in ('nee_only', 'mis'):
         lights = getattr(scene, 'lights', [])
         for light in lights:
           if not hasattr(light, 'sample_Li'):
@@ -201,30 +218,36 @@ class PathIntegrator(Integrator):
       wi_local = sample_result['wi']
       pdf_bsdf = sample_result['pdf']
       f = sample_result['f']
-      
-      # Verificar cosseno em frame local (normal = z)
-      cos_theta = wi_local.z
-      if cos_theta <= 0.0:
-        # Wi aponta para baixo; inválido
-        break
-      
-      # MIS weight (Etapa 04)
-      w_bsdf = 1.0
-      if self.mode == 'mis':
-        # Calcular PDF dessa direção via luz(es) para MIS
-        wi_bsdf_global = onb.local_to_global(wi_local)
-        pdf_light_for_bsdf = 0.0
-        lights = getattr(scene, 'lights', [])
-        for light in lights:
-          if not hasattr(light, 'pdf_Li'):
-            continue
-          pdf_light_for_bsdf += light.pdf_Li(hit.pos, wi_bsdf_global)
-        w_bsdf = power_heuristic(1, pdf_bsdf, 1, pdf_light_for_bsdf, beta=2.0)
-      
-      # Acumular throughput com weight MIS
-      # β *= f * |cos θ_i| / pdf * w_bsdf
-      beta *= f * cos_theta / pdf_bsdf * w_bsdf
-      
+      wi_global = glm.normalize(onb.local_to_global(wi_local))
+
+      if is_specular:
+        # Delta: f já é refletância/transmitância pura; o throughput NÃO leva o
+        # cosseno geométrico (cancela na delta-BSDF) e wi pode estar no hemisfério
+        # inferior (refração, wi.z < 0). MIS por luz não se aplica → peso = 1.0.
+        beta *= f / pdf_bsdf
+        pending_mis_weight = 1.0
+      else:
+        # Difuso/glossy: estimador padrão β *= f·cosθ/pdf (cosθ cancela com a pdf
+        # cosseno-ponderada na Lambertiana). wi precisa estar acima da superfície.
+        cos_theta = wi_local.z
+        if cos_theta <= 0.0:
+          break
+        beta *= f * cos_theta / pdf_bsdf
+        # MIS (Etapa 04): peso da estratégia "BSDF amostra a luz" para a emissão
+        # vista no PRÓXIMO vértice. Guardado em pending_mis_weight (aplicado uma
+        # única vez à Le) em vez de dobrado em beta — corrige contaminação dos
+        # bounces seguintes. Ref: Veach & Guibas 1995; PBRT 4e §13.4.
+        if self.mode == 'mis':
+          pdf_light_for_bsdf = 0.0
+          lights = getattr(scene, 'lights', [])
+          for light in lights:
+            if not hasattr(light, 'pdf_Li'):
+              continue
+            pdf_light_for_bsdf += light.pdf_Li(hit.pos, wi_global)
+          pending_mis_weight = power_heuristic(1, pdf_bsdf, 1, pdf_light_for_bsdf, beta=2.0)
+        else:
+          pending_mis_weight = 1.0
+
       # Russian Roulette (Etapa 05): terminação probabilística de caminhos profundos
       # Ref: PBRT 4e §2.2.4 "Russian Roulette"; Slide 9 "Traçado de Caminhos II"
       # Estratégia: p_continue = min(max(β.r, β.g, β.b), 1.0); se random() > p_continue, termina
@@ -237,12 +260,10 @@ class PathIntegrator(Integrator):
       # Verificar se beta ficou muito pequeno (evita infinitos)
       if glm.length(beta) < 1e-6:
         break
-      
-      # Novo raio em frame global
-      wi_global = onb.local_to_global(wi_local)
-      wi_global = glm.normalize(wi_global)
-      
-      # Offset point para evitar shadow acne
+
+      # Novo raio em frame global (wi_global já calculado e normalizado acima).
+      # Offset point para evitar shadow acne / auto-interseção (vale para
+      # reflexão e refração: o sinal segue dot(direction, normal)).
       offset_origin = scene.offset_point(hit.pos, hit.normal, wi_global)
       current_ray = type(current_ray)(offset_origin, wi_global)
       current_depth = iter_depth + 1
