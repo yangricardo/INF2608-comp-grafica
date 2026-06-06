@@ -9,6 +9,8 @@ Referências:
 """
 
 from __future__ import annotations
+from path_tracing.ray import Ray
+from path_tracing.scene import Scene
 from pyglm import glm
 import random
 
@@ -52,9 +54,9 @@ class PathIntegrator(Integrator):
   
   def Li(
     self,
-    ray,  # Ray
-    scene,  # Scene
-    sampler=None,  # Sampler | None
+    ray: Ray,  # Ray
+    scene: Scene,  # Scene
+    sampler: Sampler | None = None,  # Sampler | None
     depth: int = 1,
   ) -> glm.vec3:
     """Estima radiância ao longo do raio via path tracing.
