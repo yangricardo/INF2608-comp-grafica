@@ -109,17 +109,40 @@ class RectAreaLight(Light):
     }
   
   def pdf_Li(self, ref_point: glm.vec3, wi: glm.vec3) -> float:
-    """Calcula PDF em ângulo sólido para direção wi.
-    
-    Requer interseção com o plano da luz para computar a distância.
-    Por simplicidade, retorna 0 aqui; será refinado quando se tiver Hit.
-    
-    Ref: PBRT 4e §13.1.1
+    """PDF em ângulo sólido para direção wi a partir de ref_point.
+
+    Interseciona o raio (ref_point, wi) com o plano da luz para obter
+    a distância e calcular a conversão área → ângulo sólido.
+
+    Ref: PBRT 4e §13.1.1; Veach & Guibas SIGGRAPH 1995 eq. 9.
     """
-    # Ref: PBRT 4e §13.1.1
-    # Para MIS com BSDF, precisaríamos intersecar com o plano da luz
-    # Por enquanto, retorna 0 (será implementado em MIS na Etapa 04)
-    return 0.0
+    # Interseção com o plano da luz via equação paramétrica:
+    # p(t) = ref_point + t * wi;  dot(p(t) - corner, normal) = 0
+    denom = glm.dot(wi, self.normal)
+    if abs(denom) < 1e-6:
+      return 0.0  # Raio paralelo ao plano
+
+    t = glm.dot(self.corner - ref_point, self.normal) / denom
+    if t <= 1e-4:
+      return 0.0  # Interseção atrás ou muito perto
+
+    p_hit = ref_point + t * wi
+
+    # Verificar se o ponto está dentro do paralelogramo
+    # Projetar (p_hit - corner) nas arestas e checar [0, 1]
+    d = p_hit - self.corner
+    len_u = glm.length(self.edge_u)
+    len_v = glm.length(self.edge_v)
+    if len_u < 1e-9 or len_v < 1e-9:
+      return 0.0
+    u_coord = glm.dot(d, self.edge_u) / (len_u * len_u)
+    v_coord = glm.dot(d, self.edge_v) / (len_v * len_v)
+    if not (0.0 <= u_coord <= 1.0 and 0.0 <= v_coord <= 1.0):
+      return 0.0  # Fora do retângulo
+
+    cos_at_light = abs(denom)
+    # pdf_area = 1/area; conversão: pdf_solid_angle = pdf_area * t² / cos_at_light
+    return (t * t) / (self.area * cos_at_light)
   
   # Métodos legados para compatibilidade com interface antiga
   def radiance(self, scene: Scene, hit: Hit):
