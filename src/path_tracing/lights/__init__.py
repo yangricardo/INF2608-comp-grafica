@@ -19,6 +19,7 @@ from .base import Light
 from .point import PointLight
 from .area import AreaLight, AreaLightSamplingMode
 from .area_rect import RectAreaLight
+from .area_mesh import TriangleMeshLight
 
 __all__ = [
   'Light',
@@ -26,5 +27,6 @@ __all__ = [
   'AreaLight',
   'AreaLightSamplingMode',
   'RectAreaLight',
+  'TriangleMeshLight',
 ]
 
