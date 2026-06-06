@@ -1,6 +1,6 @@
 # Citações
 
-## [EPFL_TH9008](./EPFL_TH9008.compressed.pdf)
+## [Efficient_and_Accurate_Physically-Based_Differentiable_Rendering](./Efficient_and_Accurate_Physically-Based_Differentiable_Rendering.pdf)
 
 > VICINI, Delio Aleardo. Efficient and Accurate Physically-Based Differentiable Rendering. 2022. Tese (Doutorado em Ciência da Computação) – École Polytechnique Fédérale de Lausanne (EPFL), Lausanne, 2022
 
