@@ -102,7 +102,8 @@ class PathIntegrator(Integrator):
       if is_emissive:
         # Terminar em emissivo (apenas em primário ou se ≥ min_depth)
         if iter_depth == 1 or iter_depth >= self.min_depth:
-          L += beta * hit_material.Le
+          le_val = getattr(hit_material, 'Le', glm.vec3(0.0))
+          L += beta * le_val
         break
       
       # Se profundidade < min_depth obrigatória, não termina aqui
@@ -113,8 +114,12 @@ class PathIntegrator(Integrator):
       if hit_material is None:
         # Default: Lambertiana branca
         bsdf = LambertianBSDF(glm.vec3(0.5))
-      else:
+      elif hasattr(hit_material, 'sample'):
+        # É um BSDF com sample()
         bsdf = hit_material
+      else:
+        # Material antigo sem sample() — usar Lambertiana
+        bsdf = LambertianBSDF(glm.vec3(0.5))
       
       # Construir ONB local (normal como z)
       onb = ONB(hit.normal)
@@ -123,7 +128,7 @@ class PathIntegrator(Integrator):
       
       # Amostra BSDF
       u_sample = (self.rng.random(), self.rng.random())
-      sample_result = bsdf.sample(wo_local, glm.vec2(u_sample[0], u_sample[1]))
+      sample_result = bsdf.sample(wo_local, glm.vec2(u_sample[0], u_sample[1]))  # type: ignore[union-attr]
       
       if sample_result is None or sample_result['pdf'] == 0.0:
         break
