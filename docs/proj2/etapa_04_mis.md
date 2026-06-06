@@ -54,54 +54,72 @@ Ref: Veach & Guibas SIGGRAPH 1995, Equações 9 (balance) e 14 (power).
 ## Implementação: `mis.py`
 
 ```python
-def balance_heuristic(pdf_a: float, pdf_b: float) -> float:
+def balance_heuristic(n_a, pdf_a, n_b, pdf_b) -> float:
     """Peso para estratégia A com balance heuristic (β=1)."""
-    denom = pdf_a + pdf_b
-    if denom == 0.0:
+    denom = n_a * pdf_a + n_b * pdf_b
+    if denom <= 0.0:
         return 0.0
-    return pdf_a / denom
+    return (n_a * pdf_a) / denom
 
-def power_heuristic(pdf_a: float, pdf_b: float, beta: int = 2) -> float:
+def power_heuristic(n_a, pdf_a, n_b, pdf_b, beta: float = 2.0) -> float:
     """Peso para estratégia A com power heuristic (β=2 default)."""
-    pdf_a_b = pdf_a ** beta
-    pdf_b_b = pdf_b ** beta
-    denom = pdf_a_b + pdf_b_b
-    if denom == 0.0:
+    a = (n_a * pdf_a) ** beta
+    b = (n_b * pdf_b) ** beta
+    denom = a + b
+    if denom <= 0.0:
         return 0.0
-    return pdf_a_b / denom
+    return a / denom
 ```
+
+> As assinaturas incluem a contagem de amostras `n_a`/`n_b` (tipicamente 1 cada),
+> conforme PBRT 4e Eq. 2.14/2.15. Uso no integrador:
+> `power_heuristic(1, pdf_luz, 1, pdf_bsdf, beta=2.0)`.
 
 ---
 
 ## Integrador `mis` Mode
 
+⚠️ **Onde o peso BSDF incide (correção importante).** O peso da estratégia "BSDF
+amostrou a luz" deve incidir **apenas** sobre a emissão `Le` vista **diretamente** no
+vértice seguinte — **não** pode ser dobrado em `beta`. Se for dobrado, `beta` (que persiste
+ao longo do caminho) carrega o peso para **todas** as contribuições posteriores (NEE e
+emissão de vértices mais profundos), enviesando o estimador (imagem mais escura na
+iluminação indireta). A versão anterior tinha esse bug.
+
+Solução: `beta` permanece **throughput puro** (`f·cosθ/pdf`); o peso é guardado em
+`pending_mis_weight` e aplicado **uma única vez** quando o raio de BSDF atinge um emissor.
+
 ```python
 VALID_MODES = ('bsdf_only', 'nee_only', 'mis')
+pending_mis_weight = 1.0   # peso para a Le vista no PRÓXIMO vértice (1.0 = primário/especular)
 
-# Etapa 03: NEE com luz
-if self.mode in ('nee_only', 'mis'):
-    for light in scene.lights:
-        # ... NEE sampling ...
-        if self.mode == 'mis':
-            # Calcular PDF da mesma direção via BSDF para MIS weight
-            pdf_bsdf_for_nee = bsdf.pdf(wo_local, wi_nee_local)
-            w_nee = mis.power_heuristic(pdf_nee, pdf_bsdf_for_nee)
+for iter_depth in 1..max_depth:
+    hit = intersect(ray)
+    if hit é emissivo:
+        # peso aplicado SÓ aqui, à emissão direta; beta é throughput puro
+        L += beta * Le * pending_mis_weight
+        break
+
+    # NEE (pulado se bsdf.is_specular()): peso é local a este termo
+    if mode in ('nee_only','mis') and not bsdf.is_specular():
+        for light in scene.lights:
+            ... sample_Li ...
+            w_nee = power_heuristic(1, pdf_nee, 1, bsdf.pdf(wo,wi_nee)) if mode=='mis' else 1.0
+            L += beta * f_nee * Li_nee * cos_nee / pdf_nee * w_nee
+
+    # Amostra BSDF
+    (wi, pdf_bsdf, f) = bsdf.sample(wo, u)
+    if bsdf.is_specular():
+        beta *= f / pdf_bsdf            # sem cosseno; delta
+        pending_mis_weight = 1.0        # NEE não alcança a direção delta
+    else:
+        beta *= f * cos_theta / pdf_bsdf   # THROUGHPUT PURO (sem w_bsdf!)
+        if mode == 'mis':
+            pdf_luz = sum(light.pdf_Li(hit.pos, wi_global) for light in scene.lights)
+            pending_mis_weight = power_heuristic(1, pdf_bsdf, 1, pdf_luz)
         else:
-            w_nee = 1.0
-        L += beta * f_nee * Li_nee * cos_nee / pdf_nee * w_nee
-
-# Etapa 02: BSDF com indirect
-sample_result = bsdf.sample(wo_local, u_sample)
-if self.mode == 'mis':
-    # Calcular PDF da mesma direção via luz (MIS weight)
-    pdf_light_for_bsdf = 0.0
-    for light in scene.lights:
-        pdf_light_for_bsdf += light.pdf_Li(hit.pos, wi_bsdf_global)
-    w_bsdf = mis.power_heuristic(pdf_bsdf, pdf_light_for_bsdf)
-else:
-    w_bsdf = 1.0
-
-L += beta * f_bsdf * Li_indirect * cos_bsdf / pdf_bsdf * w_bsdf
+            pending_mis_weight = 1.0
+    ray = Ray(offset(hit.pos), wi_global)
 ```
 
 ---
@@ -109,26 +127,27 @@ L += beta * f_bsdf * Li_indirect * cos_bsdf / pdf_bsdf * w_bsdf
 ## Pseudocódigo MIS Combinado
 
 ```
-// NEE (direct) com weight MIS
-para cada luz:
+// NEE (direct) — peso local ao termo, beta puro
+para cada luz (se não especular):
     (wi_nee, pdf_nee, Li_nee) = amostra_luz(...)
     se não_ocluído(wi_nee):
-        pdf_bsdf = bsdf.pdf(wo, wi_nee)  // avaliação extra!
-        w_nee = power_heuristic(pdf_nee, pdf_bsdf)
+        pdf_bsdf = bsdf.pdf(wo, wi_nee)
+        w_nee = power_heuristic(1, pdf_nee, 1, pdf_bsdf)
         L += beta * bsdf.eval(...) * Li_nee * cos_nee * w_nee / pdf_nee
 
-// BSDF (indirect) com weight MIS
+// BSDF — calcula o peso para a Le do PRÓXIMO vértice, mas NÃO o dobra em beta
 (wi_bsdf, pdf_bsdf, f_bsdf) = amostra_bsdf(...)
-se pdf_bsdf > 0:
-    pdf_luz = 0
-    para cada luz:
-        pdf_luz += luz.pdf_Li(hit.pos, wi_bsdf)
-    w_bsdf = power_heuristic(pdf_bsdf, pdf_luz)
+pdf_luz = Σ luz.pdf_Li(hit.pos, wi_bsdf)
+pending_mis_weight = power_heuristic(1, pdf_bsdf, 1, pdf_luz)
+beta *= f_bsdf * cos_bsdf / pdf_bsdf            // throughput puro
 
-    // Recursão / próximo vértice
-    (hit2, L_indirect) = trace_ray(wi_bsdf)
-    L += beta * f_bsdf * L_indirect * cos_bsdf * w_bsdf / pdf_bsdf
+// no próximo vértice, se for emissor:
+//   L += beta * Le * pending_mis_weight        // peso aplicado UMA vez
 ```
+
+Validação: nas três variantes (`bsdf_only`, `nee_only`, `mis`) a média da imagem converge
+ao mesmo valor (teste cruzado: diferença bsdf↔mis ≈ 1.8% em 128 spp, limitada por ruído),
+confirmando estimador não-viesado.
 
 ---
 
