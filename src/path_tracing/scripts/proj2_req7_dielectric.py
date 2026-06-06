@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from pyglm import glm
 from path_tracing.render import Render
 from path_tracing.render_estimator import run_render_with_estimation, EstimatorOptions
 from path_tracing.integrators.path_tracer import PathIntegrator
@@ -48,6 +49,10 @@ if __name__ == '__main__':
                       help='Usar Russian Roulette (true|false, default: false)')
   parser.add_argument('--rr-min-depth', type=int, default=None,
                       help='Profundidade mínima para RR (default: min_depth)')
+  parser.add_argument('--absorption', type=float, nargs=3, default=[0.0, 0.0, 0.0],
+                      metavar=('R', 'G', 'B'),
+                      help='Coef. de absorção Beer-Lambert σ (RGB). 0 0 0 = incolor. '
+                           'Ex.: 0.2 0.6 1.2 (vidro âmbar); água: 0.30 0.05 0.10 (azul-esverdeado).')
   parser.add_argument('--seed', type=int, default=None, help='Seed do RNG')
   parser.add_argument('--gamma', action='store_true', help='Aplicar correção gama')
   parser.add_argument('--out', type=str, default='out/proj2/req7', help='Diretório de saída')
@@ -70,15 +75,21 @@ if __name__ == '__main__':
   print(f'  depth (máx): {args.depth}')
   print(f'  depth (mín): {args.min_depth}')
   print(f'  seed: {args.seed}')
+  print(f'  absorção (Beer-Lambert σ): {tuple(args.absorption)}')
   print(f'  resolução: {args.width}x{args.height}')
   print(f'  saída: {args.out}')
   print('=' * 70)
 
+  # Absorção Beer-Lambert (Etapa 07): None se incolor (0,0,0).
+  absorption = glm.vec3(*args.absorption)
+  has_absorption = any(c > 0.0 for c in args.absorption)
+  absorption_arg = absorption if has_absorption else None
+
   # Selecionar cena
   if args.material == 'glass':
-    scene, camera = build_proj2_cornell_glass_scene()
+    scene, camera = build_proj2_cornell_glass_scene(absorption=absorption_arg)
   else:  # water
-    scene, camera = build_proj2_cornell_water_scene()
+    scene, camera = build_proj2_cornell_water_scene(absorption=absorption_arg)
 
   integrator = PathIntegrator(
     min_depth=args.min_depth,
@@ -90,7 +101,11 @@ if __name__ == '__main__':
   )
 
   rr_suffix = '_rr' if args.use_rr else '_no_rr'
-  name = f'proj2_req7_{args.material}_{args.mode}{rr_suffix}'
+  abs_suffix = ''
+  if has_absorption:
+    r, g, b = args.absorption
+    abs_suffix = f'_abs{r:g}-{g:g}-{b:g}'
+  name = f'proj2_req7_{args.material}_{args.mode}{rr_suffix}{abs_suffix}'
   out_path = run_render_with_estimation(
     render=Render(out_root=args.out),
     scene=scene,
