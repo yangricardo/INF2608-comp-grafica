@@ -54,40 +54,31 @@ def build_proj2_cornell_mesh_light_scene() -> tuple[Scene, Camera]:
   scene.objects.append(light_panel)
 
   # === MESH LIGHT ===
-  # Pirâmide com base quadrada (3.0×3.0) centrada no teto (y=5.50)
-  # 4 vértices da base + 1 ápice = 5 vértices; 8 triângulos (4 laterais + 4 base)
-  
-  # Base: quadrado 3.0×3.0 em y=5.50
+  # Quad plano (3.0×3.0) no teto (y=5.50), dividido em 2 triângulos, com a normal
+  # apontando PARA BAIXO (-y) — para iluminar a sala. (A pirâmide anterior emitia
+  # majoritariamente para fora/para cima, deixando a cena subiluminada: a maioria
+  # das amostras caía no lado não-emissor, cos_at_light ≤ 0.) O requisito do
+  # enunciado — poliedro/malha de triângulos com amostras uniformes de área — é
+  # atendido por estes 2 triângulos coplanares.
+
+  # Quadrado 3.0×3.0 em y=5.50
   base_x_min = 1.275
   base_x_max = 4.275
   base_z_min = 1.275
   base_z_max = 4.275
   base_y = 5.50
-  
-  # Ápice: acima do centro
-  apex_x = (base_x_min + base_x_max) / 2.0
-  apex_z = (base_z_min + base_z_max) / 2.0
-  apex_y = 5.60  # 0.10 acima da base
-  
+
   vertices = [
-    glm.vec3(base_x_min, base_y, base_z_min),  # v0: corner 1
-    glm.vec3(base_x_max, base_y, base_z_min),  # v1: corner 2
-    glm.vec3(base_x_max, base_y, base_z_max),  # v2: corner 3
-    glm.vec3(base_x_min, base_y, base_z_max),  # v3: corner 4
-    glm.vec3(apex_x, apex_y, apex_z),          # v4: apex
+    glm.vec3(base_x_min, base_y, base_z_min),  # v0: canto (-x,-z)
+    glm.vec3(base_x_max, base_y, base_z_min),  # v1: canto (+x,-z)
+    glm.vec3(base_x_max, base_y, base_z_max),  # v2: canto (+x,+z)
+    glm.vec3(base_x_min, base_y, base_z_max),  # v3: canto (-x,+z)
   ]
-  
-  # Faces: 4 laterais (triângulos apontando para fora)
-  # Base triangular dividida em 2 para não degenerar (normal para cima)
+
+  # Ordem dos vértices escolhida para que cross(v1-v0, v2-v0) = (0,-9,0) → normal -y.
   faces = [
-    # Laterais (apontam para fora)
-    (0, 4, 1),  # triângulo 1: v0-apex-v1
-    (1, 4, 2),  # triângulo 2: v1-apex-v2
-    (2, 4, 3),  # triângulo 3: v2-apex-v3
-    (3, 4, 0),  # triângulo 4: v3-apex-v0
-    # Base (apontando para cima)
-    (0, 2, 1),  # triângulo 5: v0-v2-v1
-    (0, 3, 2),  # triângulo 6: v0-v3-v2
+    (0, 1, 2),  # triângulo 1
+    (0, 2, 3),  # triângulo 2
   ]
   
   # Criar TriangleMeshLight
