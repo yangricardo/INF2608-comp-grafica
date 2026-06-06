@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pyglm import glm
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .hit import Hit
 from .ray import Ray
@@ -15,7 +15,7 @@ class Shape:
     raise NotImplementedError("Shape subclasses must implement intersect()")
 
 class Sphere(Shape):
-  def __init__(self, center: glm.vec3, radius: float, material: Material):
+  def __init__(self, center: glm.vec3, radius: float, material: Any):
     self.center = glm.vec3(center)
     self.radius = radius
     self.material = material
@@ -52,7 +52,7 @@ class Sphere(Shape):
 
 
 class Plane(Shape):
-  def __init__(self, pos: glm.vec3, normal: glm.vec3, material: Material):
+  def __init__(self, pos: glm.vec3, normal: glm.vec3, material: Any):
     self.pos = glm.vec3(pos)
     self.normal = glm.normalize(glm.vec3(normal))
     self.material = material
@@ -72,7 +72,7 @@ class Plane(Shape):
 
 
 class Box(Shape):
-  def __init__(self, p_min: glm.vec3, p_max: glm.vec3, material: Material):
+  def __init__(self, p_min: glm.vec3, p_max: glm.vec3, material: Any):
     self.p_min = glm.vec3(
       min(p_min.x, p_max.x),
       min(p_min.y, p_max.y),
