@@ -102,10 +102,10 @@ class PathIntegrator(Integrator):
       )
       
       if is_emissive:
-        # Terminar em emissivo (apenas em primário ou se ≥ min_depth)
-        if iter_depth == 1 or iter_depth >= self.min_depth:
-          le_val = getattr(hit_material, 'Le', glm.vec3(0.0))
-          L += beta * le_val
+        # PBRT 4e §13.3: sempre acumula Le ao atingir emissivo em qualquer depth.
+        # min_depth é restrição de Russian Roulette (Etapa 05), não de coleta de Le.
+        le_val = getattr(hit_material, 'Le', glm.vec3(0.0))
+        L += beta * le_val
         break
       
       # Se profundidade < min_depth obrigatória, não termina aqui
