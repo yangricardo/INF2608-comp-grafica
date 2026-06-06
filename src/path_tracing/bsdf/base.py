@@ -49,12 +49,26 @@ class BSDF:
   
   def pdf(self, wo: glm.vec3, wi: glm.vec3) -> float:
     """Calcula PDF de wi dado wo (para MIS).
-    
+
     Args:
       wo: direção de saída normalizada
       wi: direção de entrada normalizada
-    
+
     Returns:
       Probabilidade (PDF) dessa direção
     """
     raise NotImplementedError("BSDF subclasses must implement pdf()")
+
+  def is_specular(self) -> bool:
+    """Indica se a BSDF é uma delta distribution (especular puro).
+
+    BSDFs especulares (espelho, dielétrico) só espalham em direções discretas,
+    então NEE e MIS por amostragem de luz não se aplicam (PDF = 0 fora da
+    direção delta). O integrador usa esta flag para: pular NEE, forçar peso
+    MIS = 1.0 e não atenuar o throughput pelo cosseno geométrico.
+
+    Default: False (BSDFs difusas/glossy). DielectricBSDF sobrescreve.
+
+    Ref: PBRT 4e §13.4 "A Better Path Tracer" (specular bounces e MIS).
+    """
+    return False
