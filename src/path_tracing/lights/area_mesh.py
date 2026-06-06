@@ -12,6 +12,7 @@ import random
 from typing import TYPE_CHECKING
 
 from .base import Light
+from ..sampling import uniform_triangle
 
 if TYPE_CHECKING:
   from ..hit import Hit
@@ -92,62 +93,42 @@ class TriangleMeshLight(Light):
     self.rng = random.Random(seed)
   
   def sample_Li(self, ref_point: glm.vec3, u: glm.vec2) -> dict | None:
-    """Amostra ponto na malha.
-    
-    Etapa 1: escolhe triângulo ponderado por área.
-    Etapa 2: amostra ponto uniforme no triângulo (barycentric coords).
-    
-    Ref: PBRT 4e §6.5 para uniform triangle sampling.
+    """Amostra ponto uniforme por área na malha.
+
+    Etapa 1: escolhe triângulo com probabilidade ∝ área (CDF sobre u.x).
+    Etapa 2: amostra ponto uniforme no triângulo via baricêntricas (PBRT §6.5).
+
+    Como a interface fornece só 2 dimensões aleatórias (u.x, u.y), reaproveitamos
+    u.x: após localizar o triângulo na CDF, remapeamos u.x para [0,1) dentro do
+    seu intervalo, obtendo uma dimensão fresca e independente de u.y. Isso evita
+    a degeneração anterior (usar u.y para as duas baricêntricas, colapsando as
+    amostras em uma curva 1D dentro do triângulo).
+
+    Ref: PBRT 4e §6.5 "Triangle Meshes" (uniform triangle sampling).
     """
-    # Etapa 1: escolher triângulo via CDF
+    # Etapa 1: escolher triângulo via CDF, guardando o limite inferior do bucket.
     u_tri = u.x
-    tri_idx = 0
+    tri_idx = len(self.triangles) - 1
+    cdf_prev = 0.0
     for i, cdf_val in enumerate(self.cdf):
       if u_tri <= cdf_val:
         tri_idx = i
         break
-    
+      cdf_prev = cdf_val
+
     tri = self.triangles[tri_idx]
     v0, v1, v2 = tri['v0'], tri['v1'], tri['v2']
     normal = tri['normal']
     area = tri['area']
-    
-    # Etapa 2: ponto uniforme no triângulo via coordenadas barycêntricas
-    # Ref: PBRT 4e §6.5: sqrt(u1) e u2 para uniform distribution
-    u_tri2 = u.y
-    sqrt_u = glm.sqrt(u_tri2)
-    
-    # Reparametrização para uniform PDF
-    r1 = 1.0 - sqrt_u
-    r2 = u_tri2 * (1.0 - u_tri2)  # Será sobrescrito abaixo
-    
-    # Simpler approach: uniform barycentric
-    r = glm.sqrt(u_tri2)
-    s = (1.0 - r)
-    
-    # Coordenadas barycêntricas: (s, t, w) onde s+t+w=1
-    # Para uniform sampling no triângulo:
-    sqrt_u_val = glm.sqrt(u_tri2)
-    # usar u_tri2 como segundo parâmetro aleatório não é correto; 
-    # já foi usado em u.y. Precisamos regenerar ou usar a estrutura diferente.
-    # Vou usar approach padrão PBRT 4e:
-    
-    # Actually, vou simplificar: use u como dois números aleatórios independentes
-    # u.x para escolher triângulo, u.y para ponto no triângulo
-    # Para ponto uniforme, usamos sqrt(u2) onde u2 é u.y ou derivado
-    
-    # Simplest: re-use u.y para barycentric, gerar outra coord
-    sqrt_u2 = glm.sqrt(u_tri2)
-    
-    # Coordenadas barycêntricas α, β, γ com α+β+γ=1
-    # Uniform: gerar via sqrt
-    alpha = 1.0 - sqrt_u2
-    beta = sqrt_u2 * (1.0 - u_tri2)
-    gamma = 1.0 - alpha - beta
-    
-    # Ponto no triângulo
-    p_on_light = alpha * v0 + beta * v1 + gamma * v2
-    
+
+    # Remapear u.x dentro do bucket do triângulo → uniforme fresco em [0,1).
+    bucket = self.cdf[tri_idx] - cdf_prev
+    u1 = (u_tri - cdf_prev) / bucket if bucket > 1e-12 else u.y
+
+    # Etapa 2: ponto uniforme por área via baricêntricas (helper compartilhado).
+    b0, b1, b2 = uniform_triangle(u1, u.y)
+    p_on_light = b0 * v0 + b1 * v1 + b2 * v2
+
     # Direção e distância
     l_vec = p_on_light - ref_point
     distance = glm.length(l_vec)
@@ -190,13 +171,18 @@ class TriangleMeshLight(Light):
     
     for tri_idx, tri in enumerate(self.triangles):
       v0, v1, v2 = tri['v0'], tri['v1'], tri['v2']
-      
+
+      # Emissão unilateral: só o lado emissor conta (cos_at_light = -dot(wi,n) > 0).
+      # Triângulo de verso não pode ser amostrado por sample_Li → PDF 0 (MIS).
+      if glm.dot(wi, tri['normal']) > -1e-9:
+        continue
+
       # Möller-Trumbore triangle intersection
       e1 = v1 - v0
       e2 = v2 - v0
       pvec = glm.cross(wi, e2)
       det = glm.dot(e1, pvec)
-      
+
       if abs(det) < 1e-6:
         continue
       
