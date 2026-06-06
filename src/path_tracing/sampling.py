@@ -9,6 +9,7 @@ emissor (`5.tracado_de_raios2.pdf`, pp. 14-23).
 
 from __future__ import annotations
 
+import math
 import random
 
 
@@ -55,3 +56,54 @@ def stratified_grid_samples_2d(samples_u: int, samples_v: int, rng: random.Rando
     for iu in range(count_u)
     for iv in range(count_v)
   ]
+
+
+def cosine_hemisphere(u1: float, u2: float) -> tuple[float, float, float]:
+  """Amostragem cosseno-ponderada do hemisfério (Método de Malley).
+
+  Gera uma direção em coordenadas locais (frame-local, normal = z+) com
+  densidade proporcional a cosθ/π — cancela com a Lambertiana pura:
+  β *= (ρ/π) · cosθ / (cosθ/π) = ρ.
+
+  Ref: Slide 7 "Integração de Monte Carlo" — Método de Malley;
+       PBRT 4e §A.5 Sampling Multidimensional Functions.
+
+  Args:
+    u1, u2: amostras uniformes em [0, 1)
+
+  Returns:
+    (x, y, z) no frame local; z ≥ 0 (hemisfério superior).
+  """
+  r = math.sqrt(u1)
+  phi = 2.0 * math.pi * u2
+  x = r * math.cos(phi)
+  y = r * math.sin(phi)
+  z = math.sqrt(max(0.0, 1.0 - x * x - y * y))
+  return x, y, z
+
+
+def cosine_hemisphere_pdf(cos_theta: float) -> float:
+  """PDF da amostragem cosseno-ponderada: cosθ/π.
+
+  Ref: PBRT 4e §9.2 Diffuse Reflection; Slide 7 "Integração de Monte Carlo".
+  """
+  return max(0.0, cos_theta) / math.pi
+
+
+def uniform_triangle(u1: float, u2: float) -> tuple[float, float, float]:
+  """Amostragem uniforme em triângulo via coordenadas baricêntricas.
+
+  Fórmula sem folding (PBRT 4e §6.5 Triangle Meshes):
+    b0 = 1 - sqrt(u1),  b1 = sqrt(u1)·(1 - u2),  b2 = sqrt(u1)·u2
+  Verificação: b0 + b1 + b2 = 1.
+
+  Ref: PBRT 4e §6.5 Triangle Meshes; Slide 9 "Traçado de Caminhos II".
+
+  Returns:
+    (b0, b1, b2): coordenadas baricêntricas, soma = 1.
+  """
+  sqrt_u1 = math.sqrt(u1)
+  b0 = 1.0 - sqrt_u1
+  b1 = sqrt_u1 * (1.0 - u2)
+  b2 = sqrt_u1 * u2
+  return b0, b1, b2
