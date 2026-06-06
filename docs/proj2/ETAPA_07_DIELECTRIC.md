@@ -12,6 +12,23 @@ Suporta dois materiais:
 - **Glass** (IOR=1.5): vidro óptico padrão
 - **Water** (IOR=1.33): água com refração mais suave
 
+### Convenção de frame (crítica)
+
+`DielectricBSDF.sample` é avaliado no **frame da normal geométrica** (z = normal
+outward, **não** a normal virada para o raio). Isso é essencial: o integrador, ao
+detectar `bsdf.is_specular()`, monta a ONB com `hit.geo_normal` (sem flip). Assim o
+**sinal de `wo.z`** codifica de que lado o raio incide:
+
+| `wo.z` | Situação | n_i (incidente) | n_t (transmitido) | eta = n_i/n_t |
+| ------ | -------- | --------------- | ----------------- | ------------- |
+| `> 0`  | ENTRANDO (vindo do ar) | 1.0 | ior | **1/ior** |
+| `< 0`  | SAINDO (vindo de dentro) | ior | 1.0 | **ior** |
+
+> ⚠️ Correção de bug: a versão anterior usava `eta = ior` ao entrar (invertido),
+> gerando reflexão interna total espúria na entrada do vidro. Como `Hit.set_face_normal`
+> sempre vira a normal para o raio, `wo.z` era sempre `> 0` e o BSDF nunca distinguia
+> entrada de saída. A correção passou a usar a **normal geométrica** no frame especular.
+
 ### Física Implementada
 
 #### 1. Lei de Snell
@@ -19,43 +36,47 @@ Suporta dois materiais:
 Determina direção refratada quando um raio passa entre dois meios:
 
 ```
-n1 * sin(θ1) = n2 * sin(θ2)
+n_i * sin(θ_i) = n_t * sin(θ_t)
 
-Em frame local (normal = z):
-cos_t = sqrt(1 - (n1/n2)² * (1 - cos_i²))
+cos_i = |wo.z|
+eta   = n_i / n_t          # 1/ior ao entrar; ior ao sair
+sin_t² = eta² * (1 - cos_i²)
 ```
 
-**Implementação**:
+**Implementação** (forma vetorial geral, válida para entrada e saída):
 
 ```python
-ratio = n1 / n2
-sin_i_sq = 1.0 - cos_i²
-sin_t_sq = ratio² * sin_i_sq
+cos_i = abs(wo.z)
+entering = wo.z > 0.0
+n_i, n_t = (1.0, ior) if entering else (ior, 1.0)
+eta = n_i / n_t
 
-if sin_t_sq > 1.0:
-  # Reflexão interna total
-  return reflect(wo)
-else:
-  cos_t = sqrt(1.0 - sin_t_sq)
-  wi_xy = (n1/n2) * (-wo_xy)
-  wi_z = -cos_t
-  return normalize([wi_xy, wi_z])
+sin_t_sq = eta * eta * (1.0 - cos_i * cos_i)
+if sin_t_sq >= 1.0:
+    return reflect(wo)              # Reflexão interna total
+
+cos_t = sqrt(1.0 - sin_t_sq)
+sign_z = 1.0 if wo.z > 0 else -1.0
+wi = vec3(-eta*wo.x, -eta*wo.y, -cos_t*sign_z)   # z vai para o lado oposto a wo
 ```
 
 #### 2. Fresnel (Reflexão dependente do ângulo)
 
-Calcula refletância R em função do ângulo de incidência:
+Refletância exata **não polarizada** = média das componentes paralela (∥) e
+perpendicular (⊥) (a versão anterior usava só uma componente):
 
 ```
-R = |(n1*cos_i - n2*cos_t) / (n1*cos_i + n2*cos_t)|²
+r_∥ = (n_t·cos_i − n_i·cos_t) / (n_t·cos_i + n_i·cos_t)
+r_⊥ = (n_i·cos_i − n_t·cos_t) / (n_i·cos_i + n_t·cos_t)
+F   = ½ (r_∥² + r_⊥²)
 ```
 
 **Validação física**:
 
-- Normal incidence (θ=0°): R ≈ ((n1-n2)/(n1+n2))²
-  - Glass (1→1.5): R ≈ 0.04 (4% reflexão)
-  - Water (1→1.33): R ≈ 0.02 (2% reflexão)
-- Grazing (θ→90°): R → 1.0 (total reflexão)
+- Normal incidence (θ=0°): F ≈ ((n_i−n_t)/(n_i+n_t))²
+  - Glass (1→1.5): F ≈ 0.04 (4% reflexão) — confirmado em teste unitário (fração refletida ≈ 0.040 em 20k amostras)
+  - Water (1→1.33): F ≈ 0.02 (2% reflexão)
+- Grazing (θ→90°): F → 1.0 (total reflexão)
 
 #### 3. Decisão Estocástica
 
@@ -84,6 +105,32 @@ if sin_t_sq > 1.0:
 ```
 
 Exemplo: Glass (n=1.5) em ar, ângulo crítico θ_c ≈ 41.8°
+
+#### 5. Integração no Path Tracer (tratamento especular)
+
+Como o dielétrico é uma **delta distribution** (`eval=0`, `pdf=0`), o integrador o trata
+de forma dedicada quando `bsdf.is_specular()` é verdadeiro
+([path_tracer.py](../../src/path_tracing/integrators/path_tracer.py)):
+
+1. **ONB pela normal geométrica** (`hit.geo_normal`), para o sinal de `wo.z` codificar
+   entrada/saída (ver tabela acima).
+2. **NEE é pulado**: a probabilidade de um raio de sombra coincidir com a direção delta é
+   zero — NEE no vidro só gastaria shadow rays retornando 0.
+3. **Throughput sem cosseno**: `β *= f / pdf` (com `pdf=1`). A delta-BSDF já embute o
+   cosseno geométrico; multiplicar por `cosθ` (como no caso difuso) escureceria
+   indevidamente as reflexões rasantes. `f` carrega refletância (`F`) ou transmitância
+   (`1−F`) pura.
+4. **Permite `wi.z < 0`**: o raio transmitido nasce no hemisfério oposto. O caso difuso
+   aborta com `cosθ ≤ 0`, mas o especular **não** — caso contrário a refração nunca
+   ocorreria (era o bug principal: o vidro renderizava como esfera escura sem transmissão).
+5. **Peso MIS = 1.0**: a emissão vista após um bounce especular entra com peso pleno
+   (a estratégia de amostragem de luz não alcança a direção delta).
+
+> **Nota sobre o fator de radiância 1/eta²**: ao transportar radiância através de uma
+> interface refrativa há um fator `(n_i/n_t)² = 1/eta²` (compressão do ângulo sólido). Ele
+> é **omitido** aqui porque **cancela em objeto fechado** (o raio entra com `1/eta²` e sai
+> com `eta²`). Como as cenas usam esfera de vidro e cubo de água fechados, o resultado é
+> exato. Para uma única interface (ex.: superfície de água aberta) seria necessário aplicá-lo.
 
 ### Arquitetura
 
@@ -152,23 +199,27 @@ python -m path_tracing.scripts.proj2_req7_dielectric \
 
 ### Testes Realizados
 
-**Glass Render** (16 SPP, seed=42, MIS):
+> ⚠️ **Atenção (correção):** as imagens commitadas em `out/proj2/req7/` foram geradas
+> **antes** da correção (refração morta + IOR invertido) e estão obsoletas — mostram a
+> esfera escura sem transmissão. Re-renderize para obter o resultado correto:
+>
+> ```bash
+> python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 32 --depth 8 --mode mis
+> python -m path_tracing.scripts.proj2_req7_dielectric --material water --spp 32 --depth 8 --mode mis
+> ```
 
-- Tempo: ~102 segundos
-- Resolução: 256×256
-- Saída: `out/proj2/req7/proj2_req7_glass_mis_no_rr_*/render.png`
-- Status: ✅ Sucesso
+**Validação por testes unitários** (sem render de imagem):
 
-**Water Render** (16 SPP, seed=42, MIS):
+- `is_specular()` → `True`; refração ao entrar produz `wi.z < 0`; ao sair produz `wi.z > 0`.
+- Lei de Snell numérica: `1·sin θ_i = 1.5·sin θ_t` (entrada no vidro).
+- Reflexão interna total em ângulo > θ_c (ao sair): reflete com `f = 1`.
+- Fresnel em incidência normal: fração refletida ≈ 0.040 (esperado 4% para vidro).
+- Integrador end-to-end nas cenas glass/water: radiância média > 0 (transmissão ocorre).
 
-- Tempo: ~102 segundos (estimado, em execução)
-- Resolução: 256×256
-- Status: ✅ Sucesso (esperado)
+**Validação Visual** (após re-render):
 
-**Validação Visual**:
-
-- Glass: refração clara com Fresnel brilhante nas bordas
-- Water: refração mais suave, menor especularidade
+- Glass: refração com ampliação/distorção do fundo + Fresnel brilhante nas bordas rasantes.
+- Water (IOR 1.33): refração mais suave, menor especularidade em ângulos normais.
 
 ### Referências Técnicas
 
