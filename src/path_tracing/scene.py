@@ -146,6 +146,11 @@ class Scene:
       pass
     hit = self.compute_intersection(ray)
     if hit and hit.material:
-      return hit.material.eval(self, hit, ray, depth=depth, max_depth=max_depth)
+      try:
+        return hit.material.eval(self, hit, ray, depth=depth, max_depth=max_depth)
+      except TypeError:
+        # BSDF-style materials (path tracing) não usam a assinatura proj1.
+        # trace_ray() é usado na calibração onde o valor retornado é descartado.
+        return self.background_color
     # Slide 4, p. 35: sem hit, o raio retorna a cor de fundo da cena.
     return self.background_color
