@@ -119,8 +119,11 @@ class RectAreaLight(Light):
     # Interseção com o plano da luz via equação paramétrica:
     # p(t) = ref_point + t * wi;  dot(p(t) - corner, normal) = 0
     denom = glm.dot(wi, self.normal)
-    if abs(denom) < 1e-6:
-      return 0.0  # Raio paralelo ao plano
+    # Emissão unilateral: só o lado emissor conta (mesmo critério de sample_Li,
+    # onde cos_at_light = -dot(wi, normal) > 0  ⟺  denom < 0). Raio paralelo ao
+    # plano ou atingindo o verso não-emissor → PDF 0 (consistência do MIS).
+    if denom > -1e-6:
+      return 0.0
 
     t = glm.dot(self.corner - ref_point, self.normal) / denom
     if t <= 1e-4:
@@ -140,7 +143,7 @@ class RectAreaLight(Light):
     if not (0.0 <= u_coord <= 1.0 and 0.0 <= v_coord <= 1.0):
       return 0.0  # Fora do retângulo
 
-    cos_at_light = abs(denom)
+    cos_at_light = -denom  # denom < 0 garantido acima ⇒ = |denom|
     # pdf_area = 1/area; conversão: pdf_solid_angle = pdf_area * t² / cos_at_light
     return (t * t) / (self.area * cos_at_light)
   
