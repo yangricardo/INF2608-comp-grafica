@@ -9,8 +9,14 @@ Referências:
 from __future__ import annotations
 from pyglm import glm
 import random
+from typing import TYPE_CHECKING
 
+# Herdar da interface base nova (não da legada para evitar circular import)
 from .base import Light
+
+if TYPE_CHECKING:
+  from ..hit import Hit
+  from ..scene import Scene
 
 
 class RectAreaLight(Light):
@@ -114,3 +120,12 @@ class RectAreaLight(Light):
     # Para MIS com BSDF, precisaríamos intersecar com o plano da luz
     # Por enquanto, retorna 0 (será implementado em MIS na Etapa 04)
     return 0.0
+  
+  # Métodos legados para compatibilidade com interface antiga
+  def radiance(self, scene: Scene, hit: Hit):
+    """Interface legada: retorna radiância e direção (não implementada)."""
+    return glm.vec3(0.0), glm.vec3(0, 0, 1)
+  
+  def sample_radiance(self, scene: Scene, hit: Hit) -> list[tuple[glm.vec3, glm.vec3]]:
+    """Interface legada: retorna lista vazia (new interface sample_Li é usada)."""
+    return []

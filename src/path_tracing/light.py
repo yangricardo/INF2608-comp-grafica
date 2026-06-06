@@ -6,6 +6,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from .sampling import regular_grid_samples_2d, stratified_grid_samples_2d, uniform_samples_2d
+from .lights.base import Light as BaseLight
 
 if TYPE_CHECKING:
   from .hit import Hit
@@ -15,7 +16,12 @@ if TYPE_CHECKING:
 def _is_black(color: glm.vec3) -> bool:
   return color.x <= 0.0 and color.y <= 0.0 and color.z <= 0.0
 
-class Light:
+class Light(BaseLight):
+  """Interface de luz legada com métodos radiance() e sample_radiance().
+  
+  Herda de BaseLight para compatibilidade com nova hierarquia de path tracing.
+  """
+  
   def __init__(self, pos: glm.vec3, power: glm.vec3):
     self.power = glm.vec3(power)
     self.pos = glm.vec3(pos)
@@ -27,6 +33,15 @@ class Light:
   def sample_radiance(self, scene: "Scene", hit: "Hit") -> list[tuple[glm.vec3, glm.vec3]]:
     """Amostra múltiplos pontos na superfície da luz para produzir penumbra."""
     return [self.radiance(scene, hit)]
+  
+  # Implementar interface nova (BaseLight) com métodos legados
+  def sample_Li(self, ref_point: glm.vec3, u: glm.vec2) -> dict | None:
+    """Implementação padrão de sample_Li para luzes legadas."""
+    return None
+  
+  def pdf_Li(self, ref_point: glm.vec3, wi: glm.vec3) -> float:
+    """Implementação padrão de pdf_Li para luzes legadas."""
+    return 0.0
 
 
 class AmbientLight:
