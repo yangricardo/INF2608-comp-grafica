@@ -1,17 +1,24 @@
-"""Path Tracer unidirecional com amostragem de BSDF (Etapa 02).
+"""Path Tracer unidirecional com amostragem de BSDF (Etapa 02) e NEE (Etapa 03).
+
+Modos suportados:
+  "bsdf_only" — Etapa 02: apenas amostragem BSDF, sem NEE
+  "nee_only"  — Etapa 03: NEE em todas as luzes, suprime Le em hits não-primários
+  "mis"       — Etapa 04: MIS combinando BSDF + NEE (power heuristic β=2)
 
 Referências:
 - Slide 7 "Integração de Monte Carlo" (MC basics, importance sampling)
 - Slide 8 "Traçado de Caminhos" (LTE, path integral, throughput)
-- Slide 9 "Traçado de Caminhos II" (extensões: NEE, MIS, RR)
+- Slide 9 "Traçado de Caminhos II" (NEE, MIS, RR)
 - PBRT 4e §13.1–13.4 "Light Transport I"
-- Kajiya, "The Rendering Equation", SIGGRAPH 1986
+- Kajiya, "The Rendering Equation", SIGGRAPH 1986, DOI 10.1145/15922.15902
+- Veach & Guibas, SIGGRAPH 1995, DOI 10.1145/218380.218498 (MIS)
 """
 
 from __future__ import annotations
 from path_tracing.ray import Ray
 from path_tracing.scene import Scene
 from pyglm import glm
+import math
 import random
 
 from .base import Integrator, Sampler
@@ -21,37 +28,36 @@ from ..bsdf.emissive import EmissiveBSDF
 
 
 class PathIntegrator(Integrator):
-  """Path Tracer unidirecional com amostragem de BSDF.
-  
-  Estimador básico: apenas amostragem BSDF, sem NEE (next event estimation).
-  Respeitando min_depth obrigatório = 4.
-  
-  Referência: PBRT 4e §13.3 "A Simple Path Tracer"
+  """Path Tracer unidirecional: BSDF-only, NEE, ou MIS.
+
+  Ref: PBRT 4e §13.3 "A Simple Path Tracer"; §13.4 "A Better Path Tracer".
   """
-  
+
+  VALID_MODES = ('bsdf_only', 'nee_only', 'mis')
+
   def __init__(
     self,
     min_depth: int = 4,
     max_depth: int = 8,
-    mode: str = "bsdf_only",
+    mode: str = 'bsdf_only',
     seed: int | None = None,
   ):
     """Inicializa path tracer.
-    
+
     Args:
-      min_depth: profundidade mínima antes de qualquer terminação (exigência: 4)
+      min_depth: profundidade mínima antes de qualquer terminação antecipada (exigência: 4)
       max_depth: profundidade máxima do caminho
-      mode: "bsdf_only" (Etapa 02) ou estendido em etapas posteriores
+      mode: "bsdf_only" | "nee_only" | "mis"
       seed: seed do RNG
     """
+    if mode not in self.VALID_MODES:
+      raise ValueError(f'mode deve ser um de {self.VALID_MODES}, recebeu {mode!r}')
     self.min_depth = max(1, int(min_depth))
     self.max_depth = max(self.min_depth, int(max_depth))
     self.mode = mode
     self.seed = seed
-    
-    # RNG global (por amostra)
     self.rng = random.Random(seed)
-  
+
   def Li(
     self,
     ray: Ray,  # Ray
@@ -104,6 +110,9 @@ class PathIntegrator(Integrator):
       if is_emissive:
         # PBRT 4e §13.3: sempre acumula Le ao atingir emissivo em qualquer depth.
         # min_depth é restrição de Russian Roulette (Etapa 05), não de coleta de Le.
+        # NEE suprime Le em hits não-primários para evitar dupla contagem.
+        if self.mode == 'nee_only' and iter_depth > 1:
+          break  # Le já foi contado via NEE no vértice anterior
         le_val = getattr(hit_material, 'Le', glm.vec3(0.0))
         L += beta * le_val
         break
@@ -128,6 +137,37 @@ class PathIntegrator(Integrator):
       wo_global = -current_ray.d
       wo_local = onb.global_to_local(wo_global)
       
+      # NEE: amostragem direta das luzes em scene.lights (Etapa 03)
+      # Ref: PBRT 4e §13.4 "A Better Path Tracer"; Slide 9 (NEE).
+      if self.mode in ('nee_only', 'mis'):
+        lights = getattr(scene, 'lights', [])
+        for light in lights:
+          if not hasattr(light, 'sample_Li'):
+            continue
+          u_light = glm.vec2(self.rng.random(), self.rng.random())
+          sample = light.sample_Li(hit.pos, u_light)
+          if sample is None:
+            continue
+          wi_nee = sample['wi']
+          Li_nee = sample['Li']
+          pdf_nee = sample['pdf_solid_angle']
+          if pdf_nee <= 0.0:
+            continue
+          # Verificar visibilidade (shadow ray)
+          shadow_orig = scene.offset_point(hit.pos, hit.normal, wi_nee)
+          shadow_ray = type(current_ray)(shadow_orig, wi_nee)
+          shadow_hit = scene.compute_intersection(shadow_ray)
+          dist_nee = sample['distance']
+          if shadow_hit is not None and shadow_hit.t < dist_nee - 1e-3:
+            continue  # Ocluído
+          # Avaliar BSDF em direção da luz (frame local)
+          wi_nee_local = onb.global_to_local(wi_nee)
+          cos_nee = max(0.0, wi_nee_local.z)
+          if cos_nee <= 0.0:
+            continue
+          f_nee: glm.vec3 = bsdf.eval(wo_local, wi_nee_local)  # type: ignore[call-arg]
+          L += beta * f_nee * Li_nee * cos_nee / pdf_nee
+
       # Amostra BSDF
       u_sample = (self.rng.random(), self.rng.random())
       sample_result = bsdf.sample(wo_local, glm.vec2(u_sample[0], u_sample[1]))  # type: ignore[union-attr]
