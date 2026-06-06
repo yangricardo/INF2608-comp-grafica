@@ -42,6 +42,8 @@ class PathIntegrator(Integrator):
     max_depth: int = 8,
     mode: str = 'bsdf_only',
     seed: int | None = None,
+    use_rr: bool = False,
+    rr_min_depth: int | None = None,
   ):
     """Inicializa path tracer.
 
@@ -50,6 +52,8 @@ class PathIntegrator(Integrator):
       max_depth: profundidade máxima do caminho
       mode: "bsdf_only" | "nee_only" | "mis"
       seed: seed do RNG
+      use_rr: usar Russian Roulette para terminação probabilística (Etapa 05)
+      rr_min_depth: profundidade mínima para RR (default: min_depth). RR ativa em depth >= rr_min_depth.
     """
     if mode not in self.VALID_MODES:
       raise ValueError(f'mode deve ser um de {self.VALID_MODES}, recebeu {mode!r}')
@@ -57,6 +61,8 @@ class PathIntegrator(Integrator):
     self.max_depth = max(self.min_depth, int(max_depth))
     self.mode = mode
     self.seed = seed
+    self.use_rr = bool(use_rr)
+    self.rr_min_depth = rr_min_depth if rr_min_depth is not None else self.min_depth
     self.rng = random.Random(seed)
 
   def Li(
@@ -218,6 +224,15 @@ class PathIntegrator(Integrator):
       # Acumular throughput com weight MIS
       # β *= f * |cos θ_i| / pdf * w_bsdf
       beta *= f * cos_theta / pdf_bsdf * w_bsdf
+      
+      # Russian Roulette (Etapa 05): terminação probabilística de caminhos profundos
+      # Ref: PBRT 4e §2.2.4 "Russian Roulette"; Slide 9 "Traçado de Caminhos II"
+      # Estratégia: p_continue = min(max(β.r, β.g, β.b), 1.0); se random() > p_continue, termina
+      if self.use_rr and iter_depth >= self.rr_min_depth:
+        p_continue = min(max(beta.x, max(beta.y, beta.z)), 1.0)
+        if self.rng.random() > p_continue:
+          break  # Caminho morreu por RR
+        beta /= p_continue  # Resampling não-enviesado (E[β'] = E[β])
       
       # Verificar se beta ficou muito pequeno (evita infinitos)
       if glm.length(beta) < 1e-6:
