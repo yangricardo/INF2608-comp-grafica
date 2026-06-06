@@ -18,13 +18,13 @@
 \citation{inf2608slides04}
 \citation{inf2608slides04}
 \citation{inf2608slides04}
+\citation{inf2608slides04}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Raio paramétrico, visibilidade e registro de interseção}{2}{subsection.2.2}\protected@file@percent }
 \newlabel{sec:raio-v3}{{2.2}{2}{Raio paramétrico, visibilidade e registro de interseção}{subsection.2.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Interseções básicas e controle numérico de $\varepsilon $}{2}{subsection.2.3}\protected@file@percent }
 \newlabel{sec:intersecoes-v3}{{2.3}{2}{Interseções básicas e controle numérico de \texorpdfstring {$\varepsilon $}{epsilon}}{subsection.2.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Câmera pinhole, filme e espaços de coordenadas}{2}{subsection.2.4}\protected@file@percent }
 \newlabel{sec:camera-v3}{{2.4}{2}{Câmera pinhole, filme e espaços de coordenadas}{subsection.2.4}{}}
-\citation{inf2608slides04}
 \citation{inf2608slides05}
 \citation{inf2608slides05}
 \citation{inf2608slides05}
@@ -39,11 +39,11 @@
 \newlabel{sec:instancia-v3}{{3.2}{3}{Instanciação, coordenadas homogêneas e transformação de normais}{subsection.3.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Luz de área, integração sobre o emissor e penumbra}{3}{subsection.3.3}\protected@file@percent }
 \newlabel{sec:arealight-v3}{{3.3}{3}{Luz de área, integração sobre o emissor e penumbra}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}De traçador local a traçador recursivo}{3}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:recursivo-v3}{{3.4}{3}{De traçador local a traçador recursivo}{subsection.3.4}{}}
 \citation{inf2608slides05}
 \citation{inf2608slides05}
 \citation{inf2608slides06}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}De traçador local a traçador recursivo}{4}{subsection.3.4}\protected@file@percent }
-\newlabel{sec:recursivo-v3}{{3.4}{4}{De traçador local a traçador recursivo}{subsection.3.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Reflexão especular com Fresnel-Schlick}{4}{subsection.3.5}\protected@file@percent }
 \newlabel{sec:fresnel-v3}{{3.5}{4}{Reflexão especular com Fresnel-Schlick}{subsection.3.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Refração dielétrica, Lei de Snell e Beer-Lambert}{4}{subsection.3.6}\protected@file@percent }
@@ -65,11 +65,11 @@
 \newlabel{sec:infra-exp-v3}{{5.1}{5}{CLI, snapshots e estimativa como infraestrutura experimental}{subsection.5.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Geometria, câmera e instanciação}{5}{subsection.5.2}\protected@file@percent }
 \newlabel{sec:fig-geometria-v3}{{5.2}{5}{Geometria, câmera e instanciação}{subsection.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Cena de geometria e instanciação: dois \texttt  {Instance(Box)} e uma \texttt  {Sphere} sob câmera fixa e iluminação ambiente (800x600, spp=1).}}{5}{figure.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:req1-v3}{{1}{5}{Cena de geometria e instanciação: dois \texttt {Instance(Box)} e uma \texttt {Sphere} sob câmera fixa e iluminação ambiente (800x600, spp=1)}{figure.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Iluminação local com múltiplas fontes pontuais}{5}{subsection.5.3}\protected@file@percent }
 \newlabel{sec:fig-luzes-v3}{{5.3}{5}{Iluminação local com múltiplas fontes pontuais}{subsection.5.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Cena de geometria e instanciação: dois \texttt  {Instance(Box)} e uma \texttt  {Sphere} sob câmera fixa e iluminação ambiente (800x600, spp=1).}}{6}{figure.1}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:req1-v3}{{1}{6}{Cena de geometria e instanciação: dois \texttt {Instance(Box)} e uma \texttt {Sphere} sob câmera fixa e iluminação ambiente (800x600, spp=1)}{figure.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Cena com múltiplas luzes pontuais e variação do brilho especular em materiais com \texttt  {shininess} distinto no baseline \texttt  {center} (800x600, spp=1, tempo de render aproximado de 19,66\,s).}}{6}{figure.2}\protected@file@percent }
 \newlabel{fig:req2-v3}{{2}{6}{Cena com múltiplas luzes pontuais e variação do brilho especular em materiais com \texttt {shininess} distinto no baseline \texttt {center} (800x600, spp=1, tempo de render aproximado de 19,66\,s)}{figure.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Phong e sombras diretas}{6}{subsection.5.4}\protected@file@percent }
@@ -80,45 +80,49 @@
 \newlabel{fig:req2-aa-v3}{{3}{6}{Mesma cena de múltiplas luzes pontuais com \texttt {sampling\_mode=stratified} e \(25\) amostras por pixel: melhora a integração espacial sem alterar materiais, luzes ou câmera (800x600, tempo de render aproximado de 501,91\,s)}{figure.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Cena de sombreamento local com Phong e sombras diretas duras por visibilidade até a fonte (800x600, spp=1).}}{6}{figure.4}\protected@file@percent }
 \newlabel{fig:req3-v3}{{4}{6}{Cena de sombreamento local com Phong e sombras diretas duras por visibilidade até a fonte (800x600, spp=1)}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Malha triangular com BVH local}{6}{subsection.5.6}\protected@file@percent }
+\newlabel{sec:fig-bvh-v3}{{5.6}{6}{Malha triangular com BVH local}{subsection.5.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Cena-base para comparação entre \texttt  {center}, \texttt  {jittered} e \texttt  {stratified} no domínio do pixel (800x600, \texttt  {sampling\_mode=center}, spp=1, tempo de render aproximado de 20,65\,s).}}{7}{figure.5}\protected@file@percent }
 \newlabel{fig:req4-v3}{{5}{7}{Cena-base para comparação entre \texttt {center}, \texttt {jittered} e \texttt {stratified} no domínio do pixel (800x600, \texttt {sampling\_mode=center}, spp=1, tempo de render aproximado de 20,65\,s)}{figure.5}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Mesma cena de antialiasing com \texttt  {sampling\_mode=jittered} e \(4\) amostras por pixel: o serrilhado estruturado vira ruído espacial mais difuso, com tempo de render aproximado de 86,56\,s.}}{7}{figure.6}\protected@file@percent }
 \newlabel{fig:req4-jittered-v3}{{6}{7}{Mesma cena de antialiasing com \texttt {sampling\_mode=jittered} e \(4\) amostras por pixel: o serrilhado estruturado vira ruído espacial mais difuso, com tempo de render aproximado de 86,56\,s}{figure.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Malha triangular com BVH local}{7}{subsection.5.6}\protected@file@percent }
-\newlabel{sec:fig-bvh-v3}{{5.6}{7}{Malha triangular com BVH local}{subsection.5.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Luz de área e emissor visível}{7}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:fig-area-v3}{{5.7}{7}{Luz de área e emissor visível}{subsection.5.7}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Mesma cena de antialiasing com \texttt  {sampling\_mode=stratified} e \(4\) amostras por pixel: a cobertura espacial mais uniforme do pixel reduz ruído e estabiliza contornos em relação ao \texttt  {jittered}, com tempo de render aproximado de 84,84\,s.}}{7}{figure.7}\protected@file@percent }
 \newlabel{fig:req4-stratified-v3}{{7}{7}{Mesma cena de antialiasing com \texttt {sampling\_mode=stratified} e \(4\) amostras por pixel: a cobertura espacial mais uniforme do pixel reduz ruído e estabiliza contornos em relação ao \texttt {jittered}, com tempo de render aproximado de 84,84\,s}{figure.7}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Cena triangular com BVH local: a imagem visualiza a malha sob o mesmo pipeline de iluminação, enquanto a poda por AABB reduz o custo interno da interseção (800x600, spp=1).}}{7}{figure.8}\protected@file@percent }
 \newlabel{fig:rext-bvh-v3}{{8}{7}{Cena triangular com BVH local: a imagem visualiza a malha sob o mesmo pipeline de iluminação, enquanto a poda por AABB reduz o custo interno da interseção (800x600, spp=1)}{figure.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Luz de área e emissor visível}{7}{subsection.5.7}\protected@file@percent }
-\newlabel{sec:fig-area-v3}{{5.7}{7}{Luz de área e emissor visível}{subsection.5.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Refração, TIR e Beer-Lambert}{7}{subsection.5.8}\protected@file@percent }
+\newlabel{sec:fig-refracao-v3}{{5.8}{7}{Refração, TIR e Beer-Lambert}{subsection.5.8}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Cena com luz de área retangular e emissor visível: a penumbra vem da fonte extensa amostrada, enquanto a aparência luminosa do painel vem de \texttt  {EmissiveMaterial} (800x600, spp=1).}}{8}{figure.9}\protected@file@percent }
 \newlabel{fig:rext-area-light-v3}{{9}{8}{Cena com luz de área retangular e emissor visível: a penumbra vem da fonte extensa amostrada, enquanto a aparência luminosa do painel vem de \texttt {EmissiveMaterial} (800x600, spp=1)}{figure.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Refração, TIR e Beer-Lambert}{8}{subsection.5.8}\protected@file@percent }
-\newlabel{sec:fig-refracao-v3}{{5.8}{8}{Refração, TIR e Beer-Lambert}{subsection.5.8}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Cena com material refratário: o resultado combina Lei de Snell, reflexão interna total e atenuação tipo Beer-Lambert dentro do mesmo pipeline recursivo (800x600, spp=1).}}{8}{figure.10}\protected@file@percent }
 \newlabel{fig:rext-refractive-v3}{{10}{8}{Cena com material refratário: o resultado combina Lei de Snell, reflexão interna total e atenuação tipo Beer-Lambert dentro do mesmo pipeline recursivo (800x600, spp=1)}{figure.10}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.9}AA em uma cena integrada}{8}{subsection.5.9}\protected@file@percent }
 \newlabel{sec:fig-cornell-aa-v3}{{5.9}{8}{AA em uma cena integrada}{subsection.5.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.10}Cenas integradas recuperadas por snapshots}{8}{subsection.5.10}\protected@file@percent }
+\newlabel{sec:fig-recuperadas-v3}{{5.10}{8}{Cenas integradas recuperadas por snapshots}{subsection.5.10}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Cena integrada \emph  {Cornell box} com pirâmide no baseline \texttt  {center}: referência para avaliar como aliasing e ruído aparecem em uma composição mais rica (800x600, spp=1, tempo aproximado de 49,76\,s).}}{8}{figure.11}\protected@file@percent }
 \newlabel{fig:cornell-center-v3}{{11}{8}{Cena integrada \emph {Cornell box} com pirâmide no baseline \texttt {center}: referência para avaliar como aliasing e ruído aparecem em uma composição mais rica (800x600, spp=1, tempo aproximado de 49,76\,s)}{figure.11}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Mesma cena integrada com \texttt  {sampling\_mode=stratified} e \(4\) amostras por pixel: a melhoria observada em \texttt  {req4} reaparece em uma imagem mais carregada, ao custo de aproximadamente 200,80\,s.}}{8}{figure.12}\protected@file@percent }
 \newlabel{fig:cornell-stratified-v3}{{12}{8}{Mesma cena integrada com \texttt {sampling\_mode=stratified} e \(4\) amostras por pixel: a melhoria observada em \texttt {req4} reaparece em uma imagem mais carregada, ao custo de aproximadamente 200,80\,s}{figure.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.10}Cenas integradas recuperadas por snapshots}{8}{subsection.5.10}\protected@file@percent }
-\newlabel{sec:fig-recuperadas-v3}{{5.10}{8}{Cenas integradas recuperadas por snapshots}{subsection.5.10}{}}
 \citation{inf2608slides04}
 \@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Cena final integrada \texttt  {proj1\_final}: combinação de materiais reflexivos, refratários e malhas triangulares em um caso no qual o estimador prevê \(63{,}6\,s\), mas o render observado chega a \(144{,}2\,s\).}}{9}{figure.13}\protected@file@percent }
 \newlabel{fig:proj1-final-v3}{{13}{9}{Cena final integrada \texttt {proj1\_final}: combinação de materiais reflexivos, refratários e malhas triangulares em um caso no qual o estimador prevê \(63{,}6\,s\), mas o render observado chega a \(144{,}2\,s\)}{figure.13}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Variante \texttt  {proj1\_final\_v2}: mesma leitura de cena integrada sob câmera equivalente, agora com tempo real de \(172{,}0\,s\) para uma previsão de \(74{,}3\,s\), reforçando a sensibilidade do custo à composição geométrica e material.}}{9}{figure.14}\protected@file@percent }
 \newlabel{fig:proj1-final-v2}{{14}{9}{Variante \texttt {proj1\_final\_v2}: mesma leitura de cena integrada sob câmera equivalente, agora com tempo real de \(172{,}0\,s\) para uma previsão de \(74{,}3\,s\), reforçando a sensibilidade do custo à composição geométrica e material}{figure.14}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Cena \texttt  {proj1\_heart\_trianglemesh}: malha triangulada com \texttt  {bvh} e \(25\) amostras por pixel, em um caso onde a estimativa \(1122{,}4\,s\) permanece relativamente próxima do tempo observado \(1008{,}0\,s\).}}{9}{figure.15}\protected@file@percent }
-\newlabel{fig:heart-triangle-v3}{{15}{9}{Cena \texttt {proj1\_heart\_trianglemesh}: malha triangulada com \texttt {bvh} e \(25\) amostras por pixel, em um caso onde a estimativa \(1122{,}4\,s\) permanece relativamente próxima do tempo observado \(1008{,}0\,s\)}{figure.15}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {6}Decisões de Modelagem e Limites}{9}{section.6}\protected@file@percent }
 \newlabel{sec:limites-v3}{{6}{9}{Decisões de Modelagem e Limites}{section.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Convenções radiométricas}{9}{subsection.6.1}\protected@file@percent }
 \newlabel{sec:lim-radiometria-v3}{{6.1}{9}{Convenções radiométricas}{subsection.6.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Cena \texttt  {proj1\_heart\_trianglemesh}: malha triangulada com \texttt  {bvh} e \(25\) amostras por pixel, em um caso onde a estimativa \(1122{,}4\,s\) permanece relativamente próxima do tempo observado \(1008{,}0\,s\).}}{9}{figure.15}\protected@file@percent }
+\newlabel{fig:heart-triangle-v3}{{15}{9}{Cena \texttt {proj1\_heart\_trianglemesh}: malha triangulada com \texttt {bvh} e \(25\) amostras por pixel, em um caso onde a estimativa \(1122{,}4\,s\) permanece relativamente próxima do tempo observado \(1008{,}0\,s\)}{figure.15}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Câmera e formação de imagem}{9}{subsection.6.2}\protected@file@percent }
 \newlabel{sec:lim-camera-v3}{{6.2}{9}{Câmera e formação de imagem}{subsection.6.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Aceleração e complexidade de cena}{9}{subsection.6.3}\protected@file@percent }
+\newlabel{sec:lim-aceleracao-v3}{{6.3}{9}{Aceleração e complexidade de cena}{subsection.6.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Materiais recursivos e truncamento}{9}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:lim-recursao-v3}{{6.4}{9}{Materiais recursivos e truncamento}{subsection.6.4}{}}
 \bibstyle{apalike-sol}
 \bibdata{refs}
 \bibcite{inf2608slides06}{{1}{2026a}{{Celes}}{{}}}
@@ -126,10 +130,6 @@
 \bibcite{inf2608slides05}{{3}{2026c}{{Celes}}{{}}}
 \bibcite{inf2608projectrepo}{{4}{2026}{{Miranda}}{{}}}
 \bibcite{pharr2023pbrt}{{5}{2023}{{Pharr {\em  et~al}.}}{{}}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Aceleração e complexidade de cena}{10}{subsection.6.3}\protected@file@percent }
-\newlabel{sec:lim-aceleracao-v3}{{6.3}{10}{Aceleração e complexidade de cena}{subsection.6.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Materiais recursivos e truncamento}{10}{subsection.6.4}\protected@file@percent }
-\newlabel{sec:lim-recursao-v3}{{6.4}{10}{Materiais recursivos e truncamento}{subsection.6.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {7}Conclusão}{10}{section.7}\protected@file@percent }
 \newlabel{sec:conclusao-v3}{{7}{10}{Conclusão}{section.7}{}}
 \citation{pharr2023pbrt}

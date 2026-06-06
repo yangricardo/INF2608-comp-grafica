@@ -2,7 +2,7 @@ PWD /Users/yang/projects/INF2608-comp-grafica/latex
 INPUT /usr/local/texlive/2026/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt
-INPUT inf2608-proj1.v3.tex
+INPUT /Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj1.v3.tex
 OUTPUT inf2608-proj1.v3.log
 INPUT ./sbcreviews-2025.cls
 INPUT sbcreviews-2025.cls
@@ -307,17 +307,8 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm
-INPUT ./inf2608-proj1.v3.aux
-INPUT ./inf2608-proj1.v3.aux
-INPUT inf2608-proj1.v3.aux
 OUTPUT inf2608-proj1.v3.aux
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
-INPUT ./inf2608-proj1.v3.out
-INPUT ./inf2608-proj1.v3.out
-INPUT inf2608-proj1.v3.out
-INPUT inf2608-proj1.v3.out
-INPUT ./inf2608-proj1.v3.out
-INPUT ./inf2608-proj1.v3.out
 OUTPUT inf2608-proj1.v3.out
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
