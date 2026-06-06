@@ -100,17 +100,32 @@ class PathIntegrator(Integrator):
     # após bounce difuso em modo MIS recebe power_heuristic; após bounce especular
     # volta a 1.0 (NEE não consegue amostrar a direção delta).
     pending_mis_weight = 1.0
-    
+    # Coeficiente de absorção do meio em que o raio corrente viaja (Beer-Lambert,
+    # Etapa 07). vec3(0) = vácuo/ar. Setado ao entrar num dielétrico absorvente;
+    # zerado ao sair. Ref: PBRT 4e §11.2 "Transmittance".
+    medium_sigma = glm.vec3(0.0)
+
     # Loop iterativo de path tracing
     for iter_depth in range(1, self.max_depth + 1):
       # Interseção
       hit = scene.compute_intersection(current_ray)
-      
+
       if hit is None:
         # Nenhuma interseção: fundo
         L += beta * scene.background_color
         break
-      
+
+      # Beer-Lambert: atenua o throughput pelo trecho recém-percorrido DENTRO de
+      # um meio absorvente. T(d)=exp(-σ·d). Raios secundários são normalizados, logo
+      # hit.t é a distância real; no raio primário medium_sigma=0 (sem efeito).
+      if medium_sigma.x > 0.0 or medium_sigma.y > 0.0 or medium_sigma.z > 0.0:
+        d = hit.t
+        beta *= glm.vec3(
+          math.exp(-medium_sigma.x * d),
+          math.exp(-medium_sigma.y * d),
+          math.exp(-medium_sigma.z * d),
+        )
+
       # Checar se superfície é emissiva
       # Assumindo hit.material possui is_emissive ou Le
       hit_material = hit.material
@@ -226,6 +241,14 @@ class PathIntegrator(Integrator):
         # inferior (refração, wi.z < 0). MIS por luz não se aplica → peso = 1.0.
         beta *= f / pdf_bsdf
         pending_mis_weight = 1.0
+        # Beer-Lambert (Etapa 07): ao TRANSMITIR através da interface, atualiza o meio
+        # do próximo trecho. Entrando → assume a absorção do dielétrico; saindo → vácuo.
+        # Reflexão/TIR não trocam de lado, então o meio permanece inalterado.
+        if sample_result.get('transmitted', False):
+          if sample_result.get('entering', wo_local.z > 0.0):
+            medium_sigma = glm.vec3(getattr(bsdf, 'absorption', glm.vec3(0.0)))
+          else:
+            medium_sigma = glm.vec3(0.0)
       else:
         # Difuso/glossy: estimador padrão β *= f·cosθ/pdf (cosθ cancela com a pdf
         # cosseno-ponderada na Lambertiana). wi precisa estar acima da superfície.
