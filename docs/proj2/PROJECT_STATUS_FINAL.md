@@ -1,5 +1,19 @@
 """# Projeto 2: Path Tracing — Status Final
 
+> ⚠️ **Revisão de cálculos (correções aplicadas).** Uma auditoria de física/Monte Carlo
+> encontrou e corrigiu bugs reais que produziam imagens fisicamente incorretas:
+> - **Dielétrico:** refração estava morta (integrador matava `wi.z ≤ 0`) e o IOR estava
+>   invertido na entrada. Corrigido (frame na normal geométrica, `eta=1/ior` ao entrar,
+>   Fresnel completo, `is_specular`). Ver [ETAPA_07_DIELECTRIC.md](ETAPA_07_DIELECTRIC.md).
+> - **MIS:** o peso da estratégia BSDF era dobrado em `beta`, contaminando o caminho.
+>   Agora incide só na emissão direta. Ver [etapa_04_mis.md](etapa_04_mis.md).
+> - **Mesh light:** amostragem do triângulo não-uniforme + geometria emitindo para fora da
+>   sala. Corrigido. Ver [ETAPA_06_MESH_LIGHTS.md](ETAPA_06_MESH_LIGHTS.md).
+>
+> As imagens em `out/proj2/req6` e `out/proj2/req7` são **anteriores** às correções e
+> precisam ser re-renderizadas. As correções foram validadas por testes unitários e por
+> verificação cruzada de não-viés (bsdf/nee/mis convergem ao mesmo valor).
+
 ## 🎉 PROJETO COMPLETO: 13.0 / 13.0 PONTOS
 
 ### Timeline de Implementação
@@ -31,8 +45,8 @@
    - MIS compatible: retorna pdf_solid_angle
 
 2. **Cornell Mesh Light Scene** (`src/path_tracing/scenes/cornell_mesh_light.py`):
-   - Pirâmide com 6 triângulos no teto
-   - Base 3×3 unidades (idêntico a RectAreaLight)
+   - Quad plano com 2 triângulos no teto, normal −y (emite para a sala)
+   - 3×3 unidades (mesma área/posição do RectAreaLight)
    - Le = (7, 7, 7) para convergência validada
 
 3. **CLI Script** (`src/path_tracing/scripts/proj2_req6_mesh_lights.py`):
@@ -51,11 +65,12 @@
 **Implementações**:
 
 1. **DielectricBSDF** (`src/path_tracing/bsdf/dielectric.py`):
-   - Snell's law: cálculo de direção refratada com mudança de índice
-   - Fresnel: refletância R(θ) com fórmula exata dielétrica
-   - Reflexão interna total: sin_t_sq > 1 → reflexão obrigatória
-   - Decisão estocástica: refletir com prob R, refractar com prob 1-R
-   - Delta distribution: PDF=1.0 para dirção amostrada
+   - Frame da normal geométrica: sinal de `wo.z` decide entrada/saída
+   - Snell's law: `eta = 1/ior` ao entrar, `ior` ao sair (corrigido)
+   - Fresnel exato não polarizado: `F = ½(r_∥² + r_⊥²)`
+   - Reflexão interna total: sin_t_sq ≥ 1 → reflexão obrigatória
+   - Decisão estocástica: refletir com prob F, refractar com prob 1−F
+   - Delta distribution (`is_specular=True`): PDF=1.0 para direção amostrada
 
 2. **Glass Scene** (`src/path_tracing/scenes/cornell_glass.py`):
    - Esfera de vidro (raio=1.0, IOR=1.5)
@@ -156,14 +171,14 @@ Reduz variância em caminhos profundos (~14% speedup validado em Etapa 05).
 1. **Lei de Snell**: `n1*sin(θ1) = n2*sin(θ2)`
    - Validado em Etapa 07 com IOR=1.5 (vidro) e IOR=1.33 (água)
 
-2. **Fresnel**: `R = |((n1*cos_i - n2*cos_t) / (n1*cos_i + n2*cos_t))|²`
-   - Validado em ângulo normal: R_glass ≈ 0.04, R_water ≈ 0.02
+2. **Fresnel** (exato, não polarizado): `F = ½(r_∥² + r_⊥²)`
+   - Validado em ângulo normal: F_glass ≈ 0.04 (fração refletida medida ≈ 0.040), F_water ≈ 0.02
 
-3. **Reflexão Interna Total**: sin_t_sq > 1.0 → reflexão obrigatória
+3. **Reflexão Interna Total**: sin_t_sq ≥ 1.0 → reflexão obrigatória
    - Ângulo crítico glass ≈ 41.8°
 
-4. **CDF Amostragem**: distribuição de triângulos por área
-   - Validado em Etapa 06 com pirâmide (4 lateral + 2 base)
+4. **CDF Amostragem**: distribuição de triângulos por área + ponto uniforme
+   via `uniform_triangle` (quad de 2 triângulos voltado para baixo)
 
 ### PBRT 4e References
 
