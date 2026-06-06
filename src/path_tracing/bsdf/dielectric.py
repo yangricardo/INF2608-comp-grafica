@@ -115,6 +115,7 @@ class DielectricBSDF(BSDF):
         'wi': glm.normalize(wi),
         'pdf': 1.0,
         'f': glm.vec3(1.0),  # refletância total
+        'transmitted': False,  # reflexão: meio não muda (raio segue do mesmo lado)
       }
 
     cos_t = glm.sqrt(1.0 - sin_t_sq)
@@ -131,6 +132,7 @@ class DielectricBSDF(BSDF):
         'wi': glm.normalize(wi),
         'pdf': 1.0,
         'f': glm.vec3(fresnel),
+        'transmitted': False,  # reflexão: meio não muda
       }
 
     # Refração especular (Snell, forma vetorial geral válida para entrada e saída):
@@ -144,4 +146,8 @@ class DielectricBSDF(BSDF):
       'wi': glm.normalize(wi),
       'pdf': 1.0,
       'f': glm.vec3(transmittance),
+      # transmissão: cruza a interface. entering indica para qual meio o raio vai
+      # (True = entrando no volume → integrador ativa absorção Beer-Lambert).
+      'transmitted': True,
+      'entering': entering,
     }
