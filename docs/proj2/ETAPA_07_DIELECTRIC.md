@@ -132,6 +132,49 @@ de forma dedicada quando `bsdf.is_specular()` é verdadeiro
 > com `eta²`). Como as cenas usam esfera de vidro e cubo de água fechados, o resultado é
 > exato. Para uma única interface (ex.: superfície de água aberta) seria necessário aplicá-lo.
 
+#### 6. Absorção volumétrica (Lei de Beer-Lambert)
+
+Materiais dielétricos coloridos (vidro âmbar, água azul-esverdeada) atenuam a radiância à
+medida que ela atravessa o volume. A transmitância segue a **Lei de Beer-Lambert**:
+
+```
+T(d) = exp(−σ · d)     (por canal RGB)
+```
+
+onde `σ` é o coeficiente de absorção (`DielectricBSDF.absorption`) e `d` a distância
+percorrida **dentro** do meio. PBRT 4e §11.2 *Transmittance*.
+
+**Rastreio de meio no integrador** ([path_tracer.py](../../src/path_tracing/integrators/path_tracer.py)):
+
+1. `medium_sigma` (vec3) guarda a absorção do meio do raio corrente (vec3(0) = ar/vácuo).
+2. Ao **transmitir** (o `sample()` do dielétrico retorna `transmitted=True`): se está
+   **entrando** (`entering=True`) → `medium_sigma = bsdf.absorption`; se **saindo** →
+   `medium_sigma = vec3(0)`. Reflexão/TIR (`transmitted=False`) não alteram o meio (o raio
+   continua do mesmo lado e segue absorvendo).
+3. No início de cada iteração, logo após a interseção, atenua o throughput pelo trecho
+   recém-percorrido: `β *= exp(−medium_sigma · hit.t)` (os raios secundários são
+   normalizados, então `hit.t` é a distância real).
+
+**Validação numérica** (raio reto atravessando ~2 unidades de vidro com `σ=(0.2,0.6,1.2)`):
+as razões de saída medidas `(R,G,B) = (0.671, 0.301, 0.091)` casam com `exp(−σ·2) =
+(0.670, 0.301, 0.091)` — o azul é fortemente absorvido, resultando em tom âmbar.
+
+**Uso (CLI)**:
+
+```bash
+# Vidro âmbar (absorve azul)
+python -m path_tracing.scripts.proj2_req7_dielectric --material glass \
+  --absorption 0.2 0.6 1.2 --spp 32 --depth 8 --mode mis
+
+# Água azul-esverdeada (absorve vermelho)
+python -m path_tracing.scripts.proj2_req7_dielectric --material water \
+  --absorption 0.30 0.05 0.10 --spp 32 --depth 8 --mode mis
+```
+
+> Os builders `build_proj2_cornell_glass_scene(absorption=...)` /
+> `build_proj2_cornell_water_scene(absorption=...)` aceitam `σ` (default `None` = incolor,
+> preservando o comportamento anterior).
+
 ### Arquitetura
 
 #### 1. DielectricBSDF (nova classe)
@@ -215,6 +258,7 @@ python -m path_tracing.scripts.proj2_req7_dielectric \
 - Reflexão interna total em ângulo > θ_c (ao sair): reflete com `f = 1`.
 - Fresnel em incidência normal: fração refletida ≈ 0.040 (esperado 4% para vidro).
 - Integrador end-to-end nas cenas glass/water: radiância média > 0 (transmissão ocorre).
+- Beer-Lambert: razão de saída `(0.671, 0.301, 0.091)` ≈ `exp(−σ·d)` com `σ=(0.2,0.6,1.2)`, `d≈2`.
 
 **Validação Visual** (após re-render):
 
@@ -257,8 +301,9 @@ python -m path_tracing.scripts.proj2_req7_dielectric \
 
 ### Próximas Melhorias (Futuro)
 
-- [ ] Beer-Lambert absorption: exp(-σ \* d) para materiais coloridos
+- [x] Beer-Lambert absorption: exp(-σ · d) para materiais coloridos — **implementado** (ver §6)
 - [ ] Schlick's approximation para Fresnel (mais rápido, menos preciso)
 - [ ] Thin film interference para efeitos iridescentes
 - [ ] Anisotropic refraction (birrefringência)
+- [ ] Meio aninhado (pilha de índices) para objetos sobrepostos
       """
