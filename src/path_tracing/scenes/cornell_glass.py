@@ -16,18 +16,22 @@ from ..bsdf.dielectric import DielectricBSDF
 from ..lights.area_rect import RectAreaLight
 
 
-def build_proj2_cornell_glass_scene() -> tuple[Scene, Camera]:
+def build_proj2_cornell_glass_scene(absorption: glm.vec3 | None = None) -> tuple[Scene, Camera]:
   """Constrói Cornell Box com esfera de vidro (IOR=1.5).
-  
+
   Geometria:
   - Cornell Box padrão com paredes em Lambertian
   - Luz: RectAreaLight 3×3 no teto
   - Objeto: esfera de vidro (raio=1.0) no piso, centrada em x,z
-  
+
   Validação:
   - Esfera refratará luz passando através
   - Reflexão Fresnel causará especularidade nas bordas
   - Caustics (padrão de luz refratada) visível no chão
+
+  Args:
+    absorption: coeficiente de absorção Beer-Lambert σ (RGB) do vidro. None/0 =
+      incolor. Ex.: glm.vec3(0.2, 0.6, 1.2) absorve mais o azul → vidro âmbar.
   """
   scene = Scene(
     ambient_light=glm.vec3(0.0),
@@ -66,7 +70,7 @@ def build_proj2_cornell_glass_scene() -> tuple[Scene, Camera]:
   ))
 
   # === ESFERA DE VIDRO ===
-  glass_bsdf = DielectricBSDF(ior=1.5, absorption=None)
+  glass_bsdf = DielectricBSDF(ior=1.5, absorption=absorption)
   glass_sphere = Sphere(
     center=glm.vec3(2.775, 1.0, 2.775),  # Centrada no piso (y=1.0 para raio 1.0 não penetrar)
     radius=1.0,
