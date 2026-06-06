@@ -44,6 +44,9 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
   red_bsdf = LambertianBSDF(glm.vec3(0.8, 0.0, 0.0))
   green_bsdf = LambertianBSDF(glm.vec3(0.0, 0.8, 0.0))
   
+  # Teto emissivo (luz)
+  light_emissive_bsdf = EmissiveBSDF(glm.vec3(2.0, 2.0, 2.0))
+  
   # Piso (z = -size)
   floor = Plane(
     pos=glm.vec3(0, 0, -size),
@@ -52,11 +55,11 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
   )
   scene.objects.append(floor)
   
-  # Teto (z = +size)
+  # Teto (z = +size) — EMISSIVO
   ceiling = Plane(
     pos=glm.vec3(0, 0, size),
     normal=glm.vec3(0, 0, -1),
-    material=white_bsdf,
+    material=light_emissive_bsdf,
   )
   scene.objects.append(ceiling)
   
