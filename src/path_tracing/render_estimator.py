@@ -32,9 +32,21 @@ class EstimatorOptions:
 
 
 class RayCountEstimator:
-  """Estimador de contagem de raios baseado em parâmetros de renderização."""
+  """Estimador de raios (ray tracing) ou caminhos (path tracing).
+
+  Quando path_tracing_mode=True:
+  - A unidade primária é o **caminho** (sample completo: câmera → bounces → luz)
+  - total_paths = W × H × SPP; bounces são detalhes internos
+  - Throughput em caminhos/segundo (medido via integrator.Li)
+  - estimate_total_rays() retorna total_paths (sem bounces) para que
+    tempo = total_paths / throughput seja correto
+
+  Quando path_tracing_mode=False (padrão — ray tracing Whitted):
+  - Comportamento original: primários + recursivos + shadow rays
+  """
 
   DEFAULT_THROUGHPUT_RAYS_PER_SECOND = 35_000
+  DEFAULT_THROUGHPUT_PATHS_PER_SECOND = 5_000  # path tracing sem calibração
 
   def __init__(
     self,
@@ -50,16 +62,22 @@ class RayCountEstimator:
     shadow_samples_per_hit: int | None = None,
     primary_hit_ratio: float = 0.70,
     recursive_surface_ratio: float = 0.05,
+    path_tracing_mode: bool = False,
+    min_depth: int = 1,
   ):
     self.width = width
     self.height = height
     self.samples_per_pixel = samples_per_pixel
     self.max_depth = max_depth
+    self.min_depth = max(1, int(min_depth))
     self.num_objects = num_objects
     self.num_lights = num_lights
-    self.throughput_rays_per_second = (
-      throughput_rays_per_second or self.DEFAULT_THROUGHPUT_RAYS_PER_SECOND
+    self.path_tracing_mode = bool(path_tracing_mode)
+    default_tp = (
+      self.DEFAULT_THROUGHPUT_PATHS_PER_SECOND if self.path_tracing_mode
+      else self.DEFAULT_THROUGHPUT_RAYS_PER_SECOND
     )
+    self.throughput_rays_per_second = float(throughput_rays_per_second) if throughput_rays_per_second else default_tp
     self.avg_intersections_per_ray = float(avg_intersections_per_ray) if avg_intersections_per_ray is not None else None
     self.measured_intersection_throughput = float(measured_intersection_throughput) if measured_intersection_throughput is not None else None
     self.shadow_samples_per_hit = int(shadow_samples_per_hit) if shadow_samples_per_hit is not None else 0
@@ -67,12 +85,25 @@ class RayCountEstimator:
     self.recursive_surface_ratio = max(0.0, min(1.0, float(recursive_surface_ratio)))
 
   def estimate_primary_rays(self) -> int:
+    """Raios primários (ray tracing) ou caminhos totais (path tracing)."""
     return self.width * self.height * self.samples_per_pixel
 
   def estimate_secondary_rays(self) -> int:
+    """Raios secundários (ray tracing) ou bounces totais (path tracing, informativo).
+
+    Path tracing: cada caminho gera avg_path_length bounces internamente.
+    Esse valor é informativo — NÃO entra no cálculo de tempo quando
+    path_tracing_mode=True (os bounces já estão embutidos no throughput medido).
+    """
+    if self.path_tracing_mode:
+      # Comprimento médio do caminho: (min_depth + max_depth) / 2
+      avg_path_length = (self.min_depth + self.max_depth) / 2.0
+      bounces_per_path = max(0.0, avg_path_length - 1.0)  # 1 primário + N bounces
+      return int(float(self.estimate_primary_rays()) * bounces_per_path)
+
+    # Ray tracing: decaimento exponencial por profundidade
     if self.max_depth <= 0 or self.recursive_surface_ratio <= 0.0:
       return 0
-
     primary = float(self.estimate_primary_rays())
     continuation_factors = [1.0, 0.60, 0.40, 0.25, 0.15]
     prev = primary * self.primary_hit_ratio * self.recursive_surface_ratio
@@ -93,11 +124,18 @@ class RayCountEstimator:
     return int(shadable * float(self.shadow_samples_per_hit))
 
   def estimate_total_rays(self) -> int:
+    """Total de trabalho para estimativa de tempo.
+
+    Path tracing: apenas caminhos (throughput medido já inclui bounces).
+    Ray tracing: primários + recursivos + shadow.
+    """
+    if self.path_tracing_mode:
+      return self.estimate_primary_rays()  # = total_paths; bounces já no throughput
     return self.estimate_primary_rays() + self.estimate_secondary_rays() + self.estimate_shadow_rays()
 
   def estimate_render_time_seconds(self) -> float:
-    total_rays = self.estimate_total_rays()
-    return total_rays / self.throughput_rays_per_second
+    total = self.estimate_total_rays()
+    return total / self.throughput_rays_per_second
 
   def format_time(self, seconds: float) -> str:
     if seconds < 0:
@@ -128,42 +166,58 @@ class RayCountEstimator:
     return float(total_tests) / float(self.measured_intersection_throughput)
 
   def print_estimate(self, title: str = 'ESTIMATIVA DE TRAÇADO DE RAIOS') -> None:
-    primary_rays = self.estimate_primary_rays()
-    secondary_rays = self.estimate_secondary_rays()
-    shadow_rays = self.estimate_shadow_rays()
-    total_rays = self.estimate_total_rays()
+    primary = self.estimate_primary_rays()
+    secondary = self.estimate_secondary_rays()
+    shadow = self.estimate_shadow_rays()
+    total = self.estimate_total_rays()
     estimated_time = self.estimate_render_time_seconds()
 
-    lines = [
-      f'Resolução: {self.width}x{self.height} pixels',
-      f'Amostras por pixel: {self.samples_per_pixel}',
-      f'Profundidade máxima: {self.max_depth}',
-      f'Objetos: {self.num_objects}',
-      f'Luzes: {self.num_lights}',
-      f'Raios primários: {self.format_ray_count(primary_rays)} raios',
-      f'Raios secundários (recursivos): {self.format_ray_count(secondary_rays)} raios',
-      f'Shadow rays: {self.format_ray_count(shadow_rays)} raios',
-      f'Total de raios: {self.format_ray_count(total_rays)} raios',
-      f'Throughput: {self.format_ray_count(int(self.throughput_rays_per_second))} raios/segundo',
-      f'Tempo estimado (por raios): {self.format_time(estimated_time)}',
-    ]
-    time_by_intersections = self.estimate_render_time_by_intersections_seconds()
-    if time_by_intersections is not None:
-      lines.append(f'Tempo estimado (por interseções): {self.format_time(time_by_intersections)}')
+    if self.path_tracing_mode:
+      avg_path_length = (self.min_depth + self.max_depth) / 2.0
+      lines = [
+        f'Resolução: {self.width}x{self.height} pixels',
+        f'Amostras por pixel (SPP): {self.samples_per_pixel}',
+        f'Profundidade: min={self.min_depth}, max={self.max_depth} (méd.≈{avg_path_length:.1f} bounces)',
+        f'Objetos: {self.num_objects}',
+        f'Luzes (emissivas em scene.objects): {self.num_lights}',
+        f'Caminhos totais: {self.format_ray_count(primary)} caminhos',
+        f'Bounces estimados: {self.format_ray_count(secondary)} (informativo; já no throughput)',
+        f'Shadow rays: {self.format_ray_count(shadow)} raios',
+        f'Throughput: {self.format_ray_count(int(self.throughput_rays_per_second))} caminhos/segundo',
+        f'Tempo estimado: {self.format_time(estimated_time)}',
+      ]
+    else:
+      lines = [
+        f'Resolução: {self.width}x{self.height} pixels',
+        f'Amostras por pixel: {self.samples_per_pixel}',
+        f'Profundidade máxima: {self.max_depth}',
+        f'Objetos: {self.num_objects}',
+        f'Luzes: {self.num_lights}',
+        f'Raios primários: {self.format_ray_count(primary)} raios',
+        f'Raios secundários (recursivos): {self.format_ray_count(secondary)} raios',
+        f'Shadow rays: {self.format_ray_count(shadow)} raios',
+        f'Total de raios: {self.format_ray_count(total)} raios',
+        f'Throughput: {self.format_ray_count(int(self.throughput_rays_per_second))} raios/segundo',
+        f'Tempo estimado (por raios): {self.format_time(estimated_time)}',
+      ]
+      time_by_intersections = self.estimate_render_time_by_intersections_seconds()
+      if time_by_intersections is not None:
+        lines.append(f'Tempo estimado (por interseções): {self.format_time(time_by_intersections)}')
     _print_log_block(title, lines)
 
   def to_dict(self) -> dict:
-    primary_rays = self.estimate_primary_rays()
-    secondary_rays = self.estimate_secondary_rays()
-    shadow_rays = self.estimate_shadow_rays()
-    total_rays = self.estimate_total_rays()
+    primary = self.estimate_primary_rays()
+    secondary = self.estimate_secondary_rays()
+    shadow = self.estimate_shadow_rays()
+    total = self.estimate_total_rays()
     estimated_time = self.estimate_render_time_seconds()
 
     data: dict[str, Any] = {
-      'primary_rays': primary_rays,
-      'secondary_rays': secondary_rays,
-      'shadow_rays': shadow_rays,
-      'total_rays': total_rays,
+      'path_tracing_mode': self.path_tracing_mode,
+      'primary_rays': primary,
+      'secondary_rays': secondary,
+      'shadow_rays': shadow,
+      'total_rays': total,
       'estimated_time_seconds': estimated_time,
       'estimated_time_minutes': estimated_time / 60.0,
       'formatted_time': self.format_time(estimated_time),
@@ -225,16 +279,20 @@ class RenderEstimator:
 
     shadow_samples_per_hit = self._compute_shadow_samples_per_hit()
     recursive_surface_ratio = self._compute_recursive_surface_ratio()
+    path_tracing_mode = self.integrator is not None
+    min_depth = getattr(self.integrator, 'min_depth', 1) if self.integrator is not None else 1
 
     self.ray_counter = RayCountEstimator(
       width=self.width,
       height=self.height,
       samples_per_pixel=self.samples_per_pixel,
       max_depth=getattr(self.scene, 'max_depth', 3),
+      min_depth=min_depth,
       num_objects=len(getattr(self.scene, 'objects', [])),
       num_lights=len(getattr(self.scene, 'lights', [])),
       shadow_samples_per_hit=shadow_samples_per_hit,
       recursive_surface_ratio=recursive_surface_ratio,
+      path_tracing_mode=path_tracing_mode,
     )
 
   @staticmethod
@@ -261,13 +319,19 @@ class RenderEstimator:
   def _compute_recursive_surface_ratio(self) -> float:
     total_materials = 0
     recursive_materials = 0
+    # Tipos de material/BSDF que geram raio secundário (path tracing ou ray tracer)
+    _RECURSIVE_KEYWORDS = (
+      'reflective', 'transparent',          # legacy ray_tracing_2 material names
+      'lambertian', 'dielectric', 'ggx',    # BSDF types — todo BSDF não-emissivo continua
+      'microfacet', 'cooktorrance', 'glass',
+    )
     for obj in getattr(self.scene, 'objects', []):
       material = self._extract_material(obj)
       if material is None:
         continue
       total_materials += 1
       material_name = type(material).__name__.lower()
-      if 'reflective' in material_name or 'transparent' in material_name:
+      if any(k in material_name for k in _RECURSIVE_KEYWORDS):
         recursive_materials += 1
     if total_materials == 0:
       return 0.0
@@ -299,12 +363,21 @@ class RenderEstimator:
       ys = [0]
 
     samples_tested = 0
+    integrator_samples = 0  # raios efetivos contados pelo integrador (path tracing)
+    integrator_available = self.integrator is not None and hasattr(self.integrator, 'Li')
+
     for j in ys:
       for i in xs:
         samples = film.get_samples_for_pixel(i, j)
         for xn, yn in samples:
           ray = self.cam.generate_ray(xn, yn)
-          self.scene.trace_ray(ray)
+          if integrator_available:
+            # Calibração com custo real: integrador executa todos os bounces.
+            # Mede throughput em "samples completos/segundo" (inclui BSDF + interseções).
+            self.integrator.Li(ray, self.scene)  # type: ignore[union-attr]
+            integrator_samples += 1
+          else:
+            self.scene.trace_ray(ray)
           samples_tested += 1
           if perf_counter() - cal_start > float(self.options.calibrate_max_seconds):
             break
@@ -321,8 +394,21 @@ class RenderEstimator:
     rays_traced = int(stats.get('rays_traced', 0))
     intersection_tests = int(stats.get('intersection_tests', 0))
     shadow_rays = int(stats.get('shadow_rays', 0))
-    measured_throughput = ((rays_traced + shadow_rays) / cal_elapsed) if cal_elapsed > 0 else 0.0
+
+    if integrator_available and integrator_samples > 0 and cal_elapsed > 0:
+      # Throughput em "samples completos por segundo" — cada sample inclui N bounces.
+      # Convertemos para "pixels/segundo" e depois para tempo total de render estimado.
+      samples_per_second = integrator_samples / cal_elapsed
+      total_pixels = self.width * self.height * self.samples_per_pixel
+      estimated_render_seconds = total_pixels / samples_per_second
+      measured_throughput = samples_per_second  # unidade: samples/s (não raios primários/s)
+      calibration_mode = 'integrator_Li'
+    else:
+      measured_throughput = ((rays_traced + shadow_rays) / cal_elapsed) if cal_elapsed > 0 else 0.0
+      estimated_render_seconds = None
+      calibration_mode = 'scene_trace_ray'
     self.calibration_info = {
+      'calibration_mode': calibration_mode,
       'calibration_elapsed_seconds': cal_elapsed,
       'calibration_samples_tested': samples_tested,
       'calibration_rays_traced': rays_traced,
@@ -331,19 +417,29 @@ class RenderEstimator:
       'measured_throughput_rays_per_second': measured_throughput,
     }
 
-    _print_log_block(
-      'RESULTADO DA CALIBRACAO',
-      [
-        f'samples_tested: {samples_tested}',
-        f'rays_traced: {rays_traced}',
-        f'intersection_tests: {intersection_tests}',
-        f'shadow_rays: {shadow_rays}',
-        f'elapsed: {_format_seconds_and_minutes(cal_elapsed)}',
-        f'measured_throughput (rays + shadow_rays): {measured_throughput:.0f} raios/segundo',
-      ],
-    )
+    log_lines = [
+      f'modo: {calibration_mode}',
+      f'samples_tested: {samples_tested}',
+      f'rays_traced: {rays_traced}',
+      f'intersection_tests: {intersection_tests}',
+      f'shadow_rays: {shadow_rays}',
+      f'elapsed: {_format_seconds_and_minutes(cal_elapsed)}',
+    ]
+    if integrator_available:
+      log_lines.append(f'throughput (samples completos/s): {measured_throughput:.0f} samples/segundo')
+      if estimated_render_seconds is not None:
+        log_lines.append(f'tempo estimado direto: {_format_seconds_and_minutes(estimated_render_seconds)}')
+    else:
+      log_lines.append(f'measured_throughput (rays + shadow_rays): {measured_throughput:.0f} raios/segundo')
+    _print_log_block('RESULTADO DA CALIBRACAO', log_lines)
 
-    if measured_throughput > 0.0:
+    if integrator_available and integrator_samples > 0 and cal_elapsed > 0:
+      # Path tracing: throughput em caminhos/segundo (paths/s).
+      # estimate_total_rays() no modo path_tracing_mode retorna total_paths,
+      # então tempo = total_paths / paths_per_second — sem conversão extra.
+      if measured_throughput > 0.0:
+        self.ray_counter.throughput_rays_per_second = measured_throughput
+    elif measured_throughput > 0.0:
       self.ray_counter.throughput_rays_per_second = measured_throughput
 
     shadow_samples_per_hit = max(1, int(self.ray_counter.shadow_samples_per_hit))
@@ -353,8 +449,12 @@ class RenderEstimator:
 
     if intersection_tests > 0 and cal_elapsed > 0.0:
       self.ray_counter.measured_intersection_throughput = float(intersection_tests) / float(cal_elapsed)
-      denom = float(rays_traced + shadow_rays) if (rays_traced + shadow_rays) > 0 else float(max(1, rays_traced))
-      self.ray_counter.avg_intersections_per_ray = float(intersection_tests) / denom
+      if not integrator_available and rays_traced > 0:
+        # Só computa avg_intersections_per_ray no modo ray-tracer: o integrador chama
+        # compute_intersection() diretamente sem incrementar rays_traced, então
+        # rays_traced=0 e a divisão produziria um valor absurdo (25K+).
+        denom = float(rays_traced + shadow_rays) if (rays_traced + shadow_rays) > 0 else float(max(1, rays_traced))
+        self.ray_counter.avg_intersections_per_ray = float(intersection_tests) / denom
 
     self.ray_counter.print_estimate('ESTIMATIVA DE TRAÇADO DE RAIOS')
 
