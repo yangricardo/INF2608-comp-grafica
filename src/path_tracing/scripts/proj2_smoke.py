@@ -2,47 +2,38 @@
 """Smoke test da Etapa 01: Renderiza esfera com normal-as-color (ray-cast).
 
 Uso:
-  python -m path_tracing.scripts.proj2_smoke --spp 1 --out out/smoke
+  python -m path_tracing.scripts.proj2_smoke --out out/proj2/smoke
 """
 
 import sys
 import argparse
+from datetime import datetime
 from pathlib import Path
 
 from pyglm import glm
-import numpy as np
 from PIL import Image
 
-# Adiciona src ao path se necessário
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from path_tracing.scene import Scene
 from path_tracing.camera import Camera
 from path_tracing.shape import Sphere
 from path_tracing.bsdf.lambertian import LambertianBSDF
-from path_tracing.ray import Ray
-from path_tracing.film import Film
 
 
-def render_smoke_test(width: int, height: int, out_dir: str | None = None) -> str:
-  """Renderiza esfera com normal-as-color (ray-cast primário).
-  
-  Referência:
-    - Etapa 01: boilerplate + smoke test
-    - Técnica: ray-cast com cor = (n+1)/2
+def render_smoke_test(width: int, height: int, out_root: str = 'out/proj2/smoke') -> str:
+  """Renderiza esfera com normal-as-color (ray-cast primário, sem integrador).
+
+  Cor = (n + 1) / 2 mapeia normal em [-1,1]^3 para [0,1]^3.
+  Ref: Etapa 01 boilerplate smoke test; PBRT 4e para.1.1 Ray Casting.
   """
-  # Cena
   scene = Scene()
-  
-  # Esfera unitária na origem
-  sphere = Sphere(
+  scene.objects.append(Sphere(
     center=glm.vec3(0, 0, 0),
     radius=1.0,
-    material=LambertianBSDF(glm.vec3(1.0)),  # Material não importa para smoke test
-  )
-  scene.objects.append(sphere)
-  
-  # Câmera
+    material=LambertianBSDF(glm.vec3(1.0)),
+  ))
+
   camera = Camera(
     eye=glm.vec3(0, 0, 3),
     center=glm.vec3(0, 0, 0),
@@ -52,51 +43,43 @@ def render_smoke_test(width: int, height: int, out_dir: str | None = None) -> st
     height=height,
     focal_distance=1.0,
   )
-  
-  # Renderizar manualmente (ray-cast, sem integrador)
-  image = np.zeros((height, width, 3), dtype=np.float32)
-  
+
+  pixels: list[int] = []
   for j in range(height):
     for i in range(width):
       xn = (i + 0.5) / width
       yn = (j + 0.5) / height
-      
-      ray = camera.generate_ray(xn, yn)
-      hit = scene.compute_intersection(ray)
-      
+      hit = scene.compute_intersection(camera.generate_ray(xn, yn))
       if hit is not None:
-        # Normal como cor: (n+1)/2
-        color = (hit.normal + glm.vec3(1.0)) / 2.0
+        c = (hit.normal + glm.vec3(1.0)) * 0.5
       else:
-        # Fundo cinza escuro
-        color = glm.vec3(0.1)
-      
-      image[j, i] = [color.x, color.y, color.z]
-    
-    if (j + 1) % 50 == 0:
-      print(f"  {(j + 1) / height * 100:.1f}%", file=sys.stderr)
-  
-  # Salvar PNG
-  out_path = Path(out_dir) if out_dir else Path("output_smoke.png")
-  out_path.parent.mkdir(parents=True, exist_ok=True)
-  
-  img_uint8 = (np.clip(image, 0, 1) * 255).astype(np.uint8)
-  pil_img = Image.fromarray(img_uint8, 'RGB')
-  pil_img.save(str(out_path))
-  
-  print(f"Smoke test renderizado: {out_path}")
-  return str(out_path)
+        c = glm.vec3(0.1)
+      pixels += [
+        int(min(255, max(0, round(c.x * 255)))),
+        int(min(255, max(0, round(c.y * 255)))),
+        int(min(255, max(0, round(c.z * 255)))),
+      ]
+    if (j + 1) % max(1, height // 4) == 0:
+      print(f'  Renderizacao: {(j + 1) / height * 100:.0f}%')
+
+  img = Image.frombytes('RGB', (width, height), bytes(pixels))
+
+  timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+  out_dir = Path(out_root) / f'proj2_smoke_{timestamp}'
+  out_dir.mkdir(parents=True, exist_ok=True)
+  out_path = out_dir / 'render.png'
+  img.save(str(out_path))
+
+  print(f'Smoke test renderizado: {out_path}')
+  return str(out_dir)
 
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
-    description='Smoke test da Etapa 01 — renderiza esfera com normal-as-color (ray-cast)',
+    description='Smoke test da Etapa 01 — esfera com normal-as-color (ray-cast primario)',
   )
   parser.add_argument('--width', type=int, default=256, help='Largura da imagem')
   parser.add_argument('--height', type=int, default=256, help='Altura da imagem')
-  parser.add_argument('--spp', type=int, default=1, help='Samples per pixel (não usado em smoke test)')
-  parser.add_argument('--out', type=str, default=None, help='Diretório de saída')
-  
+  parser.add_argument('--out', type=str, default='out/proj2/smoke', help='Diretorio raiz de saida')
   args = parser.parse_args()
-  
   render_smoke_test(args.width, args.height, args.out)
