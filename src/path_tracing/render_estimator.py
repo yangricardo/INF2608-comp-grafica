@@ -203,6 +203,7 @@ class RenderEstimator:
     seed: int | None,
     gamma_fix: bool,
     options: EstimatorOptions | None = None,
+    integrator: Any = None,
   ):
     self.render = render
     self.scene = scene
@@ -215,6 +216,7 @@ class RenderEstimator:
     self.seed = seed
     self.gamma_fix = bool(gamma_fix)
     self.options = options or EstimatorOptions()
+    self.integrator = integrator
     self.calibration_info: dict[str, Any] | None = None
 
   def _reset_run_state(self) -> None:
@@ -440,6 +442,7 @@ class RenderEstimator:
       sampling_mode=self.sampling_mode,
       seed=self.seed,
       gamma_fix=self.gamma_fix,
+      integrator=self.integrator,
     )
     self.render.last_result = core
 
@@ -502,6 +505,7 @@ def run_render_with_estimation(
   seed: int | None,
   gamma_fix: bool,
   estimator_options: EstimatorOptions | None = None,
+  integrator: Any = None,
 ) -> str:
   estimator = RenderEstimator(
     render=render,
@@ -515,5 +519,6 @@ def run_render_with_estimation(
     seed=seed,
     gamma_fix=gamma_fix,
     options=estimator_options,
+    integrator=integrator,
   )
   return estimator.run()
