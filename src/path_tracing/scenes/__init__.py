@@ -14,6 +14,7 @@ from ..camera import Camera
 from ..shape import Box, Sphere
 from ..bsdf.lambertian import LambertianBSDF
 from ..bsdf.emissive import EmissiveBSDF
+from ..lights.area_rect import RectAreaLight
 
 
 def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
@@ -55,6 +56,18 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
     material=light_bsdf,
   )
   scene.objects.append(light_panel)
+
+  # RectAreaLight paralela ao painel: usada por NEE (mode=nee_only/mis).
+  # Mesmas coordenadas do EmissiveBSDF Box — corner=p_min do topo do painel,
+  # edges ao longo de x e z. Le idêntico para que bsdf_only e nee_only
+  # convirjam para o mesmo valor em SPP alto.
+  # Ref: PBRT 4e §12.4 Area Lights; §13.4 A Better Path Tracer.
+  scene.lights.append(RectAreaLight(
+    corner=glm.vec3(1.275, 5.50, 1.275),
+    edge_u=glm.vec3(3.0, 0.0, 0.0),
+    edge_v=glm.vec3(0.0, 0.0, 3.0),
+    Le=glm.vec3(7.0, 7.0, 7.0),
+  ))
 
   # === OBJETOS (estilo req3, axis-aligned) ===
   low_box  = Box(p_min=glm.vec3(0.85, 0.00, 0.85), p_max=glm.vec3(2.50, 1.10, 2.50), material=white_bsdf)
