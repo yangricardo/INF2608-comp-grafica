@@ -52,8 +52,8 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
   # 3.0×3.0 unidades centrado no teto; Le=(7,7,7) calibrado para exposição razoável
   light_bsdf = EmissiveBSDF(glm.vec3(7.0, 7.0, 7.0))
   light_panel = Box(
-    p_min=glm.vec3(1.275, 5.45, 1.275),
-    p_max=glm.vec3(4.275, 5.55, 4.275),
+    p_min=glm.vec3(1.275, 5.449, 1.275),
+    p_max=glm.vec3(4.275, 5.550, 4.275),
     material=light_bsdf,
   )
   scene.objects.append(light_panel)
@@ -64,7 +64,7 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
   # convirjam para o mesmo valor em SPP alto.
   # Ref: PBRT 4e §12.4 Area Lights; §13.4 A Better Path Tracer.
   scene.lights.append(RectAreaLight(
-    corner=glm.vec3(1.275, 5.50, 1.275),
+    corner=glm.vec3(1.275, 5.45, 1.275),
     edge_u=glm.vec3(3.0, 0.0, 0.0),
     edge_v=glm.vec3(0.0, 0.0, 3.0),
     Le=glm.vec3(7.0, 7.0, 7.0),
