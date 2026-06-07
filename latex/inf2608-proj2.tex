@@ -62,6 +62,20 @@
 
 %% --- Links para o código-fonte ---
 \newcommand{\ghsrcbaseurl}{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/src/path_tracing/}
+\ExplSyntaxOn
+\cs_new_protected:Npn \gh_src_lines:nn #1#2
+    {
+        \href{\ghsrcbaseurl#1}{\texttt{\detokenize{#1}:}}
+        \int_zero:N \l_tmpa_int
+        \clist_map_inline:nn {#2}
+            {
+                \int_incr:N \l_tmpa_int
+                \href{\ghsrcbaseurl#1\c_hash_str L##1}{\texttt{##1}}
+                \int_compare:nNnT { \l_tmpa_int } < { \clist_count:n {#2} } {,~}
+            }
+    }
+\NewDocumentCommand{\ghsrclines}{m m}{\gh_src_lines:nn {#1} {#2}}
+\ExplSyntaxOff
 
 \newcommand{\figcmd}[1]{%
     \par\medskip
@@ -146,7 +160,8 @@ BSDF Lambertiana (Seção~\ref{sec:core}), a amostragem direta de luz — NEE (S
 o \emph{multiple importance sampling} (Seção~\ref{sec:mis}), a Roleta Russa
 (Seção~\ref{sec:rr}), as luzes de área retangular e poliédrica (Seção~\ref{sec:lights}) e a
 BSDF dielétrica refrativa (Seção~\ref{sec:dielectric}). As evidências visuais estão reunidas
-na Seção~\ref{sec:evidencias}, e as decisões e limites na Seção~\ref{sec:limites}.
+na Seção~\ref{sec:evidencias}, e a comparação com o ray tracer do Projeto~1 (incluindo a
+evolução do material dielétrico) na Seção~\ref{sec:comparacao}.
 
 % =====================================================================
 \section{Núcleo: Path Tracer Unidirecional e BSDF Lambertiana}
@@ -302,6 +317,12 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req1_lambert_basic --spp 64 --depth 8 --seed 42}
 
+\noindent\textbf{Variações de parâmetros} (estudo de ruído$\times$SPP e de profundidade):
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item Convergência: \texttt{-{}-spp 4}, \texttt{16}, \texttt{64}, \texttt{256} (com \texttt{-{}-depth 6 -{}-seed 42}) --- o ruído decai $\propto 1/\sqrt{N}$.
+\item Profundidade do caminho: \texttt{-{}-depth 2}, \texttt{4}, \texttt{8} (com \texttt{-{}-spp 64}) --- evidencia o \emph{bleeding} indireto a partir do 4\textsuperscript{o} vértice.
+\end{itemize}
+
 \subsection{NEE (Etapa 03)}
 \begin{figure}[!ht]
 \centering
@@ -309,6 +330,12 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \caption{Amostragem direta da luz (NEE): menor variância que BSDF-only no mesmo SPP.}
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req2_nee --spp 16 --depth 8 --seed 42}
+
+\noindent\textbf{Variações de parâmetros} (mesma cena/SPP/semente, dois estimadores):
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item \texttt{-{}-mode bsdf\_only -{}-spp 16 -{}-seed 42} --- alta variância (luz raramente amostrada pela BSDF).
+\item \texttt{-{}-mode nee\_only -{}-spp 16 -{}-seed 42} --- amostragem direta: ruído visivelmente menor.
+\end{itemize}
 
 \subsection{MIS (Etapa 04)}
 \begin{figure}[!ht]
@@ -318,6 +345,13 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req3_mis --spp 16 --depth 8 --seed 42}
 
+\noindent\textbf{Variações de parâmetros} (os três estimadores convergem à mesma média --- não-viés):
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item \texttt{-{}-mode bsdf\_only -{}-spp 32 -{}-seed 42}
+\item \texttt{-{}-mode nee\_only -{}-spp 32 -{}-seed 42}
+\item \texttt{-{}-mode mis -{}-spp 32 -{}-seed 42} --- menor variância combinando ambas as estratégias.
+\end{itemize}
+
 \subsection{Roleta Russa (Etapa 05)}
 \begin{figure}[!ht]
 \centering
@@ -326,6 +360,13 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req5_rr --use-rr true --spp 16 --depth 8 --seed 42}
 
+\noindent\textbf{Variações de parâmetros} (controle off$\times$on e ganho em caminhos profundos):
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item \texttt{-{}-mode mis -{}-use-rr false -{}-spp 32} vs.\ \texttt{-{}-use-rr true -{}-spp 32} --- mesma média, menor tempo.
+\item \texttt{-{}-depth 12 -{}-use-rr true} --- a Roleta Russa encurta caminhos longos sem viés.
+\item \texttt{-{}-use-rr true -{}-rr-min-depth 6} --- adia a terminação probabilística.
+\end{itemize}
+
 \subsection{Luz como malha de triângulos (Etapa 06)}
 \begin{figure}[!ht]
 \centering
@@ -333,6 +374,12 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \caption{Fonte poliédrica (malha de triângulos) com amostragem uniforme por área.}
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req6_mesh_lights --spp 16 --depth 8 --mode mis}
+
+\noindent\textbf{Variações de parâmetros} (malha com MIS e com Roleta Russa):
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item \texttt{-{}-mode mis -{}-spp 16} --- equivalente à luz retangular de mesma área em alto SPP.
+\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 32} --- combina amostragem uniforme por área e RR.
+\end{itemize}
 
 \subsection{Dielétrico (Etapa 07)}
 \begin{figure}[!ht]
@@ -343,18 +390,88 @@ refração/IOR/Beer-Lambert; re-renderizar para a versão final.}
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --absorption 0.2 0.6 1.2 --spp 32 --depth 8 --mode mis}
 
-% =====================================================================
-\section{Decisões de Modelagem e Limites}
-\label{sec:limites}
+\noindent\textbf{Variações de parâmetros} (material $\times$ absorção $\times$ estimador):
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item \texttt{-{}-material glass -{}-spp 32 -{}-mode mis} (incolor) vs.\ \texttt{-{}-absorption 0.2 0.6 1.2} (âmbar, absorve azul).
+\item \texttt{-{}-material water -{}-spp 32 -{}-mode mis} (incolor) vs.\ \texttt{-{}-absorption 0.30 0.05 0.10} (azul-esverdeado, absorve vermelho).
+\item \texttt{-{}-material glass -{}-mode bsdf\_only} (cáusticas ruidosas) vs.\ \texttt{-{}-mode mis}.
+\item \texttt{-{}-material glass -{}-use-rr true -{}-depth 12} --- caminhos internos profundos (múltiplas reflexões/TIR) com RR.
+\end{itemize}
 
-A implementação é em Python puro (\texttt{pyglm}/PIL), priorizando clareza e corretude sobre
-desempenho; resoluções $\le 512^2$ e SPP moderado são o regime prático. Radiância em RGB
-linear (gama opcional no PNG). O dielétrico assume meio \emph{não aninhado} (um nível
-dentro/fora), suficiente para esfera/cubo convexos isolados, e omite o fator de radiância
-$1/\eta^2$ por cancelar em objeto fechado. \emph{Não} foram implementadas (ficam como evolução):
-microfacetas GGX, luz infinita/\emph{environment}, traçado bidirecional (BDPT) e Metropolis
-(MLT). Como os extras já realizados (MIS, Roleta Russa, malha, dielétrico) excedem a cota de
-pontos de extensão, essas ausências não comprometem os requisitos do enunciado.
+% =====================================================================
+\section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
+\label{sec:comparacao}
+
+A transição do Projeto~1 para o Projeto~2 é, sobretudo, uma \textbf{reescrita do integrador},
+não da geometria: câmera \emph{pinhole}, interseções, instanciação e BVH são reaproveitadas. O
+ray tracer recursivo (\emph{Whitted}) em \path{src/ray_tracing_2/} avalia Phong analiticamente
+e dispara raios secundários apenas para reflexão/refração especular; o path tracer em
+\path{src/path_tracing/} estima a equação de transporte de luz~\citep{kajiya1986rendering}
+por Monte Carlo, construindo caminhos completos com \emph{throughput} $\beta$
+\pbrtsecs{13.1, 13.3, 13.4}.
+
+\begin{table*}[!ht]
+\caption{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}
+\label{tab:rt-vs-pt}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Aspecto & Projeto 1 --- Ray Tracing (Whitted) & Projeto 2 --- Path Tracing \\
+Equação resolvida & Phong analítico + reflexão/refração recursiva & Estimador de Monte Carlo da LTE / integral de caminhos~\citep{kajiya1986rendering} \\
+Iluminação direta & \texttt{direct\_lighting()} analítico por luz pontual/área & NEE (amostragem da luz) + MIS no último segmento \\
+Iluminação indireta & Apenas especular (reflexão/refração) & Difusa e especular (GI completa) via $\beta$ acumulado \\
+Sombreamento & Função fechada do material (Phong) & Probabilístico: $\beta \mathrel{\ast}= f\,\lvert\cos\theta\rvert/p$ \\
+Terminação & \texttt{can\_spawn\_ray()} / \texttt{max\_depth} fixo & \texttt{min\_depth}=4 + Roleta Russa \pbrtsec{2.2.4} \\
+Convergência & Determinística (nítida em baixo SPP) & Estocástica, ruído $\propto 1/\sqrt{N}$ \\
+Especular + luz & Reflexão/refração somadas na recursão & Delta: pula NEE/MIS, peso 1 (\texttt{is\_specular}) \\
+\end{tblr}
+\end{table*}
+
+\subsection{Evolução do material dielétrico}
+\label{sec:dielectric-evol}
+
+O material refrativo é o caso mais ilustrativo da evolução. No Projeto~1,
+\texttt{TransparentMaterial} (\path{src/ray_tracing_2/material.py}, linha~176) é um material
+\emph{recursivo} derivado de Phong: usa Fresnel-Schlick, \texttt{glm.refract()} e atenuação de
+Beer-Lambert aplicada nos \emph{raios de sombra}. No Projeto~2, \texttt{DielectricBSDF}
+(\path{src/path_tracing/bsdf/dielectric.py}) é uma BSDF \emph{delta} amostrada
+estocasticamente, com Fresnel exato e absorção rastreada no integrador. A
+Tabela~\ref{tab:dielectric-evol} resume as diferenças.
+
+\begin{table*}[!ht]
+\caption{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times$ path tracer (Projeto~2).}
+\label{tab:dielectric-evol}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Aspecto & \texttt{TransparentMaterial} (P1) & \texttt{DielectricBSDF} (P2) \\
+Fresnel & Aproximação de Schlick $R_0+(1-R_0)(1-\cos\theta)^5$ & Exato não polarizado $F=\tfrac12(r_\parallel^2+r_\perp^2)$ \pbrtsec{9.5} \\
+Reflexão vs.\ refração & Ponderação determinística ($R$ e $1-R$) na recursão & Escolha estocástica (uma direção delta por vértice) \\
+Direção refratada & \texttt{glm.refract()} & Forma vetorial no frame da normal geométrica \\
+Reflexão interna total & Teste heurístico sobre a direção refratada & Analítico: $\sin^2\theta_t = \eta^2(1-\cos^2\theta_i)\ge 1$ \\
+Entrada/saída do meio & \texttt{front\_face}/\texttt{backfacing} (normal virada) & Sinal de $\omega_o\!\cdot\! n$ (normal geométrica) \\
+Absorção (Beer-Lambert) & Nos raios de sombra ao sair do meio \pbrtsec{11.2} & Rastreio de meio: $\beta\mathrel{\ast}=e^{-\sigma d}$ em qualquer segmento interno \\
+Integração com a luz & Embutida no sombreamento recursivo de Phong & Especular pula NEE/MIS (peso 1); GI por amostragem da BSDF \\
+\end{tblr}
+\end{table*}
+
+\paragraph{Limites declarados.} A implementação é em Python puro (\texttt{pyglm}/PIL),
+priorizando clareza e corretude; resoluções $\le 512^2$ e SPP moderado são o regime prático.
+O dielétrico assume meio \emph{não aninhado} (um nível dentro/fora), suficiente para
+esfera/cubo convexos isolados, e omite o fator de radiância $1/\eta^2$ por cancelar em objeto
+fechado. \emph{Não} foram implementadas (ficam como evolução): microfacetas GGX, luz infinita/
+\emph{environment}, traçado bidirecional (BDPT) e Metropolis (MLT); como os extras já
+realizados excedem a cota de pontos de extensão, essas ausências não comprometem o enunciado.
 
 % =====================================================================
 \section{Conclusão e Trabalhos Futuros}
@@ -371,5 +488,38 @@ bidirecionais/MCMC para reduzir o ruído de cáusticas. A base ortonormal local 
 % =====================================================================
 \bibliographystyle{apalike-sol}
 \bibliography{refs}
+
+% =====================================================================
+\clearpage
+\section*{Anexo A: Quadro de Referências Conceituais}
+
+O quadro a seguir mapeia cada conceito implementado à evidência mais direta no código
+(\path{src/path_tracing/}) e a uma nota compacta com as páginas dos slides, a seção mais
+próxima em \pbrtbook{} e as linhas de código relevantes.
+
+\begin{table*}[!ht]
+\caption{Mapeamento conceito $\to$ evidência $\to$ referências (etapas 02--07 e infraestrutura).}
+\label{tab:referencias}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.24\textwidth] Q[l,wd=0.34\textwidth] Q[l,wd=0.36\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Conceito de referência & Evidência principal & Nota \\
+Núcleo unidirecional e \emph{throughput} $\beta$ & \texttt{PathIntegrator}, \texttt{Li()} & \slidesref{inf2608slides08}{8}{—}; \pbrtsec{13.3}; \ghsrclines{integrators/path_tracer.py}{31,68}. \\
+BSDF Lambertiana e método de Malley & \texttt{LambertianBSDF.eval/sample/pdf}, \texttt{cosine\_hemisphere()} & \slidesref{inf2608slides07}{7}{—}; \pbrtsecpair{9.2}{A.5}; \ghsrclines{bsdf/lambertian.py}{17,45,73}; \ghsrclines{sampling.py}{61}. \\
+Base ortonormal local (Frisvad) & \texttt{ONB}, \texttt{frisvad\_branchless()} & \slidesref{inf2608slides09}{9}{—}; \citet{frisvad2012orthonormal}; \ghsrclines{onb.py}{15,60}. \\
+NEE: conversão área $\to$ ângulo sólido & \texttt{RectAreaLight.sample\_Li/pdf\_Li}, laço NEE & \slidesref{inf2608slides09}{9}{—}; \pbrtsecpair{12.4}{12.6}; \ghsrclines{lights/area_rect.py}{65,111}; \ghsrclines{integrators/path_tracer.py}{178}. \\
+MIS (heurística de potência $\beta=2$) & \texttt{balance\_heuristic}, \texttt{power\_heuristic} & \slidesref{inf2608slides09}{9}{—}; \pbrtsec{2.2.3}; \citet{veach1995optimallycombin}; \ghsrclines{mis.py}{16,45}. \\
+Roleta Russa (não-viesada) & terminação probabilística por $\beta$ & \slidesref{inf2608slides09}{9}{—}; \pbrtsec{2.2.4}; \citet{misso2022unbiased}; \ghsrclines{integrators/path_tracer.py}{274}. \\
+Luz poliédrica (uniforme por área) & \texttt{TriangleMeshLight.sample\_Li/pdf\_Li}, \texttt{uniform\_triangle()} & \slidesref{inf2608slides09}{9}{—}; \pbrtsec{6.5}; \ghsrclines{lights/area_mesh.py}{22,95,163}; \ghsrclines{sampling.py}{93}. \\
+Dielétrico: Snell, Fresnel, TIR & \texttt{DielectricBSDF.sample}, \texttt{is\_specular} & \pbrtsec{9.5}; \ghsrclines{bsdf/dielectric.py}{29,71,75,112}. \\
+Beer-Lambert (rastreio de meio) & atenuação $e^{-\sigma d}$ no integrador & \pbrtsec{11.2}; \ghsrclines{integrators/path_tracer.py}{118}. \\
+Câmera, filme e amostragem de pixel & \texttt{Camera.generate\_ray()}, \texttt{Film.get\_samples\_for\_pixel/render} & \slidesref{inf2608slides07}{7}{—}; \ghsrclines{camera.py}{28}; \ghsrclines{film.py}{104,156}. \\
+\end{tblr}
+\end{table*}
 
 \end{document}
