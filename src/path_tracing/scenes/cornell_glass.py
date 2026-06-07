@@ -55,15 +55,15 @@ def build_proj2_cornell_glass_scene(absorption: glm.vec3 | None = None) -> tuple
   # === PAINEL EMISSIVO ===
   light_bsdf = EmissiveBSDF(glm.vec3(7.0, 7.0, 7.0))
   light_panel = Box(
-    p_min=glm.vec3(1.275, 5.45, 1.275),
-    p_max=glm.vec3(4.275, 5.55, 4.275),
+    p_min=glm.vec3(1.275, 5.449, 1.275),
+    p_max=glm.vec3(4.275, 5.550, 4.275),
     material=light_bsdf,
   )
   scene.objects.append(light_panel)
 
   # === LUZ (NEE) ===
   scene.lights.append(RectAreaLight(
-    corner=glm.vec3(1.275, 5.50, 1.275),
+    corner=glm.vec3(1.275, 5.45, 1.275),
     edge_u=glm.vec3(3.0, 0.0, 0.0),
     edge_v=glm.vec3(0.0, 0.0, 3.0),
     Le=glm.vec3(7.0, 7.0, 7.0),
@@ -72,7 +72,7 @@ def build_proj2_cornell_glass_scene(absorption: glm.vec3 | None = None) -> tuple
   # === ESFERA DE VIDRO ===
   glass_bsdf = DielectricBSDF(ior=1.5, absorption=absorption)
   glass_sphere = Sphere(
-    center=glm.vec3(2.775, 1.0, 2.775),  # Centrada no piso (y=1.0 para raio 1.0 não penetrar)
+    center=glm.vec3(2.775, 1.01, 2.775),  # y=1.01: evita que a base (y=0.01) toque exatamente o piso
     radius=1.0,
     material=glass_bsdf,
   )
