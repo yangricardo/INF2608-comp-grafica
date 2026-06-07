@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from pyglm import glm
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from .hit import Hit
 from .ray import Ray
 from .triangle_bvh import TriangleBVH
-
-if TYPE_CHECKING:
-  from .material import Material
 
 class Shape:
   def intersect(self, ray: Ray, hit: Hit):
@@ -143,7 +140,7 @@ class Box(Shape):
 
 class Triangle(Shape):
   # Slide 4, p. 35 e p. 47-48: a primitiva participa do mesmo fluxo de closest hit das demais.
-  def __init__(self, v0: glm.vec3, v1: glm.vec3, v2: glm.vec3, material: Material):
+  def __init__(self, v0: glm.vec3, v1: glm.vec3, v2: glm.vec3, material: Any):
     self.v0 = glm.vec3(v0)
     self.v1 = glm.vec3(v1)
     self.v2 = glm.vec3(v2)
@@ -189,7 +186,7 @@ class TriangleMesh(Shape):
   def __init__(
     self,
     triangles: list[Triangle],
-    material: Material,
+    material: Any,
     vertices: list[glm.vec3] | None = None,
     faces: list[tuple[int, int, int]] | None = None,
     name: str | None = None,
@@ -222,7 +219,7 @@ class TriangleMesh(Shape):
     cls,
     vertices: list[glm.vec3],
     faces: list[tuple[int, int, int]],
-    material: Material,
+    material: Any,
     name: str | None = None,
     accelerator: str | None = None,
     bvh_leaf_size: int = 4,
