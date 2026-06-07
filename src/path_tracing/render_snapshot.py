@@ -10,6 +10,8 @@ from pyglm import glm
 
 from .camera import Camera
 from .light import AreaLight, PointLight
+from .lights.area_rect import RectAreaLight
+from .lights.area_mesh import TriangleMeshLight
 from .material import EmissiveMaterial, PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from .scene import Scene
 from .shape import Box, Instance, Plane, Rotate, Sphere, Translate, Triangle, TriangleMesh
@@ -459,6 +461,12 @@ class LightSnapshot:
   samples_u: int | None = None
   samples_v: int | None = None
   light_sampling_mode: str | None = None
+  corner: Vec3Data | None = None
+  edge_u: Vec3Data | None = None
+  edge_v: Vec3Data | None = None
+  Le: Vec3Data | None = None
+  vertices: list[list[float]] | None = None
+  faces: list[list[int]] | None = None
 
   @classmethod
   def from_runtime(cls, light: Any) -> LightSnapshot:
