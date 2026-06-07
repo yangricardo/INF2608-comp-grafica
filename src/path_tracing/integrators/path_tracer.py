@@ -73,7 +73,7 @@ class PathIntegrator(Integrator):
     depth: int = 1,
   ) -> glm.vec3:
     """Estima radiância ao longo do raio via path tracing.
-    
+
     Pseudocódigo (PBRT 4e §13.3):
       β ← (1,1,1),  L ← (0,0,0)
       para profundidade = 1, 2, ..., max_depth:
@@ -86,11 +86,11 @@ class PathIntegrator(Integrator):
         se pdf == 0 ou f == 0: terminar
         β *= f * |cos θ_i| / pdf
         ray ← Ray(offset_point(...), wi_global)
-    
+
     Ref: PBRT 4e §13.3; Slide 8 "Traçado de Caminhos"
     """
     # Ref: PBRT 4e §13.3 A Simple Path Tracer; Slide 8 Traçado de Caminhos
-    
+
     L = glm.vec3(0.0)
     beta = glm.vec3(1.0)
     current_ray = ray
@@ -133,7 +133,7 @@ class PathIntegrator(Integrator):
         hit_material is not None
         and isinstance(hit_material, EmissiveBSDF)
       )
-      
+
       if is_emissive:
         # PBRT 4e §13.3: sempre acumula Le ao atingir emissivo em qualquer depth.
         # min_depth é restrição de Russian Roulette (Etapa 05), não de coleta de Le.
@@ -147,11 +147,11 @@ class PathIntegrator(Integrator):
         # bounces especulares; power_heuristic após bounce difuso.
         L += beta * le_val * pending_mis_weight
         break
-      
+
       # Se profundidade < min_depth obrigatória, não termina aqui
       if iter_depth >= self.max_depth:
         break
-      
+
       # Amostragem BSDF
       if hit_material is None:
         # Default: Lambertiana branca
@@ -162,7 +162,7 @@ class PathIntegrator(Integrator):
       else:
         # Material antigo sem sample() — usar Lambertiana
         bsdf = LambertianBSDF(glm.vec3(0.5))
-      
+
       # Material especular (delta): vidro/espelho. Define o frame local e o
       # tratamento de NEE/MIS/throughput (Etapa 07).
       is_specular = bool(getattr(bsdf, 'is_specular', lambda: False)())
@@ -198,10 +198,13 @@ class PathIntegrator(Integrator):
           shadow_hit = scene.compute_intersection(shadow_ray)
           dist_nee = sample['distance']
           # Se existe hit e é mais perto que a luz, é ocluído
-          # EXCETO se o hit é EmissiveBSDF (o painel de luz, não um oclusor)
+          # EXCETO se o hit é a própria luz NEE (luz coincide com primitiva
+          # emissora) — caso contrário o termo NEE seria contabilizado em dobro
+          # com a emissão direta captada por BSDF no próximo vértice.
+          # ``light.contains()`` é a forma robusta (PBRT 4e §13.4 — "Light Leaks");
+          # a checagem ``isinstance(...EmissiveBSDF)`` é o fallback legado.
           if shadow_hit is not None and shadow_hit.t < dist_nee - 1e-3:
-            # Verificar se hit é emissivo (luz panel é transparente para NEE)
-            is_light_panel = (
+            is_light_panel = light.contains(shadow_hit) or (
               shadow_hit.material is not None
               and isinstance(shadow_hit.material, EmissiveBSDF)
             )
@@ -213,23 +216,28 @@ class PathIntegrator(Integrator):
           if cos_nee <= 0.0:
             continue
           f_nee: glm.vec3 = bsdf.eval(wo_local, wi_nee_local)  # type: ignore[call-arg]
-          
+
           # MIS weight (Etapa 04)
+          # Para luzes delta (PBRT 4e §12.1.1), o peso MIS é 1.0 incondicional:
+          # a distribuição delta tem pdf_solid_angle = +inf e o balance/power
+          # heuristic colapsa. Pular o cálculo do pdf_bsdf economiza uma
+          # chamada da BSDF por vértice e evita o viés que ocorria quando
+          # pdf_nee era finito (1.0) mas a luz era delta (caso PointLight).
           w_nee = 1.0
-          if self.mode == 'mis':
+          if self.mode == 'mis' and not getattr(light, 'is_delta', False):
             # Calcular PDF dessa direção via BSDF para MIS
             pdf_bsdf_for_nee = bsdf.pdf(wo_local, wi_nee_local)  # type: ignore[call-arg]
             w_nee = power_heuristic(1, pdf_nee, 1, pdf_bsdf_for_nee, beta=2.0)
-          
+
           L += beta * f_nee * Li_nee * cos_nee / pdf_nee * w_nee
 
       # Amostra BSDF
       u_sample = (self.rng.random(), self.rng.random())
       sample_result = bsdf.sample(wo_local, glm.vec2(u_sample[0], u_sample[1]))  # type: ignore[union-attr]
-      
+
       if sample_result is None or sample_result['pdf'] == 0.0:
         break
-      
+
       wi_local = sample_result['wi']
       pdf_bsdf = sample_result['pdf']
       f = sample_result['f']
@@ -266,6 +274,10 @@ class PathIntegrator(Integrator):
           for light in lights:
             if not hasattr(light, 'pdf_Li'):
               continue
+            # Para luzes delta, a PDF contínua é 0; nada a somar aqui
+            # (o MIS weight 1.0 já foi aplicado a montante).
+            if getattr(light, 'is_delta', False):
+              continue
             pdf_light_for_bsdf += light.pdf_Li(hit.pos, wi_global)
           pending_mis_weight = power_heuristic(1, pdf_bsdf, 1, pdf_light_for_bsdf, beta=2.0)
         else:
@@ -279,7 +291,7 @@ class PathIntegrator(Integrator):
         if self.rng.random() > p_continue:
           break  # Caminho morreu por RR
         beta /= p_continue  # Resampling não-enviesado (E[β'] = E[β])
-      
+
       # Verificar se beta ficou muito pequeno (evita infinitos)
       if glm.length(beta) < 1e-6:
         break
@@ -290,5 +302,5 @@ class PathIntegrator(Integrator):
       offset_origin = scene.offset_point(hit.pos, hit.normal, wi_global)
       current_ray = type(current_ray)(offset_origin, wi_global)
       current_depth = iter_depth + 1
-    
+
     return L
