@@ -1,0 +1,194 @@
+@startuml path_tracing_class_diagram_dynamic
+' ============================================================
+' Diagrama de Classes (DINÂMICO) — src/path_tracing
+' Foco: pipeline de renderização (Render + Estimator + Snapshot),
+' integradores, montagem de cenas (scenes/) e CLIs.
+' Forçado a uma única página.
+' ============================================================
+
+title Diagrama de Classes — src/path_tracing (DINÂMICO)\nRenderização, integração, cenas, CLIs
+
+page 1 1
+top to bottom direction
+skinparam classAttributeIconSize 0
+hide empty members
+hide methods
+skinparam linetype ortho
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #888
+  FontStyle bold
+}
+skinparam class {
+  BorderColor #555
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #EFEFEF
+}
+skinparam dpi 96
+skinparam pageMargin 10
+scale 0.65
+
+' ============================================================
+' 1. path_tracing (raiz) — pipeline de render
+' ============================================================
+package "path_tracing (raiz — pipeline)" as root {
+  class Render {
+    +out_root: str
+  }
+  class EstimatorOptions {
+    +calibrate: bool
+    +calibrate_only: bool
+  }
+  class RayCountEstimator {
+    +estimate_primary_rays(): int
+    +estimate_secondary_rays(): int
+    +estimate_shadow_rays(): int
+    +estimate_total_rays(): int
+    +estimate_render_time_seconds(): float
+  }
+  class RenderEstimator {
+    +options: EstimatorOptions
+    +maybe_calibrate(film)
+    +print_initial_estimate()
+    +should_skip_render(): bool
+    +run(): str
+  }
+
+  package "render_snapshot.py" as snapshots {
+    class RenderSnapshot {
+      +from_runtime(...)
+      +from_dict(data)
+      +to_dict(): dict
+      +to_json(): str
+      +to_markdown(...)
+    }
+    class MaterialSnapshot
+    class ShapeSnapshot
+    class LightSnapshot
+    class CameraSnapshot
+    class RenderSettingsSnapshot
+    class SceneSettingsSnapshot
+  }
+
+  package "utilitários (funções)" as utils {
+    class MIS << (F,#E0E8FF) >> {
+      +power_heuristic(...)
+      +balance_heuristic(...)
+    }
+    class Sampling << (F,#E0E8FF) >> {
+      +uniform_samples_2d(...)
+      +stratified_grid_samples_2d(...)
+      +cosine_hemisphere(...)
+      +uniform_triangle(...)
+    }
+  }
+}
+
+' ============================================================
+' 2. integrators
+' ============================================================
+package "integrators" {
+  note as IntNote
+    integrators/base.py + path_tracer.py
+    Suporta BSDF-only, NEE-only, MIS + Russian Roulette.
+  end note
+
+  class Sampler {
+    +rng: random.Random
+  }
+  abstract class Integrator {
+    +Li(ray, scene, sampler, depth): glm.vec3
+  }
+  class PathIntegrator {
+    +min_depth: int
+    +max_depth: int
+    +mode: str
+    +seed: int | None
+    +use_rr: bool
+    +rr_min_depth: int
+    +VALID_MODES: tuple
+  }
+}
+
+Integrator <|-- PathIntegrator
+
+' ============================================================
+' 3. scenes
+' ============================================================
+package "scenes" {
+  note as ScenesNote
+    scenes/__init__.py + cornell_*.py + polyhedra.py
+    Construtores Cornell Box (basic/glass/mesh_light/water/showcase)
+    + helper octahedron() para malhas poliédricas.
+  end note
+
+  class Polyhedra << (F,#FFF4D0) >> {
+    +octahedron(center, radius): tuple
+  }
+
+  class SceneBuilders << (F,#FFF4D0) >> {
+    +build_proj2_cornell_basic_scene(): tuple
+    +build_proj2_cornell_glass_scene(absorption): tuple
+    +build_proj2_cornell_mesh_light_scene(): tuple
+    +build_proj2_cornell_water_scene(absorption): tuple
+    +build_proj2_cornell_showcase_scene(...): tuple
+  }
+}
+
+' ============================================================
+' 4. scripts (CLIs)
+' ============================================================
+package "scripts (CLIs)" {
+  note as ScriptsNote
+    Cada script instancia Render + RenderEstimator + Integrator
+    e gera um snapshot em out/proj2/...
+  end note
+
+  class Scripts << (F,#E8E8E8) >> {
+    +proj2_smoke
+    +proj2_req1_lambert_basic
+    +proj2_req2_nee
+    +proj2_req3_mis
+    +proj2_req5_rr
+    +proj2_req6_mesh_lights
+    +proj2_req7_dielectric
+    +proj2_showcase
+  }
+}
+
+' ============================================================
+' Relacionamentos cross-package
+' ============================================================
+
+' --- Snapshots usam polimorfismo das classes base (definidas no estático) ---
+' (LightSnapshot, ShapeSnapshot, MaterialSnapshot ligados às classes base
+'  do diagrama ESTÁTICO — referência implícita)
+
+' --- Render & Estimator ---
+Render ..> RenderEstimator
+RenderEstimator ..> EstimatorOptions
+RenderEstimator ..> RayCountEstimator
+RenderEstimator ..> Render
+
+' --- Snapshots ---
+RenderSnapshot "1" *-- "1" MaterialSnapshot
+RenderSnapshot "1" *-- "1" ShapeSnapshot
+RenderSnapshot "1" *-- "1" LightSnapshot
+RenderSnapshot "1" *-- "1" CameraSnapshot
+RenderSnapshot "1" *-- "1" RenderSettingsSnapshot
+RenderSnapshot "1" *-- "1" SceneSettingsSnapshot
+
+' --- Integrador ↔ utilitários (referência indireta) ---
+PathIntegrator ..> Sampler
+PathIntegrator ..> MIS
+
+' --- Scenes (referência indireta a Scene/Camera do estático) ---
+SceneBuilders ..> Polyhedra
+
+' --- Scripts usam Render + RenderEstimator + Integrator + SceneBuilders ---
+Scripts ..> Render
+Scripts ..> RenderEstimator
+Scripts ..> PathIntegrator
+Scripts ..> SceneBuilders
+
+@enduml
