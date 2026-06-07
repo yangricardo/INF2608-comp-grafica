@@ -95,10 +95,12 @@ def build_proj2_cornell_basic_scene() -> tuple[Scene, Camera]:
 from .cornell_mesh_light import build_proj2_cornell_mesh_light_scene
 from .cornell_glass import build_proj2_cornell_glass_scene
 from .cornell_water import build_proj2_cornell_water_scene
+from .cornell_showcase import build_proj2_cornell_showcase_scene
 
 __all__ = [
   'build_proj2_cornell_basic_scene',
   'build_proj2_cornell_mesh_light_scene',
   'build_proj2_cornell_glass_scene',
   'build_proj2_cornell_water_scene',
+  'build_proj2_cornell_showcase_scene',
 ]
