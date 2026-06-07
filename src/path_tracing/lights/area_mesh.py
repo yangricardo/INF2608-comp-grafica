@@ -210,11 +210,13 @@ class TriangleMeshLight(Light):
     if not self._bvh.intersect(ray, hit):
       return 0.0
 
-    # hit.t é a distância; hit.normal é a normal do triângulo no ponto de hit.
-    # Precisamos do triângulo original para obter a normal (a normal interpolada
-    # do hit pode ser diferente). Como o BVH não guarda referência ao triângulo
-    # original, usamos a normal do hit e verificamos o lado emissor.
-    cos_at_light = abs(glm.dot(wi, hit.normal))
+    # hit.geo_normal é a normal geométrica outward (nunca invertida por set_face_normal).
+    # cos_at_light = -dot(wi, geo_normal): positivo apenas quando o raio vem do lado
+    # emissor (hemisfério outward). Hits de face traseira dão cos_at_light ≤ 0 → PDF 0,
+    # garantindo consistência com sample_Li que rejeita cos_at_light ≤ 0.
+    cos_at_light = -glm.dot(wi, hit.geo_normal)
+    if cos_at_light <= 0.0:
+      return 0.0
 
     # pdf_area = 1 / total_area
     # pdf_solid_angle = pdf_area * t² / cos_at_light
