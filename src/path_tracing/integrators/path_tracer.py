@@ -268,18 +268,23 @@ class PathIntegrator(Integrator):
         # vista no PRÓXIMO vértice. Guardado em pending_mis_weight (aplicado uma
         # única vez à Le) em vez de dobrado em beta — corrige contaminação dos
         # bounces seguintes. Ref: Veach & Guibas 1995; PBRT 4e §13.4.
+        #
+        # Com N luzes independentes, o power heuristic exige soma dos quadrados:
+        #   w_bsdf = pdf_bsdf² / (pdf_bsdf² + Σ_i pdf_Li_i²)
+        # Usar power_heuristic(1, pdf_bsdf, 1, Σ pdf_Li_i) levaria a
+        # (Σ pdf_Li_i)² ≠ Σ pdf_Li_i² para N > 1. Calculamos diretamente.
         if self.mode == 'mis':
-          pdf_light_for_bsdf = 0.0
           lights = getattr(scene, 'lights', [])
+          pdf_light_sq_sum = 0.0
           for light in lights:
             if not hasattr(light, 'pdf_Li'):
               continue
-            # Para luzes delta, a PDF contínua é 0; nada a somar aqui
-            # (o MIS weight 1.0 já foi aplicado a montante).
             if getattr(light, 'is_delta', False):
               continue
-            pdf_light_for_bsdf += light.pdf_Li(hit.pos, wi_global)
-          pending_mis_weight = power_heuristic(1, pdf_bsdf, 1, pdf_light_for_bsdf, beta=2.0)
+            p = light.pdf_Li(hit.pos, wi_global)
+            pdf_light_sq_sum += p * p
+          denom = pdf_bsdf * pdf_bsdf + pdf_light_sq_sum
+          pending_mis_weight = (pdf_bsdf * pdf_bsdf / denom) if denom > 0.0 else 1.0
         else:
           pending_mis_weight = 1.0
 
