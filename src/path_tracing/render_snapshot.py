@@ -613,6 +613,7 @@ class RenderSettingsSnapshot:
   ray_estimation: dict[str, Any] | None = None
   estimation_quality: dict[str, Any] | None = None
   integrator_mode: str | None = None
+  command_line: str | None = None
 
   @classmethod
   def from_dict(cls, data: dict[str, Any]) -> RenderSettingsSnapshot:
@@ -628,6 +629,7 @@ class RenderSettingsSnapshot:
       ray_estimation=data.get('ray_estimation'),
       estimation_quality=data.get('estimation_quality'),
       integrator_mode=data.get('integrator_mode'),
+      command_line=data.get('command_line'),
     )
 
   def to_dict(self) -> dict[str, Any]:
@@ -642,6 +644,8 @@ class RenderSettingsSnapshot:
     }
     if self.integrator_mode is not None:
       data['integrator_mode'] = self.integrator_mode
+    if self.command_line is not None:
+      data['command_line'] = self.command_line
     if self.render_time_seconds is not None:
       data['render_time_seconds'] = float(self.render_time_seconds)
     if self.ray_estimation is not None:
@@ -761,6 +765,7 @@ class RenderSnapshot:
     render_time_seconds: float | None = None,
     ray_estimation_dict: dict[str, Any] | None = None,
     render_estimator: Any | None = None,
+    command_line: str | None = None,
   ) -> RenderSnapshot:
     if ray_estimation_dict is None and render_estimator is not None:
       try:
@@ -792,6 +797,7 @@ class RenderSnapshot:
         ray_estimation=ray_estimation_dict,
         estimation_quality=estimation_quality,
         integrator_mode=integrator_mode,
+        command_line=command_line,
       ),
       scene=SceneSettingsSnapshot.from_runtime(scene),
       camera=CameraSnapshot.from_runtime(cam),
@@ -871,6 +877,13 @@ class RenderSnapshot:
     lines = []
     lines.append('# Propriedades da Simulação')
     lines.append('')
+    if self.render.command_line:
+      lines.append('## Comando')
+      lines.append('')
+      lines.append(f'```bash')
+      lines.append(self.render.command_line)
+      lines.append('```')
+      lines.append('')
     if image_name:
       lines.append(f'![Imagem da Simulação]({image_name})')
       lines.append('')

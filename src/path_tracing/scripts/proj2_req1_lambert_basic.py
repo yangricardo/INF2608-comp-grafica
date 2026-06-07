@@ -18,6 +18,8 @@ from path_tracing.integrators.path_tracer import PathIntegrator
 from path_tracing.scenes import build_proj2_cornell_basic_scene
 
 
+_ARGV = ' '.join(sys.argv)
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
     description='Etapa 02: Path Tracer unidirecional — Cornell Box básica (7.0 pts)',
@@ -72,6 +74,7 @@ if __name__ == '__main__':
     gamma_fix=args.gamma,
     estimator_options=EstimatorOptions(calibrate=not args.no_calibrate, calibrate_only=False),
     integrator=integrator,
+    command_line=_ARGV,
   )
 
   print(f'Renderização concluída: {out_path}')

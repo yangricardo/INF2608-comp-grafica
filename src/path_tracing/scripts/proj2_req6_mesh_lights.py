@@ -24,6 +24,8 @@ from path_tracing.integrators.path_tracer import PathIntegrator
 from path_tracing.scenes import build_proj2_cornell_mesh_light_scene
 
 
+_ARGV = ' '.join(sys.argv)
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
     description='Etapa 06: Mesh Lights — Luz como poliedro com amostragem uniforme de área',
@@ -88,6 +90,7 @@ if __name__ == '__main__':
     gamma_fix=args.gamma,
     estimator_options=EstimatorOptions(calibrate=not args.no_calibrate, calibrate_only=False),
     integrator=integrator,
+    command_line=_ARGV,
   )
 
   print(f'Renderização concluída: {out_path}')

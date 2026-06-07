@@ -258,6 +258,7 @@ class RenderEstimator:
     gamma_fix: bool,
     options: EstimatorOptions | None = None,
     integrator: Any = None,
+    command_line: str | None = None,
   ):
     self.render = render
     self.scene = scene
@@ -271,6 +272,7 @@ class RenderEstimator:
     self.gamma_fix = bool(gamma_fix)
     self.options = options or EstimatorOptions()
     self.integrator = integrator
+    self.command_line = command_line
     self.calibration_info: dict[str, Any] | None = None
 
   def _reset_run_state(self) -> None:
@@ -521,6 +523,7 @@ class RenderEstimator:
         gamma_fix=self.gamma_fix,
         render_time_seconds=None,
         render_estimator=self,
+        command_line=self.command_line,
       )
       properties_json_path, properties_md_path = self._write_snapshot_files(snapshot, image_name=None)
       _print_log_block(
@@ -558,6 +561,7 @@ class RenderEstimator:
       gamma_fix=bool(core.get('gamma_fix', False)),
       render_time_seconds=float(core.get('render_time_seconds', 0.0)),
       render_estimator=self,
+      command_line=self.command_line,
     )
     properties_json_path, properties_md_path = self._write_snapshot_files(
       snapshot,
@@ -606,6 +610,7 @@ def run_render_with_estimation(
   gamma_fix: bool,
   estimator_options: EstimatorOptions | None = None,
   integrator: Any = None,
+  command_line: str | None = None,
 ) -> str:
   estimator = RenderEstimator(
     render=render,
@@ -620,5 +625,6 @@ def run_render_with_estimation(
     gamma_fix=gamma_fix,
     options=estimator_options,
     integrator=integrator,
+    command_line=command_line,
   )
   return estimator.run()

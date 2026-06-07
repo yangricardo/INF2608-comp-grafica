@@ -28,6 +28,8 @@ from path_tracing.integrators.path_tracer import PathIntegrator
 from path_tracing.scenes import build_proj2_cornell_showcase_scene
 
 
+_ARGV = ' '.join(sys.argv)
+
 def render_one(args, mode: str, use_rr: bool) -> str:
   """Renderiza a showcase num dado modo/RR e copia para um caminho estável."""
   scene, camera = build_proj2_cornell_showcase_scene()
@@ -59,6 +61,7 @@ def render_one(args, mode: str, use_rr: bool) -> str:
     gamma_fix=args.gamma,
     estimator_options=EstimatorOptions(calibrate=not args.no_calibrate, calibrate_only=False),
     integrator=integrator,
+    command_line=_ARGV,
   )
 
   # Cópia estável (caminho determinístico, sem timestamp) para o relatório.

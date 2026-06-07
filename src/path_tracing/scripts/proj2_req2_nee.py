@@ -14,6 +14,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+_ARGV = ' '.join(sys.argv)
+
 from path_tracing.render import Render
 from path_tracing.render_estimator import run_render_with_estimation, EstimatorOptions
 from path_tracing.integrators.path_tracer import PathIntegrator
@@ -74,6 +76,7 @@ if __name__ == '__main__':
     gamma_fix=args.gamma,
     estimator_options=EstimatorOptions(calibrate=not args.no_calibrate, calibrate_only=False),
     integrator=integrator,
+    command_line=_ARGV,
   )
 
   print(f'Renderização concluída: {out_path}')

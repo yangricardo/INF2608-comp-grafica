@@ -29,6 +29,8 @@ from path_tracing.render import Render
 from path_tracing.render_estimator import run_render_with_estimation, EstimatorOptions
 from path_tracing.integrators.path_tracer import PathIntegrator
 from path_tracing.scenes import (
+
+_ARGV = ' '.join(sys.argv)
   build_proj2_cornell_glass_scene,
   build_proj2_cornell_water_scene,
 )
@@ -119,6 +121,7 @@ if __name__ == '__main__':
     gamma_fix=args.gamma,
     estimator_options=EstimatorOptions(calibrate=not args.no_calibrate, calibrate_only=False),
     integrator=integrator,
+    command_line=_ARGV,
   )
 
   print(f'Renderização concluída: {out_path}')
