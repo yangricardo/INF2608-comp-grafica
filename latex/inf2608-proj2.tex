@@ -77,6 +77,26 @@
 \NewDocumentCommand{\ghsrclines}{m m}{\gh_src_lines:nn {#1} {#2}}
 \ExplSyntaxOff
 
+% Figura "talvez": inclui a imagem se o arquivo existir; senão, mostra um
+% placeholder. Permite documentar renders "a rodar em breve" sem quebrar a
+% compilação --- a imagem aparece automaticamente assim que o render existir.
+\newcommand{\figmaybe}[2]{%
+    \begin{figure}[!ht]
+    \centering
+    \IfFileExists{#1}{%
+        \includegraphics[width=0.92\linewidth]{#1}%
+    }{%
+        \setlength{\fboxsep}{10pt}%
+        \fbox{\parbox{0.86\linewidth}{\centering\footnotesize\itshape
+            \vspace{0.8cm}
+            Figura a gerar --- execute o comando indicado; a imagem aparece
+            automaticamente em \texttt{\detokenize{#1}}.
+            \vspace{0.8cm}}}%
+    }
+    \caption{#2}
+    \end{figure}%
+}
+
 \newcommand{\figcmd}[1]{%
     \par\medskip
     \begingroup
@@ -368,16 +388,17 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \end{itemize}
 
 \subsection{Luz como malha de triângulos (Etapa 06)}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.92\linewidth]{../out/proj2/req6/proj2_req6_mis_no_rr_20260606_170307/render.png}
-\caption{Fonte poliédrica (malha de triângulos) com amostragem uniforme por área.}
-\end{figure}
+
+A fonte é um \textbf{octaedro} emissivo (8 faces triangulares) suspenso no teto --- um
+poliedro nítido, e não um quad plano --- com amostragem uniforme por área. O mesmo octaedro
+é geometria visível e luz de NEE.
+
+\figmaybe{../out/proj2/req6/proj2_req6_octahedron.png}{Luz poliédrica (octaedro) com amostragem uniforme por área. \emph{Re-renderizar} após a troca de geometria (copie o \texttt{render.png} gerado para este caminho).}
 \figcmd{python -m path_tracing.scripts.proj2_req6_mesh_lights --spp 16 --depth 8 --mode mis}
 
-\noindent\textbf{Variações de parâmetros} (malha com MIS e com Roleta Russa):
+\noindent\textbf{Variações de parâmetros} (malha poliédrica com MIS e com Roleta Russa):
 \begin{itemize}\small\setlength{\itemsep}{1pt}
-\item \texttt{-{}-mode mis -{}-spp 16} --- equivalente à luz retangular de mesma área em alto SPP.
+\item \texttt{-{}-mode bsdf\_only -{}-spp 16} vs.\ \texttt{-{}-mode mis -{}-spp 16} --- a luz menor (octaedro) realça o ganho do NEE/MIS.
 \item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 32} --- combina amostragem uniforme por área e RR.
 \end{itemize}
 
@@ -397,6 +418,31 @@ refração/IOR/Beer-Lambert; re-renderizar para a versão final.}
 \item \texttt{-{}-material glass -{}-mode bsdf\_only} (cáusticas ruidosas) vs.\ \texttt{-{}-mode mis}.
 \item \texttt{-{}-material glass -{}-use-rr true -{}-depth 12} --- caminhos internos profundos (múltiplas reflexões/TIR) com RR.
 \end{itemize}
+
+\subsection{Cena integrada (\emph{showcase})}
+\label{sec:showcase}
+
+Para comparar os estimadores a partir de \textbf{uma única cena}, a \emph{showcase}
+(\path{src/path_tracing/scenes/cornell_showcase.py}) reúne, numa Cornell Box: duas caixas
+difusas rotacionadas, uma esfera de vidro incolor, uma esfera de vidro \textbf{âmbar}
+(absorção de Beer-Lambert), uma esfera difusa azul (\emph{color bleeding}) e uma
+\textbf{luz poliédrica} --- um octaedro emissivo (8 faces) que serve de geometria visível e
+de luz para NEE. Assim, GI difusa, dielétrico (incolor e absorvente) e luz de malha são
+exercitados juntos. O script renderiza os quatro modos e grava cópias estáveis em
+\path{out/proj2/showcase/} (incluídas automaticamente abaixo quando existirem).
+
+\figcmd{python -m path_tracing.scripts.proj2_showcase --all --spp 64 --depth 8 --seed 42}
+
+\noindent Equivalente, modo a modo:
+\begin{itemize}\small\setlength{\itemsep}{1pt}
+\item \texttt{-{}-mode bsdf\_only -{}-spp 64} \quad \texttt{-{}-mode nee\_only -{}-spp 64} \quad \texttt{-{}-mode mis -{}-spp 64}
+\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 64} (Roleta Russa)
+\end{itemize}
+
+\figmaybe{../out/proj2/showcase/proj2_showcase_bsdf_only_no_rr.png}{Showcase --- \texttt{bsdf\_only} (alta variância; luz pequena raramente amostrada pela BSDF).}
+\figmaybe{../out/proj2/showcase/proj2_showcase_nee_only_no_rr.png}{Showcase --- \texttt{nee\_only} (amostragem direta da luz poliédrica).}
+\figmaybe{../out/proj2/showcase/proj2_showcase_mis_no_rr.png}{Showcase --- \texttt{mis} (combina BSDF e NEE; menor ruído).}
+\figmaybe{../out/proj2/showcase/proj2_showcase_mis_rr.png}{Showcase --- \texttt{mis} + Roleta Russa (mesma média, menor custo).}
 
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
