@@ -1,9 +1,10 @@
 """Cena Cornell Box com Mesh Light (Etapa 06).
 
-Idêntica a build_proj2_cornell_basic_scene(), mas:
+Idêntica a build_proj2_cornell_basic_scene(), mas a fonte é uma **luz poliédrica**:
 - RectAreaLight (retangular) → TriangleMeshLight (malha de triângulos)
-- Luz ainda é 3.0×3.0 unidades no teto, mas representada por 8 triângulos
-  (pirâmide com base quadrada)
+- A luz é um **octaedro** suspenso no teto (8 faces triangulares), claramente um
+  poliedro — não um quad plano. O mesmo octaedro serve de geometria emissiva
+  (visível para a câmera) e de luz para NEE.
 
 Ref: PBRT 4e §6.5 "Triangle Sampling"; §12.4 "Area Lights".
 """
@@ -13,10 +14,11 @@ from pyglm import glm
 
 from ..scene import Scene
 from ..camera import Camera
-from ..shape import Box, Sphere
+from ..shape import Box, Sphere, TriangleMesh
 from ..bsdf.lambertian import LambertianBSDF
 from ..bsdf.emissive import EmissiveBSDF
 from ..lights.area_mesh import TriangleMeshLight
+from .polyhedra import octahedron
 
 
 def build_proj2_cornell_mesh_light_scene() -> tuple[Scene, Camera]:
@@ -44,51 +46,17 @@ def build_proj2_cornell_mesh_light_scene() -> tuple[Scene, Camera]:
   floor_box  = Box(p_min=glm.vec3(-0.10, -0.10,  0.00), p_max=glm.vec3(5.65, 0.00,  5.55), material=white_bsdf)
   scene.objects.extend([front_wall, left_wall, right_wall, ceiling, floor_box])
 
-  # === PAINEL EMISSIVO (mesh light geometry) ===
-  light_bsdf = EmissiveBSDF(glm.vec3(7.0, 7.0, 7.0))
-  light_panel = Box(
-    p_min=glm.vec3(1.275, 5.45, 1.275),
-    p_max=glm.vec3(4.275, 5.55, 4.275),
-    material=light_bsdf,
+  # === LUZ POLIÉDRICA (octaedro) ===
+  # Octaedro suspenso no teto: poliedro nítido (8 faces). O MESMO octaedro é tanto
+  # a geometria emissiva visível (TriangleMesh + EmissiveBSDF) quanto a luz de NEE
+  # (TriangleMeshLight). Le maior que o painel 3x3 porque a área é menor (ajustável).
+  light_center = glm.vec3(2.775, 4.90, 2.775)
+  Le = glm.vec3(18.0, 18.0, 18.0)
+  verts, faces = octahedron(light_center, radius=0.60)
+  scene.objects.append(
+    TriangleMesh.from_vertices_faces(verts, faces, EmissiveBSDF(Le), name='octahedron_light')
   )
-  scene.objects.append(light_panel)
-
-  # === MESH LIGHT ===
-  # Quad plano (3.0×3.0) no teto (y=5.50), dividido em 2 triângulos, com a normal
-  # apontando PARA BAIXO (-y) — para iluminar a sala. (A pirâmide anterior emitia
-  # majoritariamente para fora/para cima, deixando a cena subiluminada: a maioria
-  # das amostras caía no lado não-emissor, cos_at_light ≤ 0.) O requisito do
-  # enunciado — poliedro/malha de triângulos com amostras uniformes de área — é
-  # atendido por estes 2 triângulos coplanares.
-
-  # Quadrado 3.0×3.0 em y=5.50
-  base_x_min = 1.275
-  base_x_max = 4.275
-  base_z_min = 1.275
-  base_z_max = 4.275
-  base_y = 5.50
-
-  vertices = [
-    glm.vec3(base_x_min, base_y, base_z_min),  # v0: canto (-x,-z)
-    glm.vec3(base_x_max, base_y, base_z_min),  # v1: canto (+x,-z)
-    glm.vec3(base_x_max, base_y, base_z_max),  # v2: canto (+x,+z)
-    glm.vec3(base_x_min, base_y, base_z_max),  # v3: canto (-x,+z)
-  ]
-
-  # Ordem dos vértices escolhida para que cross(v1-v0, v2-v0) = (0,-9,0) → normal -y.
-  faces = [
-    (0, 1, 2),  # triângulo 1
-    (0, 2, 3),  # triângulo 2
-  ]
-  
-  # Criar TriangleMeshLight
-  # Mesma Le que RectAreaLight para convergência
-  mesh_light = TriangleMeshLight(
-    vertices=vertices,
-    faces=faces,
-    Le=glm.vec3(7.0, 7.0, 7.0),
-  )
-  scene.lights.append(mesh_light)
+  scene.lights.append(TriangleMeshLight(vertices=verts, faces=faces, Le=Le))
 
   # === OBJETOS ===
   low_box  = Box(p_min=glm.vec3(0.85, 0.00, 0.85), p_max=glm.vec3(2.50, 1.10, 2.50), material=white_bsdf)
