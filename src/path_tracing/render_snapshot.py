@@ -10,6 +10,9 @@ from pyglm import glm
 
 from .camera import Camera
 from .light import AreaLight, PointLight
+from .bsdf.lambertian import LambertianBSDF
+from .bsdf.emissive import EmissiveBSDF
+from .bsdf.dielectric import DielectricBSDF
 from .lights.area_rect import RectAreaLight
 from .lights.area_mesh import TriangleMeshLight
 from .material import EmissiveMaterial, PhongMaterial, ReflectiveMaterial, TransparentMaterial
@@ -107,11 +110,24 @@ class MaterialSnapshot:
   reflection_tint: Vec3Data | None = None
   ior: float | None = None
   opacity: float | None = None
+  albedo: Vec3Data | None = None
 
   @classmethod
   def from_runtime(cls, material: Any) -> MaterialSnapshot:
+    type_name = type(material).__name__
+    if isinstance(material, LambertianBSDF):
+      return cls(type=type_name, albedo=_vec3_to_list(material.rho))
+    if isinstance(material, EmissiveBSDF):
+      return cls(type=type_name, emission=_vec3_to_list(material.Le))
+    if isinstance(material, DielectricBSDF):
+      return cls(
+        type=type_name,
+        ior=float(material.ior),
+        attenuation=_vec3_to_list(material.absorption),
+      )
+    # Legacy ray_tracing_2 materials
     return cls(
-      type=type(material).__name__,
+      type=type_name,
       emission=_vec3_to_list(getattr(material, 'emission', None)),
       shadow_passthrough=bool(getattr(material, 'shadow_passthrough')) if hasattr(material, 'shadow_passthrough') else None,
       ambient=_vec3_to_list(getattr(material, 'm_amb', None)),
@@ -142,6 +158,7 @@ class MaterialSnapshot:
       reflection_tint=data.get('reflection_tint'),
       ior=float(data['ior']) if data.get('ior') is not None else None,
       opacity=float(data['opacity']) if data.get('opacity') is not None else None,
+      albedo=data.get('albedo'),
     )
 
   def to_dict(self) -> dict[str, Any]:
@@ -159,6 +176,7 @@ class MaterialSnapshot:
       'reflection_tint',
       'ior',
       'opacity',
+      'albedo',
     ):
       value = getattr(self, key)
       if value is not None:
@@ -166,6 +184,21 @@ class MaterialSnapshot:
     return data
 
   def to_runtime(self):
+    if self.type == 'LambertianBSDF':
+      albedo = _list_to_vec3(self.albedo or [0.73, 0.73, 0.73], field_name='material.albedo')
+      return LambertianBSDF(albedo)
+
+    if self.type == 'EmissiveBSDF':
+      le = _list_to_vec3(self.emission or [0.0, 0.0, 0.0], field_name='material.emission')
+      return EmissiveBSDF(le)
+
+    if self.type == 'DielectricBSDF':
+      absorption = _optional_list_to_vec3(self.attenuation, field_name='material.attenuation')
+      return DielectricBSDF(
+        ior=1.5 if self.ior is None else float(self.ior),
+        absorption=absorption,
+      )
+
     ambient = _list_to_vec3(self.ambient or [0.0, 0.0, 0.0], field_name='material.ambient')
     diffuse = _list_to_vec3(self.diffuse or [0.0, 0.0, 0.0], field_name='material.diffuse')
     specular = _list_to_vec3(self.specular or [0.0, 0.0, 0.0], field_name='material.specular')
@@ -475,7 +508,16 @@ class LightSnapshot:
       pos=_vec3_to_list(getattr(light, 'pos', None)),
       power=_vec3_to_list(getattr(light, 'power', None)),
     )
-    if isinstance(light, AreaLight):
+    if isinstance(light, RectAreaLight):
+      snapshot.corner = _vec3_to_list(light.corner)
+      snapshot.edge_u = _vec3_to_list(light.edge_u)
+      snapshot.edge_v = _vec3_to_list(light.edge_v)
+      snapshot.Le = _vec3_to_list(light.Le)
+    elif isinstance(light, TriangleMeshLight):
+      snapshot.vertices = [_vec3_to_list(v) for v in light.vertices]
+      snapshot.faces = [list(f) for f in light.faces]
+      snapshot.Le = _vec3_to_list(light.Le)
+    elif isinstance(light, AreaLight):
       snapshot.p = _vec3_to_list(light.p)
       snapshot.e_u = _vec3_to_list(light.e_u)
       snapshot.e_v = _vec3_to_list(light.e_v)
@@ -496,17 +538,47 @@ class LightSnapshot:
       samples_u=int(data['samples_u']) if data.get('samples_u') is not None else None,
       samples_v=int(data['samples_v']) if data.get('samples_v') is not None else None,
       light_sampling_mode=data.get('light_sampling_mode'),
+      corner=data.get('corner'),
+      edge_u=data.get('edge_u'),
+      edge_v=data.get('edge_v'),
+      Le=data.get('Le'),
+      vertices=data.get('vertices'),
+      faces=data.get('faces'),
     )
 
   def to_dict(self) -> dict[str, Any]:
     data: dict[str, Any] = {'type': self.type}
-    for key in ('pos', 'power', 'p', 'e_u', 'e_v', 'samples_u', 'samples_v', 'light_sampling_mode'):
+    for key in (
+      'pos', 'power',
+      'p', 'e_u', 'e_v', 'samples_u', 'samples_v', 'light_sampling_mode',
+      'corner', 'edge_u', 'edge_v', 'Le',
+      'vertices', 'faces',
+    ):
       value = getattr(self, key)
       if value is not None:
         data[key] = value
     return data
 
   def to_runtime(self):
+    if self.type == 'RectAreaLight':
+      return RectAreaLight(
+        corner=_list_to_vec3(self.corner, field_name='light.corner'),
+        edge_u=_list_to_vec3(self.edge_u, field_name='light.edge_u'),
+        edge_v=_list_to_vec3(self.edge_v, field_name='light.edge_v'),
+        Le=_list_to_vec3(self.Le, field_name='light.Le'),
+      )
+
+    if self.type == 'TriangleMeshLight':
+      vertices = [_list_to_vec3(v, field_name='light.vertices') for v in (self.vertices or [])]
+      faces: list[tuple[int, int, int]] = [
+        (int(f[0]), int(f[1]), int(f[2])) for f in (self.faces or [])
+      ]
+      return TriangleMeshLight(
+        vertices=vertices,
+        faces=faces,
+        Le=_list_to_vec3(self.Le, field_name='light.Le'),
+      )
+
     if self.type == 'PointLight':
       return PointLight(
         pos=_list_to_vec3(self.pos, field_name='light.pos'),
@@ -540,6 +612,7 @@ class RenderSettingsSnapshot:
   render_time_seconds: float | None = None
   ray_estimation: dict[str, Any] | None = None
   estimation_quality: dict[str, Any] | None = None
+  integrator_mode: str | None = None
 
   @classmethod
   def from_dict(cls, data: dict[str, Any]) -> RenderSettingsSnapshot:
@@ -554,6 +627,7 @@ class RenderSettingsSnapshot:
       render_time_seconds=float(data['render_time_seconds']) if data.get('render_time_seconds') is not None else None,
       ray_estimation=data.get('ray_estimation'),
       estimation_quality=data.get('estimation_quality'),
+      integrator_mode=data.get('integrator_mode'),
     )
 
   def to_dict(self) -> dict[str, Any]:
@@ -566,6 +640,8 @@ class RenderSettingsSnapshot:
       'seed': self.seed,
       'gamma_fix': bool(self.gamma_fix),
     }
+    if self.integrator_mode is not None:
+      data['integrator_mode'] = self.integrator_mode
     if self.render_time_seconds is not None:
       data['render_time_seconds'] = float(self.render_time_seconds)
     if self.ray_estimation is not None:
@@ -693,6 +769,12 @@ class RenderSnapshot:
       except Exception:
         ray_estimation_dict = None
 
+    integrator_mode: str | None = None
+    if render_estimator is not None:
+      integrator = getattr(render_estimator, 'integrator', None)
+      if integrator is not None:
+        integrator_mode = getattr(integrator, 'mode', None)
+
     estimation_quality = cls._build_estimation_quality(
       ray_estimation=ray_estimation_dict,
       render_time_seconds=render_time_seconds,
@@ -709,6 +791,7 @@ class RenderSnapshot:
         render_time_seconds=render_time_seconds,
         ray_estimation=ray_estimation_dict,
         estimation_quality=estimation_quality,
+        integrator_mode=integrator_mode,
       ),
       scene=SceneSettingsSnapshot.from_runtime(scene),
       camera=CameraSnapshot.from_runtime(cam),
@@ -797,34 +880,39 @@ class RenderSnapshot:
       lines.append('## Render')
       lines.append('')
       for key, value in render_settings.items():
-        if key not in {'ray_estimation', 'estimation_quality'}:  # Handle these in dedicated sections
+        if key not in {'ray_estimation', 'estimation_quality'}:
           lines.append(f'- **{key}**: {value}')
       if self.render.render_time_seconds is not None:
         lines.append(f'- **render_time_minutes**: {self.render.render_time_seconds / 60.0}')
-      
-      # Add ray estimation as a separate section
+
       if self.render.ray_estimation:
         lines.append('')
-        lines.append('## Estimativa de Raios')
-        lines.append('')
         ray_est = self.render.ray_estimation
-        lines.append(f'- **Raios Primários**: {ray_est.get("primary_rays", "N/A"):,}')
-        lines.append(f'- **Raios Secundários**: {ray_est.get("secondary_rays", "N/A"):,}')
+        is_pt = bool(ray_est.get('path_tracing_mode', False))
+        lines.append('## Estimativa de Caminhos' if is_pt else '## Estimativa de Raios')
+        lines.append('')
+        if is_pt:
+          lines.append(f'- **Caminhos Totais**: {ray_est.get("primary_rays", "N/A"):,}')
+          lines.append(f'- **Bounces Estimados**: {ray_est.get("secondary_rays", "N/A"):,} (informativo)')
+        else:
+          lines.append(f'- **Raios Primários**: {ray_est.get("primary_rays", "N/A"):,}')
+          lines.append(f'- **Raios Secundários**: {ray_est.get("secondary_rays", "N/A"):,}')
         if ray_est.get('shadow_rays') is not None:
           lines.append(f'- **Shadow Rays**: {ray_est.get("shadow_rays", "N/A"):,}')
-        lines.append(f'- **Total de Raios**: {ray_est.get("total_rays", "N/A"):,}')
-        lines.append(f'- **Throughput**: {ray_est.get("throughput_rays_per_second", "N/A"):,} raios/segundo')
+        lines.append(f'- **Total**: {ray_est.get("total_rays", "N/A"):,}')
+        throughput_unit = 'caminhos/segundo' if is_pt else 'raios/segundo'
+        lines.append(f'- **Throughput**: {ray_est.get("throughput_rays_per_second", "N/A"):,} {throughput_unit}')
         lines.append(f'- **Tempo Estimado**: {ray_est.get("formatted_time", "N/A")}')
         lines.append(f'- **Tempo Estimado (minutos)**: {ray_est.get("estimated_time_minutes", "N/A"):.3f}')
-        if ray_est.get('estimated_time_by_intersections_seconds') is not None:
+        if not is_pt and ray_est.get('estimated_time_by_intersections_seconds') is not None:
           lines.append(f'- **Tempo Estimado (interseções)**: {ray_est.get("estimated_time_by_intersections_seconds"):.3f}s')
-        if ray_est.get('primary_hit_ratio') is not None:
-          lines.append(f'- **Primary Hit Ratio**: {ray_est.get("primary_hit_ratio"):.3f}')
-        if ray_est.get('recursive_surface_ratio') is not None:
-          lines.append(f'- **Recursive Surface Ratio**: {ray_est.get("recursive_surface_ratio"):.3f}')
-        if ray_est.get('shadow_samples_per_hit') is not None:
-          lines.append(f'- **Shadow Samples/Hit**: {ray_est.get("shadow_samples_per_hit")}')
-        # If calibration info is present, include a short summary
+        if not is_pt:
+          if ray_est.get('primary_hit_ratio') is not None:
+            lines.append(f'- **Primary Hit Ratio**: {ray_est.get("primary_hit_ratio"):.3f}')
+          if ray_est.get('recursive_surface_ratio') is not None:
+            lines.append(f'- **Recursive Surface Ratio**: {ray_est.get("recursive_surface_ratio"):.3f}')
+          if ray_est.get('shadow_samples_per_hit') is not None:
+            lines.append(f'- **Shadow Samples/Hit**: {ray_est.get("shadow_samples_per_hit")}')
         cal = ray_est.get('calibration') if isinstance(ray_est, dict) else None
         if cal:
           lines.append('')
@@ -840,8 +928,8 @@ class RenderSnapshot:
           if cal.get('calibration_shadow_rays') is not None:
             lines.append(f'- **shadow_rays**: {cal.get("calibration_shadow_rays"):,}')
           if cal.get('measured_throughput_rays_per_second') is not None:
-            lines.append(f'- **measured_throughput**: {cal.get("measured_throughput_rays_per_second"):.0f} raios/segundo')
-      
+            lines.append(f'- **measured_throughput**: {cal.get("measured_throughput_rays_per_second"):.0f} {throughput_unit}')
+
       lines.append('')
 
       if self.render.estimation_quality:
@@ -919,20 +1007,34 @@ class RenderSnapshot:
       for index, light in enumerate(lights):
         light_type = light.get('type', 'Light')
         lines.append(f'- **Light {index + 1} ({light_type})**:')
+        if 'Le' in light:
+          lines.append(f'  - Le: {light.get("Le")}')
+        if 'corner' in light:
+          lines.append(f'  - corner: {light.get("corner")}')
+        if 'edge_u' in light:
+          lines.append(f'  - edge_u: {light.get("edge_u")}')
+        if 'edge_v' in light:
+          lines.append(f'  - edge_v: {light.get("edge_v")}')
+        if 'vertices' in light:
+          lines.append(f'  - vertex_count: {len(light.get("vertices", []))}')
+        if 'faces' in light:
+          lines.append(f'  - face_count: {len(light.get("faces", []))}')
         if 'pos' in light:
           lines.append(f'  - pos: {light.get("pos")}')
         if 'power' in light:
           lines.append(f'  - power: {light.get("power")}')
+        if 'p' in light:
+          lines.append(f'  - p: {light.get("p")}')
+        if 'e_u' in light:
+          lines.append(f'  - e_u: {light.get("e_u")}')
+        if 'e_v' in light:
+          lines.append(f'  - e_v: {light.get("e_v")}')
         if 'samples_u' in light:
           lines.append(f'  - samples_u: {light.get("samples_u")}')
         if 'samples_v' in light:
           lines.append(f'  - samples_v: {light.get("samples_v")}')
         if 'light_sampling_mode' in light:
           lines.append(f'  - light_sampling_mode: {light.get("light_sampling_mode")}')
-        if 'e_u' in light:
-          lines.append(f'  - e_u: {light.get("e_u")}')
-        if 'e_v' in light:
-          lines.append(f'  - e_v: {light.get("e_v")}')
         lines.append('')
     else:
       lines.append('- (Nenhuma luz detalhada fornecida)')

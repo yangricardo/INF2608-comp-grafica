@@ -179,7 +179,7 @@ class RayCountEstimator:
         f'Amostras por pixel (SPP): {self.samples_per_pixel}',
         f'Profundidade: min={self.min_depth}, max={self.max_depth} (méd.≈{avg_path_length:.1f} bounces)',
         f'Objetos: {self.num_objects}',
-        f'Luzes (emissivas em scene.objects): {self.num_lights}',
+        f'Luzes (NEE/MIS em scene.lights): {self.num_lights}',
         f'Caminhos totais: {self.format_ray_count(primary)} caminhos',
         f'Bounces estimados: {self.format_ray_count(secondary)} (informativo; já no throughput)',
         f'Shadow rays: {self.format_ray_count(shadow)} raios',
