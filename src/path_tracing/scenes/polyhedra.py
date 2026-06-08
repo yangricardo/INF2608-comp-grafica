@@ -9,6 +9,7 @@ Ref: PBRT 4e §6.5 "Triangle Meshes"; §12.4 "Area Lights".
 """
 
 from __future__ import annotations
+import math
 from pyglm import glm
 
 
@@ -32,6 +33,44 @@ def _orient_outward(
     else:
       oriented.append((i0, i1, i2))
   return oriented
+
+
+def hexagonal_panel(
+  center: glm.vec3,
+  normal: glm.vec3,
+  radius: float,
+  up: glm.vec3 | None = None,
+) -> tuple[list[glm.vec3], list[tuple[int, int, int]]]:
+  """Hexágono regular plano — 7 vértices (1 hub + 6 externos), 6 faces em leque.
+
+  As normais outward das faces apontam na direção de ``normal``.
+  ``up`` define o eixo local Y no plano; se None, escolhe um vetor perpendicular a ``normal``.
+  """
+  n = glm.normalize(glm.vec3(normal))
+
+  if up is not None:
+    u_raw = glm.vec3(up)
+  elif abs(n.y) < 0.9:
+    u_raw = glm.vec3(0.0, 1.0, 0.0)
+  else:
+    u_raw = glm.vec3(1.0, 0.0, 0.0)
+
+  u = glm.normalize(u_raw - glm.dot(u_raw, n) * n)
+  # v = cross(n, u): com winding CCW em {u,v}, cross(e1,e2) ∝ n (outward)
+  v = glm.normalize(glm.cross(n, u))
+
+  c = glm.vec3(center)
+  r = float(radius)
+
+  vertices: list[glm.vec3] = [c]
+  for i in range(6):
+    theta = math.radians(60.0 * i)
+    vertices.append(c + r * math.cos(theta) * u + r * math.sin(theta) * v)
+
+  # Leque: (hub=0, v_i, v_{i mod 6 + 1}), i=1..6
+  faces: list[tuple[int, int, int]] = [(0, i, i % 6 + 1) for i in range(1, 7)]
+
+  return vertices, faces
 
 
 def octahedron(
