@@ -26,7 +26,7 @@ class CommonRenderOptions:
   width: int
   height: int
   spp: int = 1
-  sampling_mode: str = SamplingMode.JITTERED.value
+  sampling_mode: str = SamplingMode.STRATIFIED.value
   seed: int | None = None
   gamma_fix: bool = False
   calibrate: bool = True

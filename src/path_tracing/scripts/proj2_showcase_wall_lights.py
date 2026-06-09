@@ -52,7 +52,7 @@ def render_one(args, mode: str, use_rr: bool) -> str:
     height=args.height,
     name=name,
     samples_per_pixel=args.spp,
-    sampling_mode='jittered',
+    sampling_mode='stratified',
     seed=args.seed,
     gamma_fix=args.gamma,
     estimator_options=EstimatorOptions(calibrate=not args.no_calibrate, calibrate_only=False),
