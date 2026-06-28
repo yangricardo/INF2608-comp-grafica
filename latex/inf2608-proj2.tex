@@ -254,7 +254,14 @@ Um cuidado essencial de implementação (\path{src/path_tracing/integrators/path
 o peso da estratégia ``BSDF amostra a luz'' incide \emph{apenas} sobre a emissão vista
 diretamente no vértice seguinte; ele \textbf{não} é multiplicado no $\beta$ persistente, pois
 isso contaminaria todas as contribuições posteriores do caminho. Materiais especulares (delta)
-\emph{não} participam de MIS — apenas amostragem de BSDF.
+\emph{não} participam de MIS: \texttt{pending\_mis\_weight} é resetado a $1{,}0$ e NEE é
+suprimido no vértice especular. \textbf{Esta é implementação correta}, não um defeito.
+
+Com $N$ luzes independentes, a heurística de potência é calculada diretamente como
+$w_\text{bsdf} = p_\text{bsdf}^2 / \bigl(p_\text{bsdf}^2 + \sum_i p_{L_i}^2\bigr)$,
+mais preciso que \texttt{power\_heuristic}$(1,\,p_\text{bsdf},\,1,\,\sum_i p_{L_i})$,
+pois $\bigl(\sum_i p_{L_i}\bigr)^2 \neq \sum_i p_{L_i}^2$ para $N>1$
+\citep{veach1995optimallycombin}.
 
 % =====================================================================
 \section{Roleta Russa}

@@ -405,6 +405,14 @@ INPUT ../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png
 INPUT ../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png
 INPUT ../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png
 INPUT ../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png
+INPUT ../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmib10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmib10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmmib7.tfm
