@@ -3,89 +3,61 @@
 \bibitem[Celes, 2026a]{inf2608slides07}
 Celes, W. (2026a).
 \newblock Integra{\c c}{\~a}o de monte carlo.
-\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c
-  c}{\~a}o Gr{\'a}fica.
-\newblock Autor dos slides: W. Celes. Contato:
-  \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br}. Dispon{\'\i}vel em:
-  \url{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/7.montecarlo.pdf}.
-  Acesso em: 6 jun. 2026.
+\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c c}{\~a}o Gr{\'a}fica.
+\newblock Autor dos slides: W. Celes. Contato: \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br}. Dispon{\'\i}vel em: \url{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/7.montecarlo.pdf}. Acesso em: 6 jun. 2026.
 
 \bibitem[Celes, 2026b]{inf2608slides08}
 Celes, W. (2026b).
 \newblock Tra{\c c}ado de caminhos.
-\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c
-  c}{\~a}o Gr{\'a}fica.
-\newblock Autor dos slides: W. Celes. Contato:
-  \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br}. Dispon{\'\i}vel em:
-  \url{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/8.tracado_de_caminhos.pdf}.
-  Acesso em: 6 jun. 2026.
+\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c c}{\~a}o Gr{\'a}fica.
+\newblock Autor dos slides: W. Celes. Contato: \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br}. Dispon{\'\i}vel em: \url{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/8.tracado_de_caminhos.pdf}. Acesso em: 6 jun. 2026.
 
 \bibitem[Celes, 2026c]{inf2608slides09}
 Celes, W. (2026c).
 \newblock Tra{\c c}ado de caminhos ii.
-\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c
-  c}{\~a}o Gr{\'a}fica.
-\newblock Autor dos slides: W. Celes. Contato:
-  \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br}. Dispon{\'\i}vel em:
-  \url{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/9.tracado_de_caminhos2.pdf}.
-  Acesso em: 6 jun. 2026.
+\newblock Slides de aula em PDF da disciplina Fundamentos de Computa{\c c}{\~a}o Gr{\'a}fica.
+\newblock Autor dos slides: W. Celes. Contato: \href{mailto:celes@inf.puc-rio.br}{celes@inf.puc-rio.br}. Dispon{\'\i}vel em: \url{https://github.com/yangricardo/INF2608-comp-grafica/blob/main/materiais/tra\%C3\%A7ado_de_caminhos/9.tracado_de_caminhos2.pdf}. Acesso em: 6 jun. 2026.
 
 \bibitem[Frisvad, 2012]{frisvad2012orthonormal}
 Frisvad, J.~R. (2012).
-\newblock Building an orthonormal basis from a 3d unit vector without
-  normalization.
+\newblock Building an orthonormal basis from a 3d unit vector without normalization.
 \newblock {\em Journal of Graphics Tools}, 16(3):151--159.
-\newblock C{\'o}digo branchless para base ortonormal local (ONB) a partir de um
-  vetor normal. DOI: 10.1080/2165347X.2012.689606.
+\newblock C{\'o}digo branchless para base ortonormal local (ONB) a partir de um vetor normal. DOI: 10.1080/2165347X.2012.689606.
 
 \bibitem[Kajiya, 1986]{kajiya1986rendering}
 Kajiya, J.~T. (1986).
 \newblock The rendering equation.
-\newblock In {\em Proceedings of the 13th Annual Conference on Computer
-  Graphics and Interactive Techniques (SIGGRAPH)}, pages 143--150.
-\newblock Artigo seminal que define a Light Transport Equation (LTE) integral
-  de caminhos de luz. DOI: 10.1145/15922.15902.
+\newblock In {\em Proceedings of the 13th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH)}, pages 143--150.
+\newblock Artigo seminal que define a Light Transport Equation (LTE) integral de caminhos de luz. DOI: 10.1145/15922.15902.
 
 \bibitem[Miranda, 2026]{inf2608projectrepo}
 Miranda, Y. R.~B. (2026).
-\newblock Ray tracer e path tracer educacionais -- projetos 1 e 2 de inf2608 --
-  fundamentos de computa{\c c}{\~a}o gr{\'a}fica.
+\newblock Ray tracer e path tracer educacionais -- projetos 1 e 2 de inf2608 -- fundamentos de computa{\c c}{\~a}o gr{\'a}fica.
 \newblock Reposit{\'o}rio GitHub do projeto.
-\newblock Dispon{\'\i}vel em:
-  \url{https://github.com/yangricardo/INF2608-comp-grafica}. Acesso em: 6 jun.
-  2026.
+\newblock Dispon{\'\i}vel em: \url{https://github.com/yangricardo/INF2608-comp-grafica}. Acesso em: 6 jun. 2026.
 
 \bibitem[Misso {\em et~al}., 2022]{misso2022unbiased}
 Misso, Z., Bitterli, B., Georgiev, I., and Jarosz, W. (2022).
 \newblock Unbiased and consistent rendering using biased estimators.
 \newblock {\em ACM Transactions on Graphics}, 41(4).
-\newblock Debiasing via s{\'e}ries de Taylor e telescoping; path tracing e
-  Russian Roulette como inst{\^a}ncias de telescoping. DOI:
-  10.1145/3528223.3530160.
+\newblock Debiasing via s{\'e}ries de Taylor e telescoping; path tracing e Russian Roulette como inst{\^a}ncias de telescoping. DOI: 10.1145/3528223.3530160.
 
 \bibitem[Pharr {\em et~al}., 2023]{pharr2023pbrt}
 Pharr, M., Jakob, W., and Humphreys, G. (2023).
 \newblock {\em Physically Based Rendering: From Theory to Implementation}.
 \newblock MIT Press, 4 edition.
-\newblock Online edition: \url{https://pbr-book.org/4ed/contents}. Contém
-  capítulos sobre Integração Monte Carlo (\S2), Geometria (\S3), Shapes
-  (\S6), Reflection Models (\S9), Light Sources (\S12), Light Transport (\S13),
-  e Appendices (\S{}A).
+\newblock Online edition: \url{https://pbr-book.org/4ed/contents}. Contém capítulos sobre Integração Monte Carlo (\S2), Geometria (\S3), Shapes (\S6), Reflection Models (\S9), Light Sources (\S12), Light Transport (\S13), e Appendices (\S{}A).
 
 \bibitem[Veach and Guibas, 1995]{veach1995optimallycombin}
 Veach, E. and Guibas, L.~J. (1995).
 \newblock Optimally combining sampling techniques for monte carlo rendering.
-\newblock In {\em Proceedings of the 22nd Annual Conference on Computer
-  Graphics and Interactive Techniques (SIGGRAPH)}, pages 419--428.
-\newblock Fundamento de Multiple Importance Sampling (MIS) com
-  heur{\'{\i}}sticas balance e power (\(\beta=2\)). DOI: 10.1145/218380.218498.
+\newblock In {\em Proceedings of the 22nd Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH)}, pages 419--428.
+\newblock Fundamento de Multiple Importance Sampling (MIS) com heur{\'{\i}}sticas balance e power (\(\beta=2\)). DOI: 10.1145/218380.218498.
 
 \bibitem[Walter {\em et~al}., 2007]{walter2007microfacet}
 Walter, B., Marschner, S.~R., Li, H., and Torrance, K.~E. (2007).
 \newblock Microfacet models for refraction through rough surfaces.
-\newblock In {\em Proceedings of the 18th Eurographics Symposium on Rendering
-  (EGSR)}, pages 195--206.
-\newblock Modelo Cook-Torrance com GGX (Trowbridge-Reitz), Smith, Schlick
-  Fresnel. DOI: 10.2312/EGWR/EGSR07/195-206.
+\newblock In {\em Proceedings of the 18th Eurographics Symposium on Rendering (EGSR)}, pages 195--206.
+\newblock Modelo Cook-Torrance com GGX (Trowbridge-Reitz), Smith, Schlick Fresnel. DOI: 10.2312/EGWR/EGSR07/195-206.
 
 \end{thebibliography}
