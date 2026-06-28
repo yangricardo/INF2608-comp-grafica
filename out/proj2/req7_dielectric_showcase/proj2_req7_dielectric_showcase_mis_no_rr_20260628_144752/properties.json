@@ -1,0 +1,345 @@
+{
+  "schema_version": "1.0",
+  "render": {
+    "name": "proj2_req7_dielectric_showcase_mis_no_rr",
+    "width": 512,
+    "height": 512,
+    "samples_per_pixel": 4,
+    "sampling_mode": "jittered",
+    "seed": null,
+    "gamma_fix": false,
+    "integrator_mode": "mis",
+    "command_line": "/Users/yang/projects/INF2608-comp-grafica/src/path_tracing/scripts/proj2_req7_dielectric_showcase.py --spp 4 --depth 8 --mode mis --use-rr 12",
+    "render_time_seconds": 128.51911958300116,
+    "ray_estimation": {
+      "path_tracing_mode": true,
+      "primary_rays": 1048576,
+      "secondary_rays": 5242880,
+      "shadow_rays": 4404019,
+      "total_rays": 1048576,
+      "estimated_time_seconds": 105.36409599892795,
+      "estimated_time_minutes": 1.7560682666487992,
+      "formatted_time": "105.364s (1.756 min)",
+      "throughput_rays_per_second": 9951,
+      "primary_hit_ratio": 0.7,
+      "recursive_surface_ratio": 0.9,
+      "shadow_samples_per_hit": 1,
+      "estimated_intersection_tests": 10485760,
+      "measured_intersection_throughput": 463289.5061378087,
+      "estimated_time_by_intersections_seconds": 22.633277596581124,
+      "estimated_time_by_intersections_minutes": 0.37722129327635207,
+      "calibration": {
+        "calibration_mode": "integrator_Li",
+        "calibration_elapsed_seconds": 0.10289462499895308,
+        "calibration_samples_tested": 1024,
+        "calibration_rays_traced": 0,
+        "calibration_intersection_tests": 47670,
+        "calibration_shadow_rays": 0,
+        "measured_throughput_rays_per_second": 9951.928975983137
+      }
+    },
+    "estimation_quality": {
+      "rays_model_estimated_seconds": 105.36409599892795,
+      "rays_model_actual_seconds": 128.51911958300116,
+      "rays_model_absolute_error_seconds": 23.155023584073206,
+      "rays_model_relative_error": 0.18016792878135973,
+      "rays_model_accuracy_percent": 81.98320712186403,
+      "rays_model_actual_over_estimated": 1.2197619916400062,
+      "intersection_model_estimated_seconds": 22.633277596581124,
+      "intersection_model_actual_seconds": 128.51911958300116,
+      "intersection_model_absolute_error_seconds": 105.88584198642003,
+      "intersection_model_relative_error": 0.8238917472356015,
+      "intersection_model_accuracy_percent": 17.610825276439847,
+      "intersection_model_actual_over_estimated": 5.678325599753817
+    }
+  },
+  "scene": {
+    "ambient_light": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "background_color": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_depth": 8,
+    "ray_epsilon": 0.001
+  },
+  "camera": {
+    "eye": [
+      2.7750000953674316,
+      3.200000047683716,
+      12.774999618530273
+    ],
+    "center": [
+      2.7750000953674316,
+      2.7750000953674316,
+      2.7750000953674316
+    ],
+    "up": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "fov": 50.0,
+    "focal_distance": 1.0,
+    "aspect": 1.0
+  },
+  "objects": [
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.7300000190734863,
+          0.7300000190734863,
+          0.7300000190734863
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        -0.10000000149011612
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.650000095367432,
+        0.0
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.11999999731779099,
+          0.44999998807907104,
+          0.15000000596046448
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        0.0,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.6499999761581421,
+          0.05000000074505806,
+          0.05000000074505806
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        5.550000190734863,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.7300000190734863,
+          0.7300000190734863,
+          0.7300000190734863
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        0.0,
+        5.550000190734863,
+        0.0
+      ],
+      "p_max": [
+        5.550000190734863,
+        5.650000095367432,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.7300000190734863,
+          0.7300000190734863,
+          0.7300000190734863
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        0.0,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "EmissiveBSDF",
+        "emission": [
+          7.0,
+          7.0,
+          7.0
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        1.274999976158142,
+        5.448999881744385,
+        1.274999976158142
+      ],
+      "p_max": [
+        4.275000095367432,
+        5.550000190734863,
+        4.275000095367432
+      ]
+    },
+    {
+      "type": "Sphere",
+      "material": {
+        "type": "DielectricBSDF",
+        "attenuation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "ior": 1.5
+      },
+      "shape_chain": [
+        "Sphere"
+      ],
+      "center": [
+        1.399999976158142,
+        0.7599999904632568,
+        1.5
+      ],
+      "radius": 0.75
+    },
+    {
+      "type": "Sphere",
+      "material": {
+        "type": "DielectricBSDF",
+        "attenuation": [
+          0.20000000298023224,
+          0.6000000238418579,
+          1.2000000476837158
+        ],
+        "ior": 1.5
+      },
+      "shape_chain": [
+        "Sphere"
+      ],
+      "center": [
+        4.150000095367432,
+        0.7599999904632568,
+        1.5
+      ],
+      "radius": 0.75
+    },
+    {
+      "type": "Sphere",
+      "material": {
+        "type": "DielectricBSDF",
+        "attenuation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "ior": 1.33
+      },
+      "shape_chain": [
+        "Sphere"
+      ],
+      "center": [
+        1.399999976158142,
+        0.7599999904632568,
+        3.9000000953674316
+      ],
+      "radius": 0.75
+    },
+    {
+      "type": "Sphere",
+      "material": {
+        "type": "DielectricBSDF",
+        "attenuation": [
+          0.30000001192092896,
+          0.05000000074505806,
+          0.10000000149011612
+        ],
+        "ior": 1.33
+      },
+      "shape_chain": [
+        "Sphere"
+      ],
+      "center": [
+        4.150000095367432,
+        0.7599999904632568,
+        3.9000000953674316
+      ],
+      "radius": 0.75
+    }
+  ],
+  "lights": [
+    {
+      "type": "RectAreaLight",
+      "corner": [
+        1.274999976158142,
+        5.449999809265137,
+        1.274999976158142
+      ],
+      "edge_u": [
+        3.0,
+        0.0,
+        0.0
+      ],
+      "edge_v": [
+        0.0,
+        0.0,
+        3.0
+      ],
+      "Le": [
+        7.0,
+        7.0,
+        7.0
+      ]
+    }
+  ]
+}
