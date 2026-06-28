@@ -18,6 +18,7 @@ from ..shape import Box, Sphere, TriangleMesh, Instance
 from ..bsdf.lambertian import LambertianBSDF
 from ..bsdf.emissive import EmissiveBSDF
 from ..bsdf.dielectric import DielectricBSDF
+from ..bsdf.mirror import MirrorBSDF
 from ..lights.area_rect import RectAreaLight
 from ..lights.area_mesh import TriangleMeshLight
 from .polyhedra import hexagonal_panel
@@ -52,7 +53,7 @@ def build_proj2_cornell_combined_showcase_scene() -> tuple[Scene, Camera]:
     Piso-esq.     (1.50, 0.80, 3.40) r=0.80  IOR=1.5  incolor
     Piso-dir.     (3.90, 0.80, 3.60) r=0.80  IOR=1.5  âmbar (absorção azul)
     Suspensa-esq. (1.40, 3.60, 2.00) r=0.75  IOR=1.33 água incolor
-    Suspensa-dir. (4.10, 2.60, 2.20) r=0.75  IOR=1.33 água azul-esverdeada
+    Suspensa-dir. (4.10, 2.60, 2.20) r=0.75  Espelho (reflexão pura)
 
   Difusos:
     Caixa alta rotacionada (18°), caixa baixa rotacionada (−20°),
@@ -133,7 +134,7 @@ def build_proj2_cornell_combined_showcase_scene() -> tuple[Scene, Camera]:
   ))
   scene.objects.append(Sphere(
     center=glm.vec3(4.10, 2.60, 2.20), radius=0.75,
-    material=DielectricBSDF(ior=1.33, absorption=glm.vec3(0.30, 0.05, 0.10)),
+    material=MirrorBSDF(),
   ))
 
   # === ESFERA DIFUSA AZUL (color bleeding) ===
