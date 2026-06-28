@@ -134,6 +134,7 @@ package "scenes" {
     +build_proj2_cornell_showcase_scene(...): tuple
     +build_proj2_cornell_wall_lights_scene(): tuple
     +build_proj2_cornell_dielectric_multi_scene(): tuple
+    +build_proj2_cornell_combined_showcase_scene(): tuple
   }
 }
 
@@ -157,6 +158,7 @@ package "scripts (CLIs)" {
     +proj2_showcase
     +proj2_showcase_wall_lights
     +proj2_req7_dielectric_showcase
+    +proj2_showcase_combined
   }
 }
 
