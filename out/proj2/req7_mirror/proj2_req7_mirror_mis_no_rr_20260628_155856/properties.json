@@ -1,0 +1,276 @@
+{
+  "schema_version": "1.0",
+  "render": {
+    "name": "proj2_req7_mirror_mis_no_rr",
+    "width": 512,
+    "height": 512,
+    "samples_per_pixel": 2,
+    "sampling_mode": "jittered",
+    "seed": null,
+    "gamma_fix": false,
+    "integrator_mode": "mis",
+    "command_line": "/Users/yang/projects/INF2608-comp-grafica/src/path_tracing/scripts/proj2_req7_mirror.py --spp 2 --depth 4 --mode mis",
+    "render_time_seconds": 41.75248775,
+    "ray_estimation": {
+      "path_tracing_mode": true,
+      "primary_rays": 524288,
+      "secondary_rays": 2621440,
+      "shadow_rays": 2202009,
+      "total_rays": 524288,
+      "estimated_time_seconds": 39.36354099214077,
+      "estimated_time_minutes": 0.6560590165356796,
+      "formatted_time": "39.364s (0.656 min)",
+      "throughput_rays_per_second": 13319,
+      "primary_hit_ratio": 0.7,
+      "recursive_surface_ratio": 0.7142857142857143,
+      "shadow_samples_per_hit": 1,
+      "estimated_intersection_tests": 3670016,
+      "measured_intersection_throughput": 308108.8665885393,
+      "estimated_time_by_intersections_seconds": 11.911426115825103,
+      "estimated_time_by_intersections_minutes": 0.19852376859708504,
+      "calibration": {
+        "calibration_mode": "integrator_Li",
+        "calibration_elapsed_seconds": 0.03844095800013747,
+        "calibration_samples_tested": 512,
+        "calibration_rays_traced": 0,
+        "calibration_intersection_tests": 11844,
+        "calibration_shadow_rays": 0,
+        "measured_throughput_rays_per_second": 13319.12695823473
+      }
+    },
+    "estimation_quality": {
+      "rays_model_estimated_seconds": 39.36354099214077,
+      "rays_model_actual_seconds": 41.75248775,
+      "rays_model_absolute_error_seconds": 2.3889467578592303,
+      "rays_model_relative_error": 0.05721687225353968,
+      "rays_model_accuracy_percent": 94.27831277464604,
+      "rays_model_actual_over_estimated": 1.0606893256461913,
+      "intersection_model_estimated_seconds": 11.911426115825103,
+      "intersection_model_actual_seconds": 41.75248775,
+      "intersection_model_absolute_error_seconds": 29.8410616341749,
+      "intersection_model_relative_error": 0.7147133797835771,
+      "intersection_model_accuracy_percent": 28.528662021642294,
+      "intersection_model_actual_over_estimated": 3.5052467558463976
+    }
+  },
+  "scene": {
+    "ambient_light": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "background_color": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_depth": 8,
+    "ray_epsilon": 0.001
+  },
+  "camera": {
+    "eye": [
+      2.7750000953674316,
+      3.200000047683716,
+      12.774999618530273
+    ],
+    "center": [
+      2.7750000953674316,
+      2.7750000953674316,
+      2.7750000953674316
+    ],
+    "up": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "fov": 50.0,
+    "focal_distance": 1.0,
+    "aspect": 1.0
+  },
+  "objects": [
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.7300000190734863,
+          0.7300000190734863,
+          0.7300000190734863
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        -0.10000000149011612
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.650000095367432,
+        0.0
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.11999999731779099,
+          0.44999998807907104,
+          0.15000000596046448
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        0.0,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.6499999761581421,
+          0.05000000074505806,
+          0.05000000074505806
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        5.550000190734863,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        5.550000190734863,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.7300000190734863,
+          0.7300000190734863,
+          0.7300000190734863
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        0.0,
+        5.550000190734863,
+        0.0
+      ],
+      "p_max": [
+        5.550000190734863,
+        5.650000095367432,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "LambertianBSDF",
+        "albedo": [
+          0.7300000190734863,
+          0.7300000190734863,
+          0.7300000190734863
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        -0.10000000149011612,
+        -0.10000000149011612,
+        0.0
+      ],
+      "p_max": [
+        5.650000095367432,
+        0.0,
+        5.550000190734863
+      ]
+    },
+    {
+      "type": "Box",
+      "material": {
+        "type": "EmissiveBSDF",
+        "emission": [
+          7.0,
+          7.0,
+          7.0
+        ]
+      },
+      "shape_chain": [
+        "Box"
+      ],
+      "p_min": [
+        1.274999976158142,
+        5.448999881744385,
+        1.274999976158142
+      ],
+      "p_max": [
+        4.275000095367432,
+        5.550000190734863,
+        4.275000095367432
+      ]
+    },
+    {
+      "type": "Sphere",
+      "material": {
+        "type": "MirrorBSDF"
+      },
+      "shape_chain": [
+        "Sphere"
+      ],
+      "center": [
+        2.7750000953674316,
+        1.0099999904632568,
+        2.7750000953674316
+      ],
+      "radius": 1.0
+    }
+  ],
+  "lights": [
+    {
+      "type": "RectAreaLight",
+      "corner": [
+        1.274999976158142,
+        5.449999809265137,
+        1.274999976158142
+      ],
+      "edge_u": [
+        3.0,
+        0.0,
+        0.0
+      ],
+      "edge_v": [
+        0.0,
+        0.0,
+        3.0
+      ],
+      "Le": [
+        7.0,
+        7.0,
+        7.0
+      ]
+    }
+  ]
+}

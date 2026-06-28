@@ -99,6 +99,7 @@ from .cornell_showcase import build_proj2_cornell_showcase_scene
 from .cornell_wall_lights import build_proj2_cornell_wall_lights_scene
 from .cornell_dielectric_multi import build_proj2_cornell_dielectric_multi_scene
 from .cornell_combined_showcase import build_proj2_cornell_combined_showcase_scene
+from .cornell_mirror import build_proj2_cornell_mirror_scene
 
 __all__ = [
   'build_proj2_cornell_basic_scene',
@@ -109,4 +110,5 @@ __all__ = [
   'build_proj2_cornell_wall_lights_scene',
   'build_proj2_cornell_dielectric_multi_scene',
   'build_proj2_cornell_combined_showcase_scene',
+  'build_proj2_cornell_mirror_scene',
 ]
