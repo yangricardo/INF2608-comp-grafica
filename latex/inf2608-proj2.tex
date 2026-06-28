@@ -451,6 +451,50 @@ Parâmetros do script (\path{src/path_tracing/scripts/proj2_req7_dielectric.py})
 \texttt{-{}-mode \{bsdf\_only|nee\_only|mis\}},
 \texttt{-{}-use-rr}, \texttt{-{}-spp}, \texttt{-{}-depth}, \texttt{-{}-width/-{}-height}, \texttt{-{}-seed}.
 
+\paragraph{Espelho perfeito (reflexão especular pura).}
+Superfícies espelhadas implementam \texttt{MirrorBSDF} — reflexão delta (100\%) sem refração
+nem absorção. Contrasta com \texttt{DielectricBSDF} (vidro) que permite tanto reflexão
+quanto transmissão. O espelho é o caso limite: Fresnel$= 1$, nenhuma transmissão.
+
+As 4 variações a seguir ilustram como os modos de amostragem (\textit{bsdf\_only}, \textit{nee\_only}, \textit{mis}, \textit{mis}+RR)
+afetam a qualidade e convergência da renderização de uma esfera espelhada:
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_bsdf_only_no_rr.png}{Espelho, \texttt{bsdf\_only} (512×512, SPP=20, sem RR): alta variância; reflexões da luz direta são raramente amostradas via BSDF puro, resultando em ruído dominante nas regiões não-especulares.}
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_nee_only_no_rr.png}{Espelho, \texttt{nee\_only} (512×512, SPP=20, sem RR): iluminação direta nítida via amostragem da área de luz (NEE); as reflexões da esfera mostram apenas componentes de luz direta amostrada; regiões bloqueadas são completamente pretas.}
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_mis_no_rr.png}{Espelho, \texttt{mis} (512×512, SPP=20, sem RR): MIS combina BSDF + NEE com heurística de potência; menor variância que \textit{bsdf\_only}, detalhes visuais mais ricos que \textit{nee\_only}; reflexões especulares bem definidas.}
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_mis_rr.png}{Espelho, \texttt{mis} + Roleta Russa (512×512, SPP=20, com RR): mesma estratégia que \textit{mis}, mas com terminação probabilística de caminhos profundos; renderiza ~10--30\% mais rápido com erro visual similar.}
+
+{\small\figcmd{python -m path_tracing.scripts.proj2_req7_mirror --all --spp 20 --depth 8}}
+
+\noindent\textbf{Comparação de modos de amostragem (esfera espelhada):}
+\begin{center}\tiny
+\begin{tabular}{l@{\,}l@{\,}l}
+\textbf{Modo} & \textbf{Parâmetros} & \textbf{Característica visual} \\
+\hline
+\texttt{bsdf\_only} & SPP=20, sem NEE, sem RR & Alta variância; reflexões ruidosas \\
+\texttt{nee\_only} & SPP=20, NEE direto, sem RR & Iluminação direta nítida; sem indiretos \\
+\texttt{mis} & SPP=20, BSDF+NEE, sem RR & Balanceado; menor variância \\
+\texttt{mis}+RR & SPP=20, BSDF+NEE, com RR & Mesma média; ~10--30\% mais rápido \\
+\end{tabular}
+\end{center}
+
+\paragraph{Vidro incolor (IOR=1{,}5).}
+Esferas dielétricas com \texttt{DielectricBSDF} refratam luz (Snell) além de refletirem
+(Fresnel). A alta reflectância Fresnel em ângulos rasantes cria aparência parcialmente
+especular nas bordas; a região central mostra refração e cáusticas de TIR.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_200923/render.png}
+\caption{Esfera de vidro incolor (\texttt{DielectricBSDF}, IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): transparência com refração de Snell visível na região central; reflexão Fresnel nas bordas em ângulos rasantes; padrão de cáusticas no piso.}
+\end{figure}
+{\small\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42 --width 800 --height 600}}
+
+\paragraph{Água com absorção de Beer-Lambert (IOR=1{,}33).}
+
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_water_mis_no_rr_20260606_204425/render.png}
