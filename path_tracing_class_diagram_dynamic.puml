@@ -132,6 +132,7 @@ package "scenes" {
     +build_proj2_cornell_mesh_light_scene(): tuple
     +build_proj2_cornell_water_scene(absorption): tuple
     +build_proj2_cornell_showcase_scene(...): tuple
+    +build_proj2_cornell_wall_lights_scene(): tuple
   }
 }
 
@@ -153,6 +154,7 @@ package "scripts (CLIs)" {
     +proj2_req6_mesh_lights
     +proj2_req7_dielectric
     +proj2_showcase
+    +proj2_showcase_wall_lights
   }
 }
 
