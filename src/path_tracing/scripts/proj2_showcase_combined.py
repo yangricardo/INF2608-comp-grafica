@@ -8,11 +8,13 @@ Renderiza a cena cornell_combined_showcase, que reúne:
   - 2 caixas Lambertianas rotacionadas + esfera difusa azul
 
 Uso:
-  python -m path_tracing.scripts.proj2_showcase_combined --spp 32 --depth 12 --mode mis
-  python -m path_tracing.scripts.proj2_showcase_combined --spp 64 --depth 12 --mode mis --use-rr true
+  python -m path_tracing.scripts.proj2_showcase_combined --all --spp 64 --depth 12
+  python -m path_tracing.scripts.proj2_showcase_combined --mode mis --spp 32
 """
 
+import os
 import sys
+import shutil
 import argparse
 from pathlib import Path
 
@@ -25,50 +27,25 @@ from path_tracing.scenes import build_proj2_cornell_combined_showcase_scene
 
 _ARGV = ' '.join(sys.argv)
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser(
-    description='Showcase combinada: Wall Lights + Dielétrico Multi-Material',
-  )
-  parser.add_argument('--spp', type=int, default=64, help='Samples per pixel')
-  parser.add_argument('--depth', type=int, default=12, help='Profundidade máxima')
-  parser.add_argument('--min-depth', type=int, default=4, help='Profundidade mínima')
-  parser.add_argument('--mode', choices=['bsdf_only', 'nee_only', 'mis'], default='mis',
-                      help='Modo do integrador')
-  parser.add_argument('--use-rr', type=lambda x: x.lower() in ('true', '1', 'yes'), default=False,
-                      help='Usar Russian Roulette (true|false, default: false)')
-  parser.add_argument('--rr-min-depth', type=int, default=None)
-  parser.add_argument('--seed', type=int, default=None, help='Seed do RNG')
-  parser.add_argument('--gamma', action='store_true', help='Aplicar correção gama')
-  parser.add_argument('--out', type=str, default='out/proj2/showcase_combined',
-                      help='Diretório de saída')
-  parser.add_argument('--width', type=int, default=512, help='Largura da imagem')
-  parser.add_argument('--height', type=int, default=512, help='Altura da imagem')
-  parser.add_argument('--no-calibrate', action='store_true', help='Pular calibração')
 
-  args = parser.parse_args()
-
-  print('=' * 70)
-  print(f'SHOWCASE COMBINADA — Wall Lights + Dielétrico Multi (modo={args.mode})')
-  print('=' * 70)
-  print(f'  modo: {args.mode}  use_rr: {args.use_rr}')
-  print(f'  spp: {args.spp}  depth: {args.depth}  seed: {args.seed}')
-  print(f'  resolução: {args.width}x{args.height}  saída: {args.out}')
-  print('=' * 70)
-
+def render_one(args, mode: str, use_rr: bool) -> str:
   scene, camera = build_proj2_cornell_combined_showcase_scene()
-
   integrator = PathIntegrator(
     min_depth=args.min_depth,
     max_depth=args.depth,
-    mode=args.mode,
+    mode=mode,
     seed=args.seed,
-    use_rr=args.use_rr,
+    use_rr=use_rr,
     rr_min_depth=args.rr_min_depth,
   )
+  rr_suffix = '_rr' if use_rr else '_no_rr'
+  name = f'proj2_showcase_combined_{mode}{rr_suffix}'
 
-  rr_suffix = '_rr' if args.use_rr else '_no_rr'
-  name = f'proj2_showcase_combined_{args.mode}{rr_suffix}'
-  out_path = run_render_with_estimation(
+  print('=' * 70)
+  print(f'SHOWCASE COMBINADA — modo={mode} use_rr={use_rr} spp={args.spp} depth={args.depth}')
+  print('=' * 70)
+
+  sim_dir = run_render_with_estimation(
     render=Render(out_root=args.out),
     scene=scene,
     cam=camera,
@@ -84,4 +61,50 @@ if __name__ == '__main__':
     command_line=_ARGV,
   )
 
-  print(f'Renderização concluída: {out_path}')
+  src = os.path.join(str(sim_dir), 'render.png')
+  stable = os.path.join(args.out, f'{name}.png')
+  if os.path.exists(src):
+    os.makedirs(args.out, exist_ok=True)
+    shutil.copyfile(src, stable)
+    print(f'Cópia estável: {stable}')
+  return str(sim_dir)
+
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(
+    description='Showcase combinada: Wall Lights + Dielétrico Multi-Material',
+  )
+  parser.add_argument('--spp', type=int, default=64, help='Samples per pixel')
+  parser.add_argument('--depth', type=int, default=12, help='Profundidade máxima')
+  parser.add_argument('--min-depth', type=int, default=4, help='Profundidade mínima')
+  parser.add_argument('--mode', choices=['bsdf_only', 'nee_only', 'mis'], default='mis',
+                      help='Modo do integrador (ignorado se --all)')
+  parser.add_argument('--use-rr', type=lambda x: x.lower() in ('true', '1', 'yes'), default=False,
+                      help='Usar Russian Roulette (true|false; ignorado se --all)')
+  parser.add_argument('--rr-min-depth', type=int, default=None)
+  parser.add_argument('--all', action='store_true',
+                      help='Renderiza bsdf_only, nee_only, mis e mis+RR em sequência')
+  parser.add_argument('--seed', type=int, default=None, help='Seed do RNG')
+  parser.add_argument('--gamma', action='store_true', help='Aplicar correção gama')
+  parser.add_argument('--out', type=str, default='out/proj2/showcase_combined',
+                      help='Diretório de saída')
+  parser.add_argument('--width', type=int, default=512, help='Largura da imagem')
+  parser.add_argument('--height', type=int, default=512, help='Altura da imagem')
+  parser.add_argument('--no-calibrate', action='store_true', help='Pular calibração')
+
+  args = parser.parse_args()
+
+  if args.all:
+    jobs = [
+      ('bsdf_only', False),
+      ('nee_only',  False),
+      ('mis',       False),
+      ('mis',       True),
+    ]
+  else:
+    jobs = [(args.mode, args.use_rr)]
+
+  for mode, use_rr in jobs:
+    render_one(args, mode, use_rr)
+
+  print('Showcase combinada concluída.')
