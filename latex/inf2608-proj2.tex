@@ -481,6 +481,16 @@ afetam a qualidade e convergência da renderização de uma esfera espelhada:
 \end{tabular}
 \end{center}
 
+\noindent\textbf{Análise das variações visuais:}
+
+\noindent\textit{Modo \texttt{bsdf\_only}} (esquerda superior) amostra apenas a distribuição especular da BSDF pura, sem luz direta estruturada. Cada caminho de raio busca reflexões via Monte Carlo ingênuo, resultando em alta variância. As regiões do piso que refletem a esfera mostram ruído branco dominante, pois a probabilidade de um raio amostrado pela BSDF acertar a fonte de luz é baixa. Convergência lenta (∼ $O(1/\sqrt{\text{SPP}})$).
+
+\noindent\textit{Modo \texttt{nee\_only}} (direita superior) amostras a iluminação direta explicitamente via NEE: para cada ponto, submete um raio de sombra à fonte de luz. O resultado é nítido e sem ruído nas regiões iluminadas, pois NEE reduz variância a zero para luz direta. Porém, reflexões indiretas da esfera (aquelas que não veem a fonte diretamente após um bounce) são completamente pretas, limitando riqueza visual. A esfera aparece bem definida, mas o piso reflete um padrão de iluminação quase binário (iluminado ou sombra).
+
+\noindent\textit{Modo \texttt{mis}} (esquerda inferior) combina BSDF e NEE com múltipla importância: estima iluminação direta tanto via BSDF quanto via NEE, aplicando a heurística de potência ($\beta=2$) para pesar as duas estimativas. Resultado: convergência mais rápida que \texttt{bsdf\_only} (ambas as estratégias reduzem variância) e mais riqueza visual que \texttt{nee\_only} (reflexões indiretas são amostradas). A esfera e o piso mostram transições suaves entre luz e sombra, com reflexões bem definidas.
+
+\noindent\textit{Modo \texttt{mis}+RR} (direita inferior) aplica a mesma estratégia MIS, mas termina caminhos profundos probabilisticamente: caminhos com \emph{throughput} baixo são interrompidos com probabilidade crescente, reduzindo custo computacional. A estimativa permanece não-viesada (mantém esperança igual), resultando em render ~10--30\% mais rápido com erro visual praticamente imperceptível em SPP=20. Visualmente idêntico a \texttt{mis}, mas com tempo de processamento reduzido.
+
 \paragraph{Vidro incolor (IOR=1{,}5).}
 Esferas dielétricas com \texttt{DielectricBSDF} refratam luz (Snell) além de refletirem
 (Fresnel). A alta reflectância Fresnel em ângulos rasantes cria aparência parcialmente
@@ -608,11 +618,19 @@ avaliar NEE/MIS naquele bounce. Dois fenômenos produzem escuridão localizada:
 \texttt{mis}; a Roleta Russa (\texttt{--use-rr true}) acelera o término de caminhos de baixo
 \emph{throughput} sem introduzir viés.
 
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr.png}{Cena combinada, \texttt{bsdf\_only} (512$\times$512, SPP=2, estratificado, depth=4): alta variância; esferas dielétricas com regiões escuras por \emph{depth} esgotado e TIR.}
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png}{Cena combinada, \texttt{nee\_only} (512$\times$512, SPP=2, estratificado, depth=4): iluminação direta das três fontes nítida nas superfícies difusas; esferas especulares ainda ruidosas pois NEE é pulado em bounces dielétricos (\texttt{is\_specular}).}
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png}{Cena combinada, \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12): combina BSDF e NEE com heurística de potência ($\beta=2$); menor variância nas superfícies difusas e especulares; regiões TIR ainda visíveis nas bordas das esferas.}
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png}{Cena combinada, \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12): terminação probabilística de caminhos de baixo \emph{throughput}; reduz tempo de render mantendo estimador não-viesado.}
-{\small\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --spp 64 --depth 12 --all}}
+\paragraph{Cena combinada com esfera espelhada.}
+A cena combinada integra todos os recursos implementados: 3 fontes de luz (1 retangular no teto + 2 hexagonais nas paredes),
+4 esferas dielétricas (2 no piso com IOR=1{,}5, 1 suspensa com IOR=1{,}33) substituídas por 1 esfera espelhada (reflexão pura),
+2 caixas Lambertianas rotacionadas e 1 esfera azul (color bleeding). A esfera espelhada na posição suspensa-dir.\ reflete as 3 fontes de luz coloridas, gerando
+padrões de reflexão especular que contrastam com a refração e absorção das esferas dielétricas.
+
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr.png}{Cena combinada com esfera espelhada, \texttt{bsdf\_only} (512$\times$512, SPP=4, estratificado, depth=4): alta variância; reflexões especulares da esfera espelhada amostradas raramente via BSDF puro; esferas dielétricas com regiões escuras por \emph{depth} esgotado.}
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png}{Cena combinada com esfera espelhada, \texttt{nee\_only} (512$\times$512, SPP=4, estratificado, depth=4): iluminação direta das três fontes nítida nas superfícies difusas; esfera espelhada e dielétricas especulares ainda ruidosas pois NEE é pulado em bounces dielétricos (\texttt{is\_specular}).}
+
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png}{Cena combinada com esfera espelhada, \texttt{mis} (512$\times$512, SPP=4, estratificado, depth=4): combina BSDF e NEE com heurística de potência ($\beta=2$); reflexão especular da esfera espelhada bem definida; menor variância nas superfícies difusas; regiões TIR visíveis nas esferas dielétricas.}
+
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png}{Cena combinada com esfera espelhada, \texttt{mis} + Roleta Russa (512$\times$512, SPP=4, estratificado, depth=4): terminação probabilística de caminhos de baixo \emph{throughput}; esfera espelhada reflete múltiplas fontes com redução de tempo de render mantendo estimador não-viesado.}
+{\small\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --all --spp 20 --depth 8}}
 
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
