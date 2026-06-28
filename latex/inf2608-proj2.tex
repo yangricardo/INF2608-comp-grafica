@@ -141,19 +141,19 @@
 \maketitle
 
 \begin{abstract-pt}
-Este artigo apresenta uma análise técnico-científica da implementação de \emph{path tracing} desenvolvida no Projeto 2 da disciplina de INF2608. A partir do código efetivamente executável em \path{src/path_tracing/}, descreve-se o estimador de Monte Carlo da equação de transporte de luz e as extensões implementadas: amostragem direta de luz (NEE), \emph{multiple importance sampling} (MIS), Roleta Russa, fontes de luz como malha de triângulos e materiais dielétricos refrativos com Snell, Fresnel, reflexão interna total e absorção de Beer-Lambert. O texto enfatiza as deduções matemáticas (cancelamento do cosseno na amostragem cosseno-ponderada, conversão de PDF de área para ângulo sólido, heurística de potência e não-viés da Roleta Russa) e discute decisões de implementação, limites e evidências visuais, com os comandos geradores de cada figura.
+Este artigo apresenta uma análise técnico-científica da implementação de \emph{path tracing} desenvolvida no Projeto 2 da disciplina de INF2608. A partir do código efetivamente executável em \path{src/path_tracing/}, descreve-se o estimador de Monte Carlo da equação de transporte de luz e as extensões implementadas: amostragem direta de luz (NEE), \emph{multiple importance sampling} (MIS), Roleta Russa, fontes de luz como malha de triângulos, materiais dielétricos refrativos com Snell, Fresnel, reflexão interna total e absorção de Beer-Lambert, e reflexão especular pura (espelho). O texto enfatiza as deduções matemáticas (cancelamento do cosseno na amostragem cosseno-ponderada, conversão de PDF de área para ângulo sólido, heurística de potência e não-viés da Roleta Russa), confronta cada afirmação com o código correspondente e discute decisões de implementação, limites e evidências visuais, com os comandos geradores de cada figura.
 \end{abstract-pt}
 
 \begin{abstract-en}
-This paper presents a technical-scientific analysis of the path tracing implementation developed for the INF2608 course Project~2. From the executable code in \path{src/path_tracing/}, we describe the Monte Carlo estimator of the light transport equation and the implemented extensions: next event estimation (NEE), multiple importance sampling (MIS), Russian roulette, triangle-mesh area lights, and refractive dielectric materials with Snell's law, Fresnel, total internal reflection, and Beer-Lambert absorption. The text emphasizes the mathematical derivations (cosine cancellation in cosine-weighted sampling, area-to-solid-angle PDF conversion, the power heuristic, and the unbiasedness of Russian roulette) and discusses implementation choices, limitations, and visual evidence, with the generating command for each figure.
+This paper presents a technical-scientific analysis of the path tracing implementation developed for the INF2608 course Project~2. From the executable code in \path{src/path_tracing/}, we describe the Monte Carlo estimator of the light transport equation and the implemented extensions: next event estimation (NEE), multiple importance sampling (MIS), Russian roulette, triangle-mesh area lights, and refractive dielectric materials with Snell's law, Fresnel, total internal reflection, and Beer-Lambert absorption, and pure specular reflection (mirror). The text emphasizes the mathematical derivations (cosine cancellation in cosine-weighted sampling, area-to-solid-angle PDF conversion, the power heuristic, and the unbiasedness of Russian roulette), cross-checks each claim against the corresponding code, and discusses implementation choices, limitations, and visual evidence, with the generating command for each figure.
 \end{abstract-en}
 
 \begin{pchaves}
-traçado de caminhos, Monte Carlo, MIS, roleta russa, dielétrico, computação gráfica
+traçado de caminhos, Monte Carlo, MIS, roleta russa, dielétrico, espelho, computação gráfica
 \end{pchaves}
 
 \begin{keywords}
-path tracing, Monte Carlo, MIS, Russian roulette, dielectric, computer graphics
+path tracing, Monte Carlo, MIS, Russian roulette, dielectric, mirror, computer graphics
 \end{keywords}
 
 \begin{dates}
@@ -179,9 +179,10 @@ O texto cobre apenas as etapas \emph{efetivamente implementadas}: o núcleo unid
 BSDF Lambertiana (Seção~\ref{sec:core}), a amostragem direta de luz — NEE (Seção~\ref{sec:nee}),
 o \emph{multiple importance sampling} (Seção~\ref{sec:mis}), a Roleta Russa
 (Seção~\ref{sec:rr}), as luzes de área retangular e poliédrica (Seção~\ref{sec:lights}) e a
-BSDF dielétrica refrativa (Seção~\ref{sec:dielectric}). As evidências visuais estão reunidas
-na Seção~\ref{sec:evidencias}, e a comparação com o ray tracer do Projeto~1 (incluindo a
-evolução do material dielétrico) na Seção~\ref{sec:comparacao}.
+BSDF dielétrica refrativa (Seção~\ref{sec:dielectric}); como extra, a reflexão especular pura
+(espelho) é tratada junto às evidências (Seção~\ref{sec:mirror}). As evidências visuais estão
+reunidas na Seção~\ref{sec:evidencias}, e a comparação com o ray tracer do Projeto~1 (incluindo
+a evolução do material dielétrico) na Seção~\ref{sec:comparacao}.
 
 % =====================================================================
 \section{Núcleo: Path Tracer Unidirecional e BSDF Lambertiana}
@@ -313,9 +314,20 @@ r_\parallel &= \frac{\eta_t\cos\theta_i-\eta_i\cos\theta_t}{\eta_t\cos\theta_i+\
 r_\perp &= \frac{\eta_i\cos\theta_i-\eta_t\cos\theta_t}{\eta_i\cos\theta_i+\eta_t\cos\theta_t}, \\
 F &= \tfrac{1}{2}\big(r_\parallel^2+r_\perp^2\big).
 \end{align*}
-A cada vértice escolhe-se refletir (prob.\ $F$) ou refratar (prob.\ $1-F$); por ser delta, o
-\emph{throughput} é atualizado como $\beta\mathrel{\ast}=f/p$ sem o cosseno geométrico, e o raio
-transmitido (hemisfério oposto) \emph{não} é descartado.
+A cada vértice escolhe-se estocasticamente refletir (com probabilidade $F$) ou refratar (com
+probabilidade $1-F$). Por ser uma BSDF delta, o \emph{throughput} é atualizado por
+$\beta\mathrel{\ast}=f/p$ \emph{sem} o cosseno geométrico (que cancela na distribuição delta), e
+o raio transmitido — no hemisfério oposto — \emph{não} é descartado.
+
+\paragraph{Limitação: ponderação de Fresnel e conservação de energia.} A implementação
+(\path{src/path_tracing/bsdf/dielectric.py}) sorteia o ramo com probabilidade $F$ e retorna
+$f=F,\ p=1$ (analogamente $f=1-F,\ p=1$ na refração), de modo que o \emph{throughput} efetivo
+fica $\beta\mathrel{\ast}=F$ por ramo. Como a escolha do ramo \emph{já} ocorre com probabilidade
+$F$, o fator de Fresnel é aplicado duas vezes em esperança ($F^2$), enquanto a ponderação
+não-viesada exigiria $f/p=1$ (isto é, $p=F$). O resultado é uma sub-conservação de energia,
+$F^2+(1-F)^2<1$, que escurece reflexões e transmissões e contribui para as regiões escuras
+discutidas na Seção~\ref{sec:combined-showcase}. Trata-se de limitação conhecida; a correção
+(usar $p=F$, cancelando o fator) fica como trabalho futuro.
 
 \paragraph{Absorção de Beer-Lambert.} Ao atravessar o volume, a radiância é atenuada por
 \pbrtsec{11.2}
@@ -451,46 +463,6 @@ Parâmetros do script (\path{src/path_tracing/scripts/proj2_req7_dielectric.py})
 \texttt{-{}-mode \{bsdf\_only|nee\_only|mis\}},
 \texttt{-{}-use-rr}, \texttt{-{}-spp}, \texttt{-{}-depth}, \texttt{-{}-width/-{}-height}, \texttt{-{}-seed}.
 
-\paragraph{Espelho perfeito (reflexão especular pura).}
-Superfícies espelhadas implementam \texttt{MirrorBSDF} — reflexão delta (100\%) sem refração
-nem absorção. Contrasta com \texttt{DielectricBSDF} (vidro) que permite tanto reflexão
-quanto transmissão. O espelho é o caso limite: Fresnel$= 1$, nenhuma transmissão.
-
-As 4 variações a seguir ilustram como os modos de amostragem (\textit{bsdf\_only}, \textit{nee\_only}, \textit{mis}, \textit{mis}+RR)
-afetam a qualidade e convergência da renderização de uma esfera espelhada:
-
-\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_bsdf_only_no_rr.png}{Espelho, \texttt{bsdf\_only} (512×512, SPP=20, sem RR): alta variância; reflexões da luz direta são raramente amostradas via BSDF puro, resultando em ruído dominante nas regiões não-especulares.}
-
-\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_nee_only_no_rr.png}{Espelho, \texttt{nee\_only} (512×512, SPP=20, sem RR): iluminação direta nítida via amostragem da área de luz (NEE); as reflexões da esfera mostram apenas componentes de luz direta amostrada; regiões bloqueadas são completamente pretas.}
-
-\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_mis_no_rr.png}{Espelho, \texttt{mis} (512×512, SPP=20, sem RR): MIS combina BSDF + NEE com heurística de potência; menor variância que \textit{bsdf\_only}, detalhes visuais mais ricos que \textit{nee\_only}; reflexões especulares bem definidas.}
-
-\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_mis_rr.png}{Espelho, \texttt{mis} + Roleta Russa (512×512, SPP=20, com RR): mesma estratégia que \textit{mis}, mas com terminação probabilística de caminhos profundos; renderiza ~10--30\% mais rápido com erro visual similar.}
-
-{\small\figcmd{python -m path_tracing.scripts.proj2_req7_mirror --all --spp 20 --depth 8}}
-
-\noindent\textbf{Comparação de modos de amostragem (esfera espelhada):}
-\begin{center}\tiny
-\begin{tabular}{l@{\,}l@{\,}l}
-\textbf{Modo} & \textbf{Parâmetros} & \textbf{Característica visual} \\
-\hline
-\texttt{bsdf\_only} & SPP=20, sem NEE, sem RR & Alta variância; reflexões ruidosas \\
-\texttt{nee\_only} & SPP=20, NEE direto, sem RR & Iluminação direta nítida; sem indiretos \\
-\texttt{mis} & SPP=20, BSDF+NEE, sem RR & Balanceado; menor variância \\
-\texttt{mis}+RR & SPP=20, BSDF+NEE, com RR & Mesma média; ~10--30\% mais rápido \\
-\end{tabular}
-\end{center}
-
-\noindent\textbf{Análise das variações visuais:}
-
-\noindent\textit{Modo \texttt{bsdf\_only}} (esquerda superior) amostra apenas a distribuição especular da BSDF pura, sem luz direta estruturada. Cada caminho de raio busca reflexões via Monte Carlo ingênuo, resultando em alta variância. As regiões do piso que refletem a esfera mostram ruído branco dominante, pois a probabilidade de um raio amostrado pela BSDF acertar a fonte de luz é baixa. Convergência lenta (∼ $O(1/\sqrt{\text{SPP}})$).
-
-\noindent\textit{Modo \texttt{nee\_only}} (direita superior) amostras a iluminação direta explicitamente via NEE: para cada ponto, submete um raio de sombra à fonte de luz. O resultado é nítido e sem ruído nas regiões iluminadas, pois NEE reduz variância a zero para luz direta. Porém, reflexões indiretas da esfera (aquelas que não veem a fonte diretamente após um bounce) são completamente pretas, limitando riqueza visual. A esfera aparece bem definida, mas o piso reflete um padrão de iluminação quase binário (iluminado ou sombra).
-
-\noindent\textit{Modo \texttt{mis}} (esquerda inferior) combina BSDF e NEE com múltipla importância: estima iluminação direta tanto via BSDF quanto via NEE, aplicando a heurística de potência ($\beta=2$) para pesar as duas estimativas. Resultado: convergência mais rápida que \texttt{bsdf\_only} (ambas as estratégias reduzem variância) e mais riqueza visual que \texttt{nee\_only} (reflexões indiretas são amostradas). A esfera e o piso mostram transições suaves entre luz e sombra, com reflexões bem definidas.
-
-\noindent\textit{Modo \texttt{mis}+RR} (direita inferior) aplica a mesma estratégia MIS, mas termina caminhos profundos probabilisticamente: caminhos com \emph{throughput} baixo são interrompidos com probabilidade crescente, reduzindo custo computacional. A estimativa permanece não-viesada (mantém esperança igual), resultando em render ~10--30\% mais rápido com erro visual praticamente imperceptível em SPP=20. Visualmente idêntico a \texttt{mis}, mas com tempo de processamento reduzido.
-
 \paragraph{Vidro incolor (IOR=1{,}5).}
 Esferas dielétricas com \texttt{DielectricBSDF} refratam luz (Snell) além de refletirem
 (Fresnel). A alta reflectância Fresnel em ângulos rasantes cria aparência parcialmente
@@ -541,17 +513,57 @@ Fundo-dir.  & 1{,}33 & $(0{,}3,\,0{,}05,\,0{,}1)$ & azul-esverdeado \\
 \item \texttt{-{}-material glass -{}-use-rr true -{}-depth 12} --- caminhos internos profundos (múltiplas reflexões/TIR) com RR.
 \end{itemize}
 
+\subsection{Espelho: reflexão especular pura (extra)}
+\label{sec:mirror}
+
+Como contraponto ao dielétrico, implementou-se o \texttt{MirrorBSDF}
+(\path{src/path_tracing/bsdf/mirror.py}): uma BSDF \emph{delta} que reflete $100\%$ da
+radiância na direção especular, \emph{incondicionalmente} --- sem avaliar Fresnel, sem
+transmissão e sem absorção (\texttt{f}$=1$, \texttt{pdf}$=1$). É o caso-limite ``puramente
+reflexivo'' do espectro de materiais, oposto ao dielétrico transmissivo \pbrtsec{9.5}.
+A esfera espelhada é, assim, um teste limpo do tratamento de superfícies especulares pelo
+integrador (NEE suprimido, peso MIS unitário).
+
+As quatro figuras seguintes isolam o efeito do modo de amostragem sobre uma mesma esfera
+espelhada; a Tabela~\ref{tab:mirror-modos} resume o comportamento.
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_bsdf_only_no_rr.png}{Espelho, \texttt{bsdf\_only} (512$\times$512, SPP=20, sem RR): variância alta; a luz é raramente acertada por amostragem da BSDF, deixando ruído nas regiões não-especulares.}
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_nee_only_no_rr.png}{Espelho, \texttt{nee\_only} (512$\times$512, SPP=20, sem RR): iluminação direta nítida via NEE; a esfera reflete apenas o que é diretamente iluminado e regiões sem visão da fonte ficam pretas.}
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_mis_no_rr.png}{Espelho, \texttt{mis} (512$\times$512, SPP=20, sem RR): combinação BSDF$+$NEE (heurística de potência, $\beta=2$); menor variância que \texttt{bsdf\_only} e mais informação indireta que \texttt{nee\_only}.}
+
+\figmaybe{../out/proj2/req7_mirror/proj2_req7_mirror_mis_rr.png}{Espelho, \texttt{mis}$+$RR (512$\times$512, SPP=20, com RR): mesma média do \texttt{mis}, com terminação probabilística de caminhos profundos ($\approx$10--30\% mais rápido).}
+
+{\small\figcmd{python -m path_tracing.scripts.proj2_req7_mirror --all --spp 20 --depth 8}}
+
+\begin{table}[!ht]
+\caption{Modos de amostragem sobre a esfera espelhada (SPP=20).}
+\label{tab:mirror-modos}
+\centering\small
+\begin{tabular}{@{}lll@{}}
+\hline
+\textbf{Modo} & \textbf{Estratégia} & \textbf{Característica visual} \\
+\hline
+\texttt{bsdf\_only} & só BSDF & variância alta; reflexões ruidosas \\
+\texttt{nee\_only} & só NEE & direto nítido; indiretos pretos \\
+\texttt{mis} & BSDF$+$NEE & balanceado; menor variância \\
+\texttt{mis}$+$RR & MIS + RR & mesma média; $\approx$10--30\% mais rápido \\
+\hline
+\end{tabular}
+\end{table}
+
 \subsection{Cena integrada (\emph{showcase})}
 \label{sec:showcase}
 
 A cena \emph{wall lights} (\path{src/path_tracing/scenes/cornell_wall_lights.py}) reúne numa
-Cornell Box todos os recursos implementados no projeto: \textbf{três} fontes de área
-(\texttt{RectAreaLight} branca no teto~+ dois painéis hexagonais emissivos nas paredes
-laterais, verde à esquerda e vermelho à direita), exercitando NEE com múltiplas fontes de
-geometria distinta; duas esferas dielétricas --- vidro incolor (IOR=1{,}5) e âmbar com
-absorção de Beer-Lambert; uma esfera difusa azul (\emph{color bleeding}); e duas caixas
-Lambertianas rotacionadas. A amostragem de pixel é estratificada (\texttt{stratified}) e a
-profundidade máxima é 12.
+Cornell Box todos os recursos implementados no projeto: \textbf{três} fontes de área --- uma
+\texttt{RectAreaLight} branca no teto e dois painéis hexagonais \texttt{TriangleMeshLight}
+(Etapa~06) nas paredes laterais (verde à esquerda, vermelho à direita) ---, exercitando NEE com
+múltiplas fontes de geometria distinta; duas esferas dielétricas (vidro incolor IOR=1{,}5 e
+âmbar com absorção de Beer-Lambert); uma esfera difusa azul (\emph{color bleeding}); e duas
+caixas Lambertianas rotacionadas. A amostragem de pixel é estratificada (\texttt{stratified}) e
+a profundidade máxima é~12.
 
 O script (\path{src/path_tracing/scripts/proj2_showcase_wall_lights.py}) renderiza os quatro
 modos do \texttt{PathIntegrator} e grava cópias estáveis em
@@ -613,21 +625,23 @@ avaliar NEE/MIS naquele bounce. Dois fenômenos produzem escuridão localizada:
   \texttt{DielectricBSDF} reflete $100\%$ da energia --- nenhum raio sai do meio. Múltiplas
   TIR consecutivas criam anéis escuros na silhueta da esfera, efeito fisicamente correto
   mas visualmente não intuitivo em baixo SPP.
+
+\item \textbf{Sub-conservação de energia na ponderação de Fresnel.} Conforme discutido na
+  Seção~\ref{sec:dielectric}, a implementação aplica o fator de Fresnel duas vezes em esperança
+  ($F^2$ na reflexão, $(1-F)^2$ na transmissão), de modo que $F^2+(1-F)^2<1$. Isso atenua
+  sistematicamente a energia que atravessa as esferas, intensificando o aspecto escuro além do
+  esperado por \emph{depth}/TIR. É uma limitação conhecida da implementação.
 \end{enumerate}
 
 \noindent Para um render convergido recomenda-se SPP$\,\geq 64$, \texttt{--depth 12} e modo
 \texttt{mis}; a Roleta Russa (\texttt{--use-rr true}) acelera o término de caminhos de baixo
 \emph{throughput} sem introduzir viés.
 
-\paragraph{Cena combinada com esfera espelhada.}
-A composição final integra 3 fontes de luz coloridas (retangular no teto + duas hexagonais nas
-paredes verde e vermelha), 3 esferas dielétricas (duas no piso com IOR=1{,}5; uma suspensa com
-IOR=1{,}33) e \textbf{uma esfera espelhada} (\texttt{MirrorBSDF}, reflexão pura) na posição
-suspensa-direita, além de 2 caixas Lambertianas rotacionadas e 1 esfera difusa azul
-(\emph{color bleeding}). A esfera espelhada reflete as 3 fontes coloridas e o ambiente,
-produzindo reflexão especular nítida que contrasta com a refração/absorção das dielétricas.
-As oito figuras a seguir comparam os quatro modos de amostragem, cada um em SPP=4 (rápido,
-ruidoso) e SPP=32 (convergido), evidenciando a redução de variância $\propto 1/\sqrt{\text{SPP}}$.
+\paragraph{Comparação de modos e convergência.}
+Nesta cena, a esfera espelhada reflete as três fontes coloridas e o ambiente, produzindo
+reflexão especular nítida que contrasta com a refração e a absorção das dielétricas. As oito
+figuras a seguir comparam os quatro modos de amostragem, cada um em SPP=4 (rápido, ruidoso) e
+SPP=32 (convergido), evidenciando a redução de variância $\propto 1/\sqrt{\text{SPP}}$.
 
 \figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr_spp_4.png}{Cena combinada, \texttt{bsdf\_only} em SPP=4 (depth=10, sem RR): amostragem por BSDF pura quase inutilizável --- ruído ``sal e pimenta'' domina toda a cena, inclusive a esfera espelhada.}
 
@@ -647,45 +661,31 @@ ruidoso) e SPP=32 (convergido), evidenciando a redução de variância $\propto 
 
 {\small\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --all --spp 32 --depth 10}}
 
-\noindent\textbf{Análise: Variações de modo em cena complexa com esfera espelhada.}
+\noindent\textbf{Síntese.} A complexidade da cena amplifica as diferenças entre estimadores.
+O modo \texttt{bsdf\_only} é dominado por ruído de alta variância (granulado), pois raramente
+amostra as fontes pela BSDF; o \texttt{nee\_only} produz iluminação direta nítida, mas
+suprime a reverberação indireta (sem \emph{color bleeding}), deixando pretas as regiões sem
+visão da luz. O \texttt{mis} equilibra os dois: NEE reduz a variância da luz direta enquanto a
+amostragem por BSDF recupera a iluminação indireta --- a esfera espelhada reflete o ambiente
+com \emph{color bleeding} e as dielétricas exibem cáusticas. A Roleta Russa preserva a média do
+\texttt{mis} reduzindo o tempo em $28{,}6\%$ ($50{,}7 \to 36{,}2$~min). A
+Tabela~\ref{tab:combined-modos} consolida os tempos e a assinatura visual de cada modo.
 
-A cena combinada integra 3 fontes de luz coloridas (teto branco, paredes verde e vermelha),
-3 esferas dielétricas com refração/absorção, 1 esfera espelhada com reflexão pura, e 2 caixas difusas.
-Essa complexidade amplifica as diferenças entre modos de amostragem:
-
-\noindent\textit{Modo \texttt{bsdf\_only}} domina em ruído branco puro. A amostragem aleatória
-da BSDF falha em capturar iluminação estruturada; as reflexões especulares (esfera espelhada
-e bordas dielétricas) aparecem como ``pimenta e sal'' típico de Monte Carlo ingênuo.
-Tempo: 19{,}6 min (mais rápido, mas inútil sem convergência). Convergência: $O(1/\sqrt{\text{SPP}})$.
-
-\noindent\textit{Modo \texttt{nee\_only}} inverte o problema: iluminação direta é nítida,
-mas reflexões indiretas desaparecem. As 3 fontes brilham perfeitamente mapeadas nas superfícies;
-porém, a esfera espelhada reflete apenas essas fontes diretas (sem reverberação).
-Não há color bleeding --- efeito fisicamente correto mas visualmente vazio.
-Tempo: 47{,}3 min (2.4× mais lento que bsdf\_only).
-
-\noindent\textit{Modo \texttt{mis}} atinge equilíbrio: NEE elimina ruído de iluminação direta,
-enquanto BSDF captura reflexões indiretas. A esfera espelhada reflete cores do ambiente
-(efeito ``color bleeding'' visível nas bordas), as dielétricas mostram cáusticas ricas,
-e transições luz-sombra são suaves e naturais. Tempo: 50{,}7 min. Convergência mais rápida que bsdf\_only,
-riqueza visual superior a nee\_only.
-
-\noindent\textit{Modo \texttt{mis}+RR} aplica Roleta Russa: caminhos com low throughput
-terminam cedo com probabilidade calibrada. Resultado: 28{,}6\% mais rápido que MIS sem RR (36{,}2 min),
-visualmente imperceptível em SPP=32. Trade-off clássico de Monte Carlo:
-reduza custo computacional mantendo estimador não-viesado.
-
-\noindent\textbf{Comparação: Modos em cena combinada com esfera espelhada.}
-\begin{center}\tiny
-\begin{tabular}{l@{\,}l@{\,}l@{\,}l}
-\textbf{Modo} & \textbf{Parâmetros} & \textbf{Variância} & \textbf{Tempo (min)} \\
+\begin{table}[!ht]
+\caption{Modos na cena combinada com esfera espelhada (512$\times$512, SPP=32, depth=10).}
+\label{tab:combined-modos}
+\centering\small
+\begin{tabular}{@{}lll@{}}
 \hline
-\texttt{bsdf\_only} & SPP=32, sem NEE, sem RR & Muito alta (sal e pimenta) & 19{,}6 \\
-\texttt{nee\_only} & SPP=32, NEE direto, sem RR & Baixa (direto), sombras pretas & 47{,}3 \\
-\texttt{mis} & SPP=32, BSDF+NEE, sem RR & Moderada (balanceado) & 50{,}7 \\
-\texttt{mis}+RR & SPP=32, BSDF+NEE, com RR & Idêntica a MIS & 36{,}2 (−28{,}6\%) \\
+\textbf{Modo} & \textbf{Variância} & \textbf{Tempo (min)} \\
+\hline
+\texttt{bsdf\_only} & muito alta (granulado) & 19{,}6 \\
+\texttt{nee\_only} & baixa no direto; indiretos pretos & 47{,}3 \\
+\texttt{mis} & moderada (balanceado) & 50{,}7 \\
+\texttt{mis}$+$RR & idêntica ao \texttt{mis} & 36{,}2 ($-28{,}6\%$) \\
+\hline
 \end{tabular}
-\end{center}
+\end{table}
 
 \clearpage
 
