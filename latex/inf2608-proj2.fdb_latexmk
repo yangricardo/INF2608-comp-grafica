@@ -1,18 +1,18 @@
 # Fdb version 4
-["bibtex inf2608-proj2"] 1782667216.53386 "inf2608-proj2.aux" "inf2608-proj2.bbl" "inf2608-proj2" 1782667220.41663 0
+["bibtex inf2608-proj2"] 1782668383.19615 "inf2608-proj2.aux" "inf2608-proj2.bbl" "inf2608-proj2" 1782668387.27615 0
   "./apalike-sol.bst" 1777689754.7587 24928 269dedab788b7f84af88c155ecb45872 ""
   "./refs.bib" 1780789153.23222 14377 f5f74553d9991cc592748bf474ca1d81 ""
-  "inf2608-proj2.aux" 1782667218.68424 12799 2d99b72febb49c0106979981582ab7f4 "xelatex"
+  "inf2608-proj2.aux" 1782668385.56589 13294 7c2dfa289fa02730bf62c5a52957cc98 "xelatex"
   (generated)
   "inf2608-proj2.bbl"
   "inf2608-proj2.blg"
   (rewritten before read)
-["xdvipdfmx"] 1782667219.11513 "inf2608-proj2.xdv" "inf2608-proj2.pdf" "inf2608-proj2" 1782667220.41977 0
-  "inf2608-proj2.xdv" 1782667218.68661 326188 cb5ff540ad060252de1077d07c684c43 "xelatex"
+["xdvipdfmx"] 1782668386.00806 "inf2608-proj2.xdv" "inf2608-proj2.pdf" "inf2608-proj2" 1782668387.2792 0
+  "inf2608-proj2.xdv" 1782668385.56802 338740 a1644c83c7956e52685f33d5f6bd5e9a "xelatex"
   (generated)
   "inf2608-proj2.pdf"
   (rewritten before read)
-["xelatex"] 1782667216.71386 "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" "inf2608-proj2.xdv" "inf2608-proj2" 1782667220.41674 0
+["xelatex"] 1782668383.408 "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" "inf2608-proj2.xdv" "inf2608-proj2" 1782668387.27626 0
   "../out/proj2/req1/proj2_req1_lambert_basic_20260606_151600/render.png" 1780771131.23065 872376 07ac560173c9cf74a6867dce2ac96a7c ""
   "../out/proj2/req2/proj2_req2_nee_only_20260606_155653/render.png" 1780772327.24184 97923 a930d12e57ec2fc8b77cfdf90a877862 ""
   "../out/proj2/req2/proj2_req2_nee_only_20260606_162251/render.png" 1780773890.92832 98023 0a810881e5220be99f50d7ba630ed3f6 ""
@@ -29,7 +29,7 @@
   "../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png" 1781024064.15912 364949 912fbf368178e14e4980df5bec42c870 ""
   "../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png" 1781028250.49101 376983 57d7a79448725262e397f86554f18f90 ""
   "../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_nee_only_no_rr.png" 1781017951.72483 339617 9860108855a0ed189ce359bd88d8f2d5 ""
-  "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" 1782667071.09436 37833 c2d1d5dfd53b534c0ebd14c09dceb03c ""
+  "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" 1782668380.39497 39097 5b2fc161780f7d62d48c51882c2b0d19 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -226,10 +226,10 @@
   "/usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt" 1777678477 5948570 505f2e03eedaee2f38c2252a747843a3 ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "aas_macros.sty" 1777689754.75839 4967 cf45ff75f433e372cec5993ac08f4363 ""
-  "inf2608-proj2.aux" 1782667218.68424 12799 2d99b72febb49c0106979981582ab7f4 "xelatex"
-  "inf2608-proj2.bbl" 1782667216.70883 4245 d8d03ebf195ad0ebc7959d6640234df2 "bibtex inf2608-proj2"
-  "inf2608-proj2.out" 1782667218.68614 3835 8a4a7179bf567171ed0a1b9089285b82 "xelatex"
-  "inf2608-proj2.tex" 1782667071.09436 37833 c2d1d5dfd53b534c0ebd14c09dceb03c ""
+  "inf2608-proj2.aux" 1782668385.56589 13294 7c2dfa289fa02730bf62c5a52957cc98 "xelatex"
+  "inf2608-proj2.bbl" 1782668383.40226 4245 d8d03ebf195ad0ebc7959d6640234df2 "bibtex inf2608-proj2"
+  "inf2608-proj2.out" 1782668385.56766 3835 8a4a7179bf567171ed0a1b9089285b82 "xelatex"
+  "inf2608-proj2.tex" 1782668380.39497 39097 5b2fc161780f7d62d48c51882c2b0d19 ""
   "sbcreviews-2025.cls" 1777768907.51392 15053 3dba078b96610c60e27548cae34bb323 ""
   (generated)
   "inf2608-proj2.aux"

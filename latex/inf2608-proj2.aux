@@ -64,43 +64,34 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Cornell Box com \texttt  {TriangleMeshLight} (octaedro NEE), modo MIS sem RR (512$\times $512, SPP=16, $\approx $9{,}6 min). A fonte de malha triangular substitui a \texttt  {RectAreaLight}; a redução de variância em relação ao modo \texttt  {bsdf\_only} evidencia o ganho da amostragem direta.}}{5}{figure.8}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.6}Dielétrico (Etapa 07)}{5}{subsection.8.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Vidro incolor (IOR=1{,}5).}{5}{subsection.8.6}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Esfera de vidro incolor (IOR=1{,}5), MIS sem RR (800$\times $600, SPP=64, seed=42, $\approx $58 min). A alta reflectância Fresnel em ângulos rasantes --- comportamento correto de \texttt  {DielectricBSDF} $\delta $ amostrado estocasticamente --- confere aparência especular às bordas; refração e TIR são observáveis na região central da esfera.}}{5}{figure.9}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Esfera de vidro incolor (IOR=1{,}5), MIS sem RR (512$\times $512, SPP=32, $\approx $16 min): resolução intermediária.}}{5}{figure.10}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times $512, SPP=64, $\approx $33 min): coloração azul-esverdeada por atenuação seletiva do vermelho.}}{5}{figure.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Esfera de vidro incolor (\texttt  {DielectricBSDF}, IOR=1{,}5), MIS sem RR (800$\times $600, SPP=64, seed=42, $\approx $58 min). A alta reflectância Fresnel em ângulos rasantes confere aparência especular às bordas; refração de Snell e reflexão interna total (TIR) são observáveis na região central.}}{5}{figure.9}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Água com absorção de Beer-Lambert (IOR=1{,}33).}{5}{figure.10}\protected@file@percent }
-\citation{kajiya1986rendering}
-\citation{pharr2023pbrt}
-\citation{kajiya1986rendering}
-\citation{pharr2023pbrt}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Esfera de vidro incolor (\texttt  {DielectricBSDF}, IOR=1{,}5), MIS sem RR (512$\times $512, SPP=32, $\approx $16 min): resolução intermediária; padrão de cáusticas visível no chão.}}{5}{figure.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times $512, SPP=64, $\approx $33 min): coloração azul-esverdeada por atenuação seletiva do vermelho.}}{5}{figure.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Showcase multi-material dielétrico.}{5}{figure.12}\protected@file@percent }
 \citation{kajiya1986rendering}
 \citation{pharr2023pbrt}
 \@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times $512, SPP=256, $\approx $142 min): convergência quase total, ruído praticamente eliminado.}}{6}{figure.12}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Showcase multi-material dielétrico, MIS sem RR (512$\times $512, SPP=32): quatro esferas com \texttt  {DielectricBSDF} em variações de IOR ($1{,}5$ / $1{,}33$) e absorção Beer-Lambert, numa Cornell Box com iluminação retangular.}}{6}{figure.13}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.7}Cena integrada (\emph  {showcase})}{6}{subsection.8.7}\protected@file@percent }
 \newlabel{sec:showcase}{{8.7}{6}{Cena integrada (\emph {showcase})}{subsection.8.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Showcase --- \texttt  {bsdf\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $42 min): alta variância; as fontes hexagonais laterais são raramente amostradas por BSDF puro.}}{6}{figure.14}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {9}Comparação: Ray Tracing (Projeto 1) $\times $ Path Tracing (Projeto 2)}{6}{section.9}\protected@file@percent }
 \newlabel{sec:comparacao}{{9}{6}{Comparação: Ray Tracing (Projeto 1) \texorpdfstring {$\times $}{x} Path Tracing (Projeto 2)}{section.9}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Showcase --- \texttt  {bsdf\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $42 min): alta variância; as fontes hexagonais laterais são raramente amostradas por BSDF puro.}}{6}{figure.13}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Showcase --- \texttt  {nee\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $100 min): amostragem direta das três fontes (teto + paredes laterais); iluminação direta nítida.}}{6}{figure.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Evolução do material dielétrico}{6}{subsection.9.1}\protected@file@percent }
-\newlabel{sec:dielectric-evol}{{9.1}{6}{Evolução do material dielétrico}{subsection.9.1}{}}
-\citation{pharr2023pbrt}
-\citation{pharr2023pbrt}
-\citation{pharr2023pbrt}
-\citation{pharr2023pbrt}
 \citation{walter2007microfacet}
 \citation{frisvad2012orthonormal}
 \bibstyle{apalike-sol}
 \bibdata{refs}
 \bibcite{inf2608slides07}{{1}{2026a}{{Celes}}{{}}}
 \bibcite{inf2608slides08}{{2}{2026b}{{Celes}}{{}}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}}{7}{table.caption.1}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:rt-vs-pt}{{1}{7}{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2)}{table.caption.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Showcase --- \texttt  {mis} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $102 min): combina BSDF e NEE com heurística de potência ($\beta =2$); menor variância em superfícies difusas e especulares.}}{7}{figure.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Limites declarados.}{7}{table.caption.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Showcase --- \texttt  {nee\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $100 min): amostragem direta das três fontes (teto + paredes laterais); iluminação direta nítida.}}{7}{figure.15}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Showcase --- \texttt  {mis} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $102 min): combina BSDF e NEE com heurística de potência ($\beta =2$); menor variância em superfícies difusas e especulares.}}{7}{figure.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Evolução do material dielétrico}{7}{subsection.9.1}\protected@file@percent }
+\newlabel{sec:dielectric-evol}{{9.1}{7}{Evolução do material dielétrico}{subsection.9.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Showcase --- \texttt  {mis} + Roleta Russa (512$\times $512, SPP=64, estratificado, depth=12, $\approx $70 min): mesma média, terminação probabilística de caminhos profundos.}}{7}{figure.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Limites declarados.}{7}{subsection.9.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {10}Conclusão e Trabalhos Futuros}{7}{section.10}\protected@file@percent }
 \newlabel{sec:conclusao}{{10}{7}{Conclusão e Trabalhos Futuros}{section.10}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Showcase --- \texttt  {mis} + Roleta Russa (512$\times $512, SPP=64, estratificado, depth=12, $\approx $70 min): mesma média, terminação probabilística de caminhos profundos.}}{7}{figure.16}\protected@file@percent }
 \bibcite{inf2608slides09}{{3}{2026c}{{Celes}}{{}}}
 \bibcite{frisvad2012orthonormal}{{4}{2012}{{Frisvad}}{{}}}
 \bibcite{kajiya1986rendering}{{5}{1986}{{Kajiya}}{{}}}
@@ -109,8 +100,14 @@
 \bibcite{pharr2023pbrt}{{8}{2023}{{Pharr {\em  et~al}.}}{{}}}
 \bibcite{veach1995optimallycombin}{{9}{1995}{{Veach and Guibas}}{{}}}
 \bibcite{walter2007microfacet}{{10}{2007}{{Walter {\em  et~al}.}}{{}}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2).}}{8}{table.caption.2}\protected@file@percent }
-\newlabel{tab:dielectric-evol}{{2}{8}{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2)}{table.caption.2}{}}
+\citation{kajiya1986rendering}
+\citation{pharr2023pbrt}
+\citation{kajiya1986rendering}
+\citation{pharr2023pbrt}
+\citation{pharr2023pbrt}
+\citation{pharr2023pbrt}
+\citation{pharr2023pbrt}
+\citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{frisvad2012orthonormal}
@@ -133,6 +130,11 @@
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura).}}{10}{table.caption.3}\protected@file@percent }
-\newlabel{tab:referencias}{{3}{10}{Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura)}{table.caption.3}{}}
-\gdef \@abspage@last{10}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}}{10}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:rt-vs-pt}{{1}{10}{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2)}{table.caption.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2).}}{10}{table.caption.2}\protected@file@percent }
+\newlabel{tab:dielectric-evol}{{2}{10}{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2)}{table.caption.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura).}}{11}{table.caption.3}\protected@file@percent }
+\newlabel{tab:referencias}{{3}{11}{Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura)}{table.caption.3}{}}
+\gdef \@abspage@last{11}

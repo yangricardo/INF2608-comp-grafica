@@ -449,12 +449,12 @@ Parâmetros do script (\path{src/path_tracing/scripts/proj2_req7_dielectric.py})
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_172940/render.png}
-\caption{Esfera de vidro incolor (IOR=1{,}5), MIS sem RR (800$\times$600, SPP=64, seed=42, $\approx$58 min). A alta reflectância Fresnel em ângulos rasantes --- comportamento correto de \texttt{DielectricBSDF} $\delta$ amostrado estocasticamente --- confere aparência especular às bordas; refração e TIR são observáveis na região central da esfera.}
+\caption{Esfera de vidro incolor (\texttt{DielectricBSDF}, IOR=1{,}5), MIS sem RR (800$\times$600, SPP=64, seed=42, $\approx$58 min). A alta reflectância Fresnel em ângulos rasantes confere aparência especular às bordas; refração de Snell e reflexão interna total (TIR) são observáveis na região central.}
 \end{figure}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_200923/render.png}
-\caption{Esfera de vidro incolor (IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): resolução intermediária.}
+\caption{Esfera de vidro incolor (\texttt{DielectricBSDF}, IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): resolução intermediária; padrão de cáusticas visível no chão.}
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42 --width 800 --height 600}
 
@@ -470,6 +470,25 @@ Parâmetros do script (\path{src/path_tracing/scripts/proj2_req7_dielectric.py})
 \caption{Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times$512, SPP=256, $\approx$142 min): convergência quase total, ruído praticamente eliminado.}
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material water --spp 64 --depth 8 --mode mis}
+
+\paragraph{Showcase multi-material dielétrico.}
+A cena \path{src/path_tracing/scenes/cornell_dielectric_multi.py} instancia quatro esferas
+(\texttt{DielectricBSDF}, raio=0{,}75) dispostas em grade~2$\times$2 no piso da Cornell Box,
+cobrindo o espaço de variações de IOR e absorção de Beer-Lambert:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\textbf{Posição} & \textbf{IOR} & \textbf{Absorção $\sigma$ (RGB)} & \textbf{Efeito visual} \\
+\hline
+Frente-esq. & 1{,}5 & $(0,0,0)$ incolor & reflexão Fresnel + refração \\
+Frente-dir. & 1{,}5 & $(0{,}2,\,0{,}6,\,1{,}2)$ & tom âmbar (absorve azul) \\
+Fundo-esq.  & 1{,}33 & $(0,0,0)$ incolor & água incolor, Fresnel suave \\
+Fundo-dir.  & 1{,}33 & $(0{,}30,\,0{,}05,\,0{,}10)$ & água azul-esverdeada (absorve vermelho) \\
+\end{tabular}
+\end{center}
+
+\figmaybe{../out/proj2/req7_dielectric_showcase/proj2_req7_dielectric_showcase_mis_no_rr.png}{Showcase multi-material dielétrico, MIS sem RR (512$\times$512, SPP=32): quatro esferas com \texttt{DielectricBSDF} em variações de IOR ($1{,}5$ / $1{,}33$) e absorção Beer-Lambert, numa Cornell Box com iluminação retangular.}
+\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric_showcase --spp 32 --depth 8 --mode mis}
 
 \noindent\textbf{Variações de parâmetros} (material $\times$ absorção $\times$ estimador):
 \begin{itemize}\small\setlength{\itemsep}{1pt}
@@ -510,6 +529,58 @@ modos do \texttt{PathIntegrator} e grava cópias estáveis em
 \figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png}{Showcase --- \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$102 min): combina BSDF e NEE com heurística de potência ($\beta=2$); menor variância em superfícies difusas e especulares.}
 \figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png}{Showcase --- \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12, $\approx$70 min): mesma média, terminação probabilística de caminhos profundos.}
 
+\subsection{Cena combinada (\emph{combined showcase})}
+\label{sec:combined-showcase}
+
+A cena \path{src/path_tracing/scenes/cornell_combined_showcase.py} funde as duas cenas anteriores
+numa Cornell Box única que exercita simultaneamente todos os recursos implementados:
+\textbf{três} fontes de luz (\texttt{RectAreaLight} branca no teto + dois \texttt{TriangleMeshLight}
+hexagonais nas paredes, verde e vermelho), \textbf{quatro} esferas \texttt{DielectricBSDF} com
+variações de IOR e absorção Beer-Lambert (duas no piso e duas suspensas em alturas distintas),
+duas caixas Lambertianas rotacionadas e uma esfera difusa azul para \emph{color bleeding}.
+
+\begin{center}\small
+\begin{tabular}{lllll}
+\textbf{Objeto} & \textbf{Posição (x,y,z)} & \textbf{r} & \textbf{IOR} & \textbf{Absorção / material} \\
+\hline
+Esfera piso-esq. & (1.50, 0.80, 3.40) & 0.80 & 1{,}5 & incolor \\
+Esfera piso-dir. & (3.90, 0.80, 3.60) & 0.80 & 1{,}5 & âmbar $(0{,}2,\,0{,}6,\,1{,}2)$ \\
+Esfera susp.-esq. & (1.40, 3.60, 2.00) & 0.75 & 1{,}33 & água incolor \\
+Esfera susp.-dir. & (4.10, 2.60, 2.20) & 0.75 & 1{,}33 & água azul-esverdeada \\
+Esfera difusa azul & (2.70, 0.55, 4.70) & 0.55 & — & \texttt{LambertianBSDF} \\
+\end{tabular}
+\end{center}
+
+\paragraph{Por que regiões das esferas dielétricas aparecem escuras.}
+O \texttt{DielectricBSDF} é uma \emph{delta distribution} (\texttt{is\_specular = True}):
+em cada vértice o integrador escolhe estocasticamente refletir \emph{ou} refratar, sem
+avaliar NEE/MIS naquele bounce. Dois fenômenos produzem escuridão localizada:
+
+\begin{enumerate}\small\setlength{\itemsep}{1pt}
+\item \textbf{Caminhos aprisionados (\emph{depth} esgotado).} Um raio que entra na esfera
+  realiza pelo menos dois bounces especulares (entrada e saída via Snell). Para esferas
+  suspensas, o raio de saída pode atingir outra esfera dielétrica, multiplicando os bounces.
+  Se \texttt{max\_depth} for atingido antes de o caminho alcançar uma superfície difusa,
+  o integrador retorna radiância zero --- região preta. Aumentar \texttt{--depth} (12 ou mais)
+  reduz esse efeito.
+
+\item \textbf{Reflexão interna total (TIR).} Em ângulos acima do ângulo crítico
+  $\theta_c = \arcsin(1/\eta)$ (para IOR=1{,}5: $\theta_c \approx 41{,}8°$), o
+  \texttt{DielectricBSDF} reflete $100\%$ da energia --- nenhum raio sai do meio. Múltiplas
+  TIR consecutivas criam anéis escuros na silhueta da esfera, efeito fisicamente correto
+  mas visualmente não intuitivo em baixo SPP.
+\end{enumerate}
+
+\noindent Para um render convergido recomenda-se SPP$\,\geq 64$, \texttt{--depth 12} e modo
+\texttt{mis}; a Roleta Russa (\texttt{--use-rr true}) acelera o término de caminhos de baixo
+\emph{throughput} sem introduzir viés.
+
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr.png}{Cena combinada, \texttt{bsdf\_only} (512$\times$512, SPP=2, estratificado, depth=4): alta variância; esferas dielétricas com regiões escuras por \emph{depth} esgotado e TIR.}
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png}{Cena combinada, \texttt{nee\_only} (512$\times$512, SPP=2, estratificado, depth=4): iluminação direta das três fontes nítida nas superfícies difusas; esferas especulares ainda ruidosas pois NEE é pulado em bounces dielétricos (\texttt{is\_specular}).}
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png}{Cena combinada, \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12): combina BSDF e NEE com heurística de potência ($\beta=2$); menor variância nas superfícies difusas e especulares; regiões TIR ainda visíveis nas bordas das esferas.}
+\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png}{Cena combinada, \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12): terminação probabilística de caminhos de baixo \emph{throughput}; reduz tempo de render mantendo estimador não-viesado.}
+\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --spp 64 --depth 12 --all}
+
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
 \label{sec:comparacao}
@@ -522,28 +593,6 @@ e dispara raios secundários apenas para reflexão/refração especular; o path 
 por Monte Carlo, construindo caminhos completos com \emph{throughput} $\beta$
 \pbrtsecs{13.1, 13.3, 13.4}.
 
-\begin{table*}[!ht]
-\caption{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}
-\label{tab:rt-vs-pt}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t},
-cells={font=\small}
-}
-Aspecto & Projeto 1 --- Ray Tracing (Whitted) & Projeto 2 --- Path Tracing \\
-Equação resolvida & Phong analítico + reflexão/refração recursiva & Estimador de Monte Carlo da LTE / integral de caminhos~\citep{kajiya1986rendering} \\
-Iluminação direta & \texttt{direct\_lighting()} analítico por luz pontual/área & NEE (amostragem da luz) + MIS no último segmento \\
-Iluminação indireta & Apenas especular (reflexão/refração) & Difusa e especular (GI completa) via $\beta$ acumulado \\
-Sombreamento & Função fechada do material (Phong) & Probabilístico: $\beta \mathrel{\ast}= f\,\lvert\cos\theta\rvert/p$ \\
-Terminação & \texttt{can\_spawn\_ray()} / \texttt{max\_depth} fixo & \texttt{min\_depth}=4 + Roleta Russa \pbrtsec{2.2.4} \\
-Convergência & Determinística (nítida em baixo SPP) & Estocástica, ruído $\propto 1/\sqrt{N}$ \\
-Especular + luz & Reflexão/refração somadas na recursão & Delta: pula NEE/MIS, peso 1 (\texttt{is\_specular}) \\
-\end{tblr}
-\end{table*}
-
 \subsection{Evolução do material dielétrico}
 \label{sec:dielectric-evol}
 
@@ -554,28 +603,6 @@ Beer-Lambert aplicada nos \emph{raios de sombra}. No Projeto~2, \texttt{Dielectr
 (\path{src/path_tracing/bsdf/dielectric.py}) é uma BSDF \emph{delta} amostrada
 estocasticamente, com Fresnel exato e absorção rastreada no integrador. A
 Tabela~\ref{tab:dielectric-evol} resume as diferenças.
-
-\begin{table*}[!ht]
-\caption{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times$ path tracer (Projeto~2).}
-\label{tab:dielectric-evol}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t},
-cells={font=\small}
-}
-Aspecto & \texttt{TransparentMaterial} (P1) & \texttt{DielectricBSDF} (P2) \\
-Fresnel & Aproximação de Schlick $R_0+(1-R_0)(1-\cos\theta)^5$ & Exato não polarizado $F=\tfrac12(r_\parallel^2+r_\perp^2)$ \pbrtsec{9.5} \\
-Reflexão vs.\ refração & Ponderação determinística ($R$ e $1-R$) na recursão & Escolha estocástica (uma direção delta por vértice) \\
-Direção refratada & \texttt{glm.refract()} & Forma vetorial no frame da normal geométrica \\
-Reflexão interna total & Teste heurístico sobre a direção refratada & Analítico: $\sin^2\theta_t = \eta^2(1-\cos^2\theta_i)\ge 1$ \\
-Entrada/saída do meio & \texttt{front\_face}/\texttt{backfacing} (normal virada) & Sinal de $\omega_o\!\cdot\! n$ (normal geométrica) \\
-Absorção (Beer-Lambert) & Nos raios de sombra ao sair do meio \pbrtsec{11.2} & Rastreio de meio: $\beta\mathrel{\ast}=e^{-\sigma d}$ em qualquer segmento interno \\
-Integração com a luz & Embutida no sombreamento recursivo de Phong & Especular pula NEE/MIS (peso 1); GI por amostragem da BSDF \\
-\end{tblr}
-\end{table*}
 
 \paragraph{Limites declarados.} A implementação é em Python puro (\texttt{pyglm}/PIL),
 priorizando clareza e corretude; resoluções $\le 512^2$ e SPP moderado são o regime prático.
@@ -601,8 +628,53 @@ bidirecionais/MCMC para reduzir o ruído de cáusticas. A base ortonormal local 
 \bibliographystyle{apalike-sol}
 \bibliography{refs}
 
-% =====================================================================
 \clearpage
+
+\begin{table*}[!ht]
+\caption{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}
+\label{tab:rt-vs-pt}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Aspecto & Projeto 1 --- Ray Tracing (Whitted) & Projeto 2 --- Path Tracing \\
+Equação resolvida & Phong analítico + reflexão/refração recursiva & Estimador de Monte Carlo da LTE / integral de caminhos~\citep{kajiya1986rendering} \\
+Iluminação direta & \texttt{direct\_lighting()} analítico por luz pontual/área & NEE (amostragem da luz) + MIS no último segmento \\
+Iluminação indireta & Apenas especular (reflexão/refração) & Difusa e especular (GI completa) via $\beta$ acumulado \\
+Sombreamento & Função fechada do material (Phong) & Probabilístico: $\beta \mathrel{\ast}= f\,\lvert\cos\theta\rvert/p$ \\
+Terminação & \texttt{can\_spawn\_ray()} / \texttt{max\_depth} fixo & \texttt{min\_depth}=4 + Roleta Russa \pbrtsec{2.2.4} \\
+Convergência & Determinística (nítida em baixo SPP) & Estocástica, ruído $\propto 1/\sqrt{N}$ \\
+Especular + luz & Reflexão/refração somadas na recursão & Delta: pula NEE/MIS, peso 1 (\texttt{is\_specular}) \\
+\end{tblr}
+\end{table*}
+
+\begin{table*}[!ht]
+\caption{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times$ path tracer (Projeto~2).}
+\label{tab:dielectric-evol}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Aspecto & \texttt{TransparentMaterial} (P1) & \texttt{DielectricBSDF} (P2) \\
+Fresnel & Aproximação de Schlick $R_0+(1-R_0)(1-\cos\theta)^5$ & Exato não polarizado $F=\tfrac12(r_\parallel^2+r_\perp^2)$ \pbrtsec{9.5} \\
+Reflexão vs.\ refração & Ponderação determinística ($R$ e $1-R$) na recursão & Escolha estocástica (uma direção delta por vértice) \\
+Direção refratada & \texttt{glm.refract()} & Forma vetorial no frame da normal geométrica \\
+Reflexão interna total & Teste heurístico sobre a direção refratada & Analítico: $\sin^2\theta_t = \eta^2(1-\cos^2\theta_i)\ge 1$ \\
+Entrada/saída do meio & \texttt{front\_face}/\texttt{backfacing} (normal virada) & Sinal de $\omega_o\!\cdot\! n$ (normal geométrica) \\
+Absorção (Beer-Lambert) & Nos raios de sombra ao sair do meio \pbrtsec{11.2} & Rastreio de meio: $\beta\mathrel{\ast}=e^{-\sigma d}$ em qualquer segmento interno \\
+Integração com a luz & Embutida no sombreamento recursivo de Phong & Especular pula NEE/MIS (peso 1); GI por amostragem da BSDF \\
+\end{tblr}
+\end{table*}
+
+% =====================================================================
 \section*{Anexo A: Quadro de Referências Conceituais}
 
 O quadro a seguir mapeia cada conceito implementado à evidência mais direta no código
