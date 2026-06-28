@@ -80,20 +80,20 @@
 % Figura "talvez": inclui a imagem se o arquivo existir; senão, mostra um
 % placeholder. Permite documentar renders "a rodar em breve" sem quebrar a
 % compilação --- a imagem aparece automaticamente assim que o render existir.
-\newcommand{\figmaybe}[2]{%
-    \begin{figure}[!ht]
+\newcommand{\figmaybe}[3][!ht]{%
+    \begin{figure}[#1]
     \centering
-    \IfFileExists{#1}{%
-        \includegraphics[width=0.92\linewidth]{#1}%
+    \IfFileExists{#2}{%
+        \includegraphics[width=0.92\linewidth]{#2}%
     }{%
         \setlength{\fboxsep}{10pt}%
         \fbox{\parbox{0.86\linewidth}{\centering\footnotesize\itshape
             \vspace{0.8cm}
             Figura a gerar --- execute o comando indicado; a imagem aparece
-            automaticamente em \texttt{\detokenize{#1}}.
+            automaticamente em \texttt{\detokenize{#2}}.
             \vspace{0.8cm}}}%
     }
-    \caption{#2}
+    \caption{#3}
     \end{figure}%
 }
 
@@ -578,8 +578,9 @@ modos do \texttt{PathIntegrator} e grava cópias estáveis em
 A cena \path{src/path_tracing/scenes/cornell_combined_showcase.py} funde as duas cenas anteriores
 numa Cornell Box única que exercita simultaneamente todos os recursos implementados:
 \textbf{três} fontes de luz (\texttt{RectAreaLight} branca no teto + dois \texttt{TriangleMeshLight}
-hexagonais nas paredes, verde e vermelho), \textbf{quatro} esferas \texttt{DielectricBSDF} com
-variações de IOR e absorção Beer-Lambert (duas no piso e duas suspensas em alturas distintas),
+hexagonais nas paredes, verde e vermelho), \textbf{três} esferas \texttt{DielectricBSDF} com
+variações de IOR e absorção Beer-Lambert (duas no piso e uma suspensa) e \textbf{uma esfera
+espelhada} (\texttt{MirrorBSDF}, reflexão pura) na posição suspensa-direita,
 duas caixas Lambertianas rotacionadas e uma esfera difusa azul para \emph{color bleeding}.
 
 \begin{center}\tiny
@@ -589,7 +590,7 @@ duas caixas Lambertianas rotacionadas e uma esfera difusa azul para \emph{color 
 Piso-esq. & (1.50, 0.80, 3.40) & 0.80 & 1{,}5 & incolor \\
 Piso-dir. & (3.90, 0.80, 3.60) & 0.80 & 1{,}5 & âmbar \\
 Susp.-esq. & (1.40, 3.60, 2.00) & 0.75 & 1{,}33 & água incolor \\
-Susp.-dir. & (4.10, 2.60, 2.20) & 0.75 & 1{,}33 & água azul \\
+Susp.-dir. & (4.10, 2.60, 2.20) & 0.75 & — & \texttt{Mirror} (reflexão pura) \\
 Difusa azul & (2.70, 0.55, 4.70) & 0.55 & — & \texttt{Lambertian} \\
 \end{tabular}
 \end{center}
@@ -619,18 +620,74 @@ avaliar NEE/MIS naquele bounce. Dois fenômenos produzem escuridão localizada:
 \emph{throughput} sem introduzir viés.
 
 \paragraph{Cena combinada com esfera espelhada.}
-A cena combinada integra todos os recursos implementados: 3 fontes de luz (1 retangular no teto + 2 hexagonais nas paredes),
-4 esferas dielétricas (2 no piso com IOR=1{,}5, 1 suspensa com IOR=1{,}33) substituídas por 1 esfera espelhada (reflexão pura),
-2 caixas Lambertianas rotacionadas e 1 esfera azul (color bleeding). A esfera espelhada na posição suspensa-dir.\ reflete as 3 fontes de luz coloridas, gerando
-padrões de reflexão especular que contrastam com a refração e absorção das esferas dielétricas.
+A composição final integra 3 fontes de luz coloridas (retangular no teto + duas hexagonais nas
+paredes verde e vermelha), 3 esferas dielétricas (duas no piso com IOR=1{,}5; uma suspensa com
+IOR=1{,}33) e \textbf{uma esfera espelhada} (\texttt{MirrorBSDF}, reflexão pura) na posição
+suspensa-direita, além de 2 caixas Lambertianas rotacionadas e 1 esfera difusa azul
+(\emph{color bleeding}). A esfera espelhada reflete as 3 fontes coloridas e o ambiente,
+produzindo reflexão especular nítida que contrasta com a refração/absorção das dielétricas.
+As oito figuras a seguir comparam os quatro modos de amostragem, cada um em SPP=4 (rápido,
+ruidoso) e SPP=32 (convergido), evidenciando a redução de variância $\propto 1/\sqrt{\text{SPP}}$.
 
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr.png}{Cena combinada com esfera espelhada, \texttt{bsdf\_only} (512$\times$512, SPP=4, estratificado, depth=4): alta variância; reflexões especulares da esfera espelhada amostradas raramente via BSDF puro; esferas dielétricas com regiões escuras por \emph{depth} esgotado.}
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png}{Cena combinada com esfera espelhada, \texttt{nee\_only} (512$\times$512, SPP=4, estratificado, depth=4): iluminação direta das três fontes nítida nas superfícies difusas; esfera espelhada e dielétricas especulares ainda ruidosas pois NEE é pulado em bounces dielétricos (\texttt{is\_specular}).}
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr_spp_4.png}{Cena combinada, \texttt{bsdf\_only} em SPP=4 (depth=10, sem RR): amostragem por BSDF pura quase inutilizável --- ruído ``sal e pimenta'' domina toda a cena, inclusive a esfera espelhada.}
 
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png}{Cena combinada com esfera espelhada, \texttt{mis} (512$\times$512, SPP=4, estratificado, depth=4): combina BSDF e NEE com heurística de potência ($\beta=2$); reflexão especular da esfera espelhada bem definida; menor variância nas superfícies difusas; regiões TIR visíveis nas esferas dielétricas.}
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_bsdf_only_no_rr_spp_32.png}{Cena combinada, \texttt{bsdf\_only} em SPP=32 (depth=10, sem RR, 19{,}6 min): cena já discernível, mas ainda granulada; as fontes de luz são raramente acertadas por raios amostrados pela BSDF.}
 
-\figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png}{Cena combinada com esfera espelhada, \texttt{mis} + Roleta Russa (512$\times$512, SPP=4, estratificado, depth=4): terminação probabilística de caminhos de baixo \emph{throughput}; esfera espelhada reflete múltiplas fontes com redução de tempo de render mantendo estimador não-viesado.}
-{\small\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --all --spp 20 --depth 8}}
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr_spp_4.png}{Cena combinada, \texttt{nee\_only} em SPP=4 (depth=10, sem RR): iluminação direta das 3 fontes já legível mesmo com poucos \emph{samples}, pois NEE reduz a variância da luz direta a quase zero; sombras geométricas pretas.}
+
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr_spp_32.png}{Cena combinada, \texttt{nee\_only} em SPP=32 (depth=10, sem RR, 47{,}3 min): superfícies difusas limpas; a esfera espelhada reflete apenas geometria diretamente iluminada (sem reverberação/\emph{color bleeding}).}
+
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr_spp_4.png}{Cena combinada, \texttt{mis} em SPP=4 (depth=10, sem RR): combinação BSDF+NEE já produz imagem plausível com pouquíssimos \emph{samples}; menos ruído que \texttt{bsdf\_only} e mais informação indireta que \texttt{nee\_only}.}
+
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr_spp_32.png}{Cena combinada, \texttt{mis} em SPP=32 (depth=10, sem RR, 50{,}7 min): resultado balanceado --- a esfera espelhada reflete o ambiente com \emph{color bleeding}; as dielétricas mostram refração e cáusticas; transições luz-sombra suaves.}
+
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr_spp_4.png}{Cena combinada, \texttt{mis}+RR em SPP=4 (depth=10, com RR): praticamente idêntica ao \texttt{mis} sem RR no mesmo SPP --- a Roleta Russa não altera a média, apenas encurta caminhos de baixo \emph{throughput}.}
+
+\figmaybe[tbp]{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr_spp_32.png}{Cena combinada, \texttt{mis}+RR em SPP=32 (depth=10, com RR, 36{,}2 min): visualmente equivalente ao \texttt{mis} sem RR (50{,}7 min), porém $-28{,}6\%$ no tempo de render; estimador permanece não-viesado.}
+
+{\small\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --all --spp 32 --depth 10}}
+
+\noindent\textbf{Análise: Variações de modo em cena complexa com esfera espelhada.}
+
+A cena combinada integra 3 fontes de luz coloridas (teto branco, paredes verde e vermelha),
+3 esferas dielétricas com refração/absorção, 1 esfera espelhada com reflexão pura, e 2 caixas difusas.
+Essa complexidade amplifica as diferenças entre modos de amostragem:
+
+\noindent\textit{Modo \texttt{bsdf\_only}} domina em ruído branco puro. A amostragem aleatória
+da BSDF falha em capturar iluminação estruturada; as reflexões especulares (esfera espelhada
+e bordas dielétricas) aparecem como ``pimenta e sal'' típico de Monte Carlo ingênuo.
+Tempo: 19{,}6 min (mais rápido, mas inútil sem convergência). Convergência: $O(1/\sqrt{\text{SPP}})$.
+
+\noindent\textit{Modo \texttt{nee\_only}} inverte o problema: iluminação direta é nítida,
+mas reflexões indiretas desaparecem. As 3 fontes brilham perfeitamente mapeadas nas superfícies;
+porém, a esfera espelhada reflete apenas essas fontes diretas (sem reverberação).
+Não há color bleeding --- efeito fisicamente correto mas visualmente vazio.
+Tempo: 47{,}3 min (2.4× mais lento que bsdf\_only).
+
+\noindent\textit{Modo \texttt{mis}} atinge equilíbrio: NEE elimina ruído de iluminação direta,
+enquanto BSDF captura reflexões indiretas. A esfera espelhada reflete cores do ambiente
+(efeito ``color bleeding'' visível nas bordas), as dielétricas mostram cáusticas ricas,
+e transições luz-sombra são suaves e naturais. Tempo: 50{,}7 min. Convergência mais rápida que bsdf\_only,
+riqueza visual superior a nee\_only.
+
+\noindent\textit{Modo \texttt{mis}+RR} aplica Roleta Russa: caminhos com low throughput
+terminam cedo com probabilidade calibrada. Resultado: 28{,}6\% mais rápido que MIS sem RR (36{,}2 min),
+visualmente imperceptível em SPP=32. Trade-off clássico de Monte Carlo:
+reduza custo computacional mantendo estimador não-viesado.
+
+\noindent\textbf{Comparação: Modos em cena combinada com esfera espelhada.}
+\begin{center}\tiny
+\begin{tabular}{l@{\,}l@{\,}l@{\,}l}
+\textbf{Modo} & \textbf{Parâmetros} & \textbf{Variância} & \textbf{Tempo (min)} \\
+\hline
+\texttt{bsdf\_only} & SPP=32, sem NEE, sem RR & Muito alta (sal e pimenta) & 19{,}6 \\
+\texttt{nee\_only} & SPP=32, NEE direto, sem RR & Baixa (direto), sombras pretas & 47{,}3 \\
+\texttt{mis} & SPP=32, BSDF+NEE, sem RR & Moderada (balanceado) & 50{,}7 \\
+\texttt{mis}+RR & SPP=32, BSDF+NEE, com RR & Idêntica a MIS & 36{,}2 (−28{,}6\%) \\
+\end{tabular}
+\end{center}
+
+\clearpage
 
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}

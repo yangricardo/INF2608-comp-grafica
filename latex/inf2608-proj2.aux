@@ -82,13 +82,19 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Showcase --- \texttt  {bsdf\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $42 min): alta variância; as fontes hexagonais laterais são raramente amostradas por BSDF puro.}}{7}{figure.16}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Showcase --- \texttt  {nee\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $100 min): amostragem direta das três fontes (teto + paredes laterais); iluminação direta nítida.}}{7}{figure.17}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Por que regiões das esferas dielétricas aparecem escuras.}{7}{subsection.8.8}\protected@file@percent }
-\citation{kajiya1986rendering}
-\citation{pharr2023pbrt}
 \@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Showcase --- \texttt  {mis} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $102 min): combina BSDF e NEE com heurística de potência ($\beta =2$); menor variância em superfícies difusas e especulares.}}{8}{figure.18}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Showcase --- \texttt  {mis} + Roleta Russa (512$\times $512, SPP=64, estratificado, depth=12, $\approx $70 min): mesma média, terminação probabilística de caminhos profundos.}}{8}{figure.19}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Cena combinada com esfera espelhada.}{8}{Item.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Cena combinada com esfera espelhada, \texttt  {bsdf\_only} (512$\times $512, SPP=4, estratificado, depth=4): alta variância; reflexões especulares da esfera espelhada amostradas raramente via BSDF puro; esferas dielétricas com regiões escuras por \emph  {depth} esgotado.}}{8}{figure.20}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Cena combinada com esfera espelhada, \texttt  {nee\_only} (512$\times $512, SPP=4, estratificado, depth=4): iluminação direta das três fontes nítida nas superfícies difusas; esfera espelhada e dielétricas especulares ainda ruidosas pois NEE é pulado em bounces dielétricos (\texttt  {is\_specular}).}}{8}{figure.21}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Cena combinada, \texttt  {bsdf\_only} em SPP=4 (depth=10, sem RR): amostragem por BSDF pura quase inutilizável --- ruído ``sal e pimenta'' domina toda a cena, inclusive a esfera espelhada.}}{8}{figure.20}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Cena combinada, \texttt  {bsdf\_only} em SPP=32 (depth=10, sem RR, 19{,}6 min): cena já discernível, mas ainda granulada; as fontes de luz são raramente acertadas por raios amostrados pela BSDF.}}{9}{figure.21}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces Cena combinada, \texttt  {nee\_only} em SPP=4 (depth=10, sem RR): iluminação direta das 3 fontes já legível mesmo com poucos \emph  {samples}, pois NEE reduz a variância da luz direta a quase zero; sombras geométricas pretas.}}{9}{figure.22}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces Cena combinada, \texttt  {nee\_only} em SPP=32 (depth=10, sem RR, 47{,}3 min): superfícies difusas limpas; a esfera espelhada reflete apenas geometria diretamente iluminada (sem reverberação/\emph  {color bleeding}).}}{9}{figure.23}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces Cena combinada, \texttt  {mis} em SPP=4 (depth=10, sem RR): combinação BSDF+NEE já produz imagem plausível com pouquíssimos \emph  {samples}; menos ruído que \texttt  {bsdf\_only} e mais informação indireta que \texttt  {nee\_only}.}}{9}{figure.24}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces Cena combinada, \texttt  {mis} em SPP=32 (depth=10, sem RR, 50{,}7 min): resultado balanceado --- a esfera espelhada reflete o ambiente com \emph  {color bleeding}; as dielétricas mostram refração e cáusticas; transições luz-sombra suaves.}}{10}{figure.25}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces Cena combinada, \texttt  {mis}+RR em SPP=4 (depth=10, com RR): praticamente idêntica ao \texttt  {mis} sem RR no mesmo SPP --- a Roleta Russa não altera a média, apenas encurta caminhos de baixo \emph  {throughput}.}}{10}{figure.26}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces Cena combinada, \texttt  {mis}+RR em SPP=32 (depth=10, com RR, 36{,}2 min): visualmente equivalente ao \texttt  {mis} sem RR (50{,}7 min), porém $-28{,}6\%$ no tempo de render; estimador permanece não-viesado.}}{10}{figure.27}\protected@file@percent }
+\citation{kajiya1986rendering}
+\citation{pharr2023pbrt}
 \citation{walter2007microfacet}
 \citation{frisvad2012orthonormal}
 \bibstyle{apalike-sol}
@@ -97,21 +103,19 @@
 \bibcite{inf2608slides08}{{2}{2026b}{{Celes}}{{}}}
 \bibcite{inf2608slides09}{{3}{2026c}{{Celes}}{{}}}
 \bibcite{frisvad2012orthonormal}{{4}{2012}{{Frisvad}}{{}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces Cena combinada com esfera espelhada, \texttt  {mis} (512$\times $512, SPP=4, estratificado, depth=4): combina BSDF e NEE com heurística de potência ($\beta =2$); reflexão especular da esfera espelhada bem definida; menor variância nas superfícies difusas; regiões TIR visíveis nas esferas dielétricas.}}{9}{figure.22}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces Cena combinada com esfera espelhada, \texttt  {mis} + Roleta Russa (512$\times $512, SPP=4, estratificado, depth=4): terminação probabilística de caminhos de baixo \emph  {throughput}; esfera espelhada reflete múltiplas fontes com redução de tempo de render mantendo estimador não-viesado.}}{9}{figure.23}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {9}Comparação: Ray Tracing (Projeto 1) $\times $ Path Tracing (Projeto 2)}{9}{section.9}\protected@file@percent }
-\newlabel{sec:comparacao}{{9}{9}{Comparação: Ray Tracing (Projeto 1) \texorpdfstring {$\times $}{x} Path Tracing (Projeto 2)}{section.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Evolução do material dielétrico}{9}{subsection.9.1}\protected@file@percent }
-\newlabel{sec:dielectric-evol}{{9.1}{9}{Evolução do material dielétrico}{subsection.9.1}{}}
-\@writefile{toc}{\contentsline {paragraph}{Limites declarados.}{9}{subsection.9.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusão e Trabalhos Futuros}{9}{section.10}\protected@file@percent }
-\newlabel{sec:conclusao}{{10}{9}{Conclusão e Trabalhos Futuros}{section.10}{}}
 \bibcite{kajiya1986rendering}{{5}{1986}{{Kajiya}}{{}}}
 \bibcite{inf2608projectrepo}{{6}{2026}{{Miranda}}{{}}}
 \bibcite{misso2022unbiased}{{7}{2022}{{Misso {\em  et~al}.}}{{}}}
 \bibcite{pharr2023pbrt}{{8}{2023}{{Pharr {\em  et~al}.}}{{}}}
 \bibcite{veach1995optimallycombin}{{9}{1995}{{Veach and Guibas}}{{}}}
 \bibcite{walter2007microfacet}{{10}{2007}{{Walter {\em  et~al}.}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Comparação: Ray Tracing (Projeto 1) $\times $ Path Tracing (Projeto 2)}{11}{section.9}\protected@file@percent }
+\newlabel{sec:comparacao}{{9}{11}{Comparação: Ray Tracing (Projeto 1) \texorpdfstring {$\times $}{x} Path Tracing (Projeto 2)}{section.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Evolução do material dielétrico}{11}{subsection.9.1}\protected@file@percent }
+\newlabel{sec:dielectric-evol}{{9.1}{11}{Evolução do material dielétrico}{subsection.9.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Limites declarados.}{11}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusão e Trabalhos Futuros}{11}{section.10}\protected@file@percent }
+\newlabel{sec:conclusao}{{10}{11}{Conclusão e Trabalhos Futuros}{section.10}{}}
 \citation{kajiya1986rendering}
 \citation{pharr2023pbrt}
 \citation{kajiya1986rendering}
@@ -142,11 +146,11 @@
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}}{12}{table.caption.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}}{13}{table.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:rt-vs-pt}{{1}{12}{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2)}{table.caption.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2).}}{12}{table.caption.2}\protected@file@percent }
-\newlabel{tab:dielectric-evol}{{2}{12}{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2)}{table.caption.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura).}}{12}{table.caption.3}\protected@file@percent }
-\newlabel{tab:referencias}{{3}{12}{Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura)}{table.caption.3}{}}
-\gdef \@abspage@last{12}
+\newlabel{tab:rt-vs-pt}{{1}{13}{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2)}{table.caption.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2).}}{13}{table.caption.2}\protected@file@percent }
+\newlabel{tab:dielectric-evol}{{2}{13}{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2)}{table.caption.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura).}}{13}{table.caption.3}\protected@file@percent }
+\newlabel{tab:referencias}{{3}{13}{Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura)}{table.caption.3}{}}
+\gdef \@abspage@last{13}
