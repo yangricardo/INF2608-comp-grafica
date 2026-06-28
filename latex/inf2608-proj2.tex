@@ -103,9 +103,9 @@
     \setlength{\fboxsep}{6pt}%
     \noindent\colorbox{black!5}{%
         \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
-            \footnotesize\textbf{Comando gerador}\par
+            \small\textbf{Comando gerador}\par
             \vspace{2pt}%
-            {\footnotesize\raggedright\ttfamily\obeyspaces\detokenize{#1}\par}%
+            {\tiny\raggedright\ttfamily\obeyspaces\detokenize{#1}\par}%
         }%
     }\par
     \endgroup
@@ -224,16 +224,15 @@ A amostragem direta sorteia um ponto $p_L$ na luz de área e conecta-o ao vérti
 reduzindo a variância frente à amostragem por BSDF \pbrtsecpair{12.4}{13.4}. A amostragem é
 uniforme por área, $p_A(p_L)=1/A$; a conversão para medida de ângulo sólido introduz o fator
 geométrico:
-\begin{equation}
-p_\omega(\omega_i) = p_A\,\frac{r^2}{\cos\theta_L}, \qquad r=\lVert p-p_L\rVert,\;\;
-\cos\theta_L=\max(0,-\omega_i\!\cdot\! n_L).
-\label{eq:areatosolid}
-\end{equation}
+\begin{align}
+p_\omega(\omega_i) &= p_A\,\frac{r^2}{\cos\theta_L}, \label{eq:areatosolid}\\
+r &= \lVert p-p_L \rVert, \quad \cos\theta_L = \max(0, -\omega_i \cdot n_L). \notag
+\end{align}
 O termo direto estimado em uma amostra fica
-\begin{equation}
-L_{\mathrm{dir}} = \frac{f_r(\omega_o,\omega_i)\,L_e\,\cos\theta_x}{p_\omega}
-                 = f_r\,L_e\,\frac{\cos\theta_x\,\cos\theta_L}{r^2}\,A ,
-\end{equation}
+\begin{align*}
+L_{\mathrm{dir}} &= \frac{f_r(\omega_o,\omega_i)\,L_e\,\cos\theta_x}{p_\omega} \\
+                &= f_r\,L_e\,\frac{\cos\theta_x\,\cos\theta_L}{r^2}\,A ,
+\end{align*}
 ou seja, o fator geométrico $G=\cos\theta_x\cos\theta_L/r^2$ \emph{já está embutido} na
 $p_\omega$ — não deve ser aplicado uma segunda vez. A implementação
 (\path{src/path_tracing/lights/area_rect.py}) retorna \texttt{pdf\_solid\_angle} já convertida,
@@ -303,17 +302,17 @@ Materiais refrativos (vidro, água) são tratados como BSDF \emph{delta}
 o índice relativo é $\eta=\eta_i/\eta_t$ ($1/\text{ior}$ ao entrar, $\text{ior}$ ao sair).
 
 \paragraph{Snell e reflexão interna total (TIR).}
-\begin{equation}
-\sin^2\theta_t = \eta^2\,(1-\cos^2\theta_i);\qquad
-\sin^2\theta_t \ge 1 \;\Rightarrow\; \text{TIR (reflete tudo)} .
-\end{equation}
+\begin{align*}
+\sin^2\theta_t &= \eta^2\,(1-\cos^2\theta_i) \\
+\sin^2\theta_t &\ge 1 \;\Rightarrow\; \text{TIR (reflete tudo)}
+\end{align*}
 
 \paragraph{Fresnel dielétrico (não polarizado).}
-\begin{equation}
-r_\parallel = \frac{\eta_t\cos\theta_i-\eta_i\cos\theta_t}{\eta_t\cos\theta_i+\eta_i\cos\theta_t},\;\;
-r_\perp = \frac{\eta_i\cos\theta_i-\eta_t\cos\theta_t}{\eta_i\cos\theta_i+\eta_t\cos\theta_t},\;\;
-F = \tfrac{1}{2}\big(r_\parallel^2+r_\perp^2\big).
-\end{equation}
+\begin{align*}
+r_\parallel &= \frac{\eta_t\cos\theta_i-\eta_i\cos\theta_t}{\eta_t\cos\theta_i+\eta_i\cos\theta_t}, \\
+r_\perp &= \frac{\eta_i\cos\theta_i-\eta_t\cos\theta_t}{\eta_i\cos\theta_i+\eta_t\cos\theta_t}, \\
+F &= \tfrac{1}{2}\big(r_\parallel^2+r_\perp^2\big).
+\end{align*}
 A cada vértice escolhe-se refletir (prob.\ $F$) ou refratar (prob.\ $1-F$); por ser delta, o
 \emph{throughput} é atualizado como $\beta\mathrel{\ast}=f/p$ sem o cosseno geométrico, e o raio
 transmitido (hemisfério oposto) \emph{não} é descartado.
@@ -452,20 +451,6 @@ Parâmetros do script (\path{src/path_tracing/scripts/proj2_req7_dielectric.py})
 \texttt{-{}-mode \{bsdf\_only|nee\_only|mis\}},
 \texttt{-{}-use-rr}, \texttt{-{}-spp}, \texttt{-{}-depth}, \texttt{-{}-width/-{}-height}, \texttt{-{}-seed}.
 
-\paragraph{Vidro incolor (IOR=1{,}5).}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_172940/render.png}
-\caption{Esfera de vidro incolor (\texttt{DielectricBSDF}, IOR=1{,}5), MIS sem RR (800$\times$600, SPP=64, seed=42, $\approx$58 min). A alta reflectância Fresnel em ângulos rasantes confere aparência especular às bordas; refração de Snell e reflexão interna total (TIR) são observáveis na região central.}
-\end{figure}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_200923/render.png}
-\caption{Esfera de vidro incolor (\texttt{DielectricBSDF}, IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): resolução intermediária; padrão de cáusticas visível no chão.}
-\end{figure}
-\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42 --width 800 --height 600}
-
-\paragraph{Água com absorção de Beer-Lambert (IOR=1{,}33).}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_water_mis_no_rr_20260606_204425/render.png}
@@ -483,19 +468,16 @@ A cena \path{src/path_tracing/scenes/cornell_dielectric_multi.py} instancia quat
 (\texttt{DielectricBSDF}, raio=0{,}75) dispostas em grade~2$\times$2 no piso da Cornell Box,
 cobrindo o espaço de variações de IOR e absorção de Beer-Lambert:
 
-\begin{center}\small
-\begin{tabular}{llll}
-\textbf{Posição} & \textbf{IOR} & \textbf{Absorção $\sigma$ (RGB)} & \textbf{Efeito visual} \\
+\begin{center}\tiny
+\begin{tabular}{l@{\,}c@{\,}c@{\,}l}
+\textbf{Posição} & \textbf{IOR} & \textbf{$\sigma$ (RGB)} & \textbf{Efeito visual} \\
 \hline
-Frente-esq. & 1{,}5 & $(0,0,0)$ incolor & reflexão Fresnel + refração \\
-Frente-dir. & 1{,}5 & $(0{,}2,\,0{,}6,\,1{,}2)$ & tom âmbar (absorve azul) \\
-Fundo-esq.  & 1{,}33 & $(0,0,0)$ incolor & água incolor, Fresnel suave \\
-Fundo-dir.  & 1{,}33 & $(0{,}30,\,0{,}05,\,0{,}10)$ & água azul-esverdeada (absorve vermelho) \\
+Frente-esq. & 1{,}5 & $(0,0,0)$ & Fresnel + refração \\
+Frente-dir. & 1{,}5 & $(0{,}2,\,0{,}6,\,1{,}2)$ & âmbar (absorve azul) \\
+Fundo-esq.  & 1{,}33 & $(0,0,0)$ & água incolor \\
+Fundo-dir.  & 1{,}33 & $(0{,}3,\,0{,}05,\,0{,}1)$ & azul-esverdeado \\
 \end{tabular}
 \end{center}
-
-\figmaybe{../out/proj2/req7_dielectric_showcase/proj2_req7_dielectric_showcase_mis_no_rr.png}{Showcase multi-material dielétrico, MIS sem RR (512$\times$512, SPP=32): quatro esferas com \texttt{DielectricBSDF} em variações de IOR ($1{,}5$ / $1{,}33$) e absorção Beer-Lambert, numa Cornell Box com iluminação retangular.}
-\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric_showcase --spp 32 --depth 8 --mode mis}
 
 \noindent\textbf{Variações de parâmetros} (material $\times$ absorção $\times$ estimador):
 \begin{itemize}\small\setlength{\itemsep}{1pt}
@@ -546,15 +528,15 @@ hexagonais nas paredes, verde e vermelho), \textbf{quatro} esferas \texttt{Diele
 variações de IOR e absorção Beer-Lambert (duas no piso e duas suspensas em alturas distintas),
 duas caixas Lambertianas rotacionadas e uma esfera difusa azul para \emph{color bleeding}.
 
-\begin{center}\small
-\begin{tabular}{lllll}
-\textbf{Objeto} & \textbf{Posição (x,y,z)} & \textbf{r} & \textbf{IOR} & \textbf{Absorção / material} \\
+\begin{center}\tiny
+\begin{tabular}{l@{\,}l@{\,}c@{\,}c@{\,}l}
+\textbf{Obj.} & \textbf{Pos. (x,y,z)} & \textbf{r} & \textbf{IOR} & \textbf{Absorção/mat.} \\
 \hline
-Esfera piso-esq. & (1.50, 0.80, 3.40) & 0.80 & 1{,}5 & incolor \\
-Esfera piso-dir. & (3.90, 0.80, 3.60) & 0.80 & 1{,}5 & âmbar $(0{,}2,\,0{,}6,\,1{,}2)$ \\
-Esfera susp.-esq. & (1.40, 3.60, 2.00) & 0.75 & 1{,}33 & água incolor \\
-Esfera susp.-dir. & (4.10, 2.60, 2.20) & 0.75 & 1{,}33 & água azul-esverdeada \\
-Esfera difusa azul & (2.70, 0.55, 4.70) & 0.55 & — & \texttt{LambertianBSDF} \\
+Piso-esq. & (1.50, 0.80, 3.40) & 0.80 & 1{,}5 & incolor \\
+Piso-dir. & (3.90, 0.80, 3.60) & 0.80 & 1{,}5 & âmbar \\
+Susp.-esq. & (1.40, 3.60, 2.00) & 0.75 & 1{,}33 & água incolor \\
+Susp.-dir. & (4.10, 2.60, 2.20) & 0.75 & 1{,}33 & água azul \\
+Difusa azul & (2.70, 0.55, 4.70) & 0.55 & — & \texttt{Lambertian} \\
 \end{tabular}
 \end{center}
 
@@ -586,7 +568,7 @@ avaliar NEE/MIS naquele bounce. Dois fenômenos produzem escuridão localizada:
 \figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_nee_only_no_rr.png}{Cena combinada, \texttt{nee\_only} (512$\times$512, SPP=2, estratificado, depth=4): iluminação direta das três fontes nítida nas superfícies difusas; esferas especulares ainda ruidosas pois NEE é pulado em bounces dielétricos (\texttt{is\_specular}).}
 \figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_no_rr.png}{Cena combinada, \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12): combina BSDF e NEE com heurística de potência ($\beta=2$); menor variância nas superfícies difusas e especulares; regiões TIR ainda visíveis nas bordas das esferas.}
 \figmaybe{../out/proj2/showcase_combined/proj2_showcase_combined_mis_rr.png}{Cena combinada, \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12): terminação probabilística de caminhos de baixo \emph{throughput}; reduz tempo de render mantendo estimador não-viesado.}
-\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --spp 64 --depth 12 --all}
+{\small\figcmd{python -m path_tracing.scripts.proj2_showcase_combined --spp 64 --depth 12 --all}}
 
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
