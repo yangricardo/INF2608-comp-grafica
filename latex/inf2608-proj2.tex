@@ -404,37 +404,59 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 
 \subsection{Luz como malha de triângulos (Etapa 06)}
 
-A fonte é um \textbf{octaedro} emissivo (8 faces triangulares) suspenso no teto --- um
-poliedro nítido, e não um quad plano --- com amostragem uniforme por área. O mesmo octaedro
-é geometria visível e luz de NEE.
+A cena (\path{src/path_tracing/scenes/cornell_mesh_light.py}) substitui a \texttt{RectAreaLight}
+retangular por uma \texttt{TriangleMeshLight}: uma malha de triângulos (octaedro com 8 faces
+e raio~0,60) suspensa no teto que serve exclusivamente como fonte NEE\@. A amostragem sorteia
+um triângulo com probabilidade proporcional à sua área (via CDF) e sorteia um ponto por
+coordenadas baricêntricas uniformes (\path{src/path_tracing/sampling.py},
+\texttt{uniform\_triangle}). A geometria emissiva do octaedro é de pequena escala nesta cena
+--- sua representação visual é melhor apreciada na cena integrada da
+Seção~\ref{sec:showcase}.
+
+Parâmetros do script (\path{src/path_tracing/scripts/proj2_req6_mesh_lights.py}):
+\texttt{-{}-mode \{bsdf\_only|nee\_only|mis\}} (integrador),
+\texttt{-{}-use-rr \{true|false\}} (Roleta Russa),
+\texttt{-{}-spp N} (amostras/pixel),
+\texttt{-{}-depth D} (profundidade máxima; mín=4),
+\texttt{-{}-width/-{}-height} (resolução),
+\texttt{-{}-seed S} (reprodutibilidade).
 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req6/proj2_req6_mis_no_rr_20260606_205410/render.png}
-\caption{Luz poliédrica --- octaedro emissivo (8 faces) com amostragem uniforme por área, MIS (512$\times$512, SPP=16).}
+\caption{Cornell Box com \texttt{TriangleMeshLight} (octaedro NEE), modo MIS sem RR
+(512$\times$512, SPP=16, $\approx$9{,}6 min). A fonte de malha triangular substitui a
+\texttt{RectAreaLight}; a redução de variância em relação ao modo \texttt{bsdf\_only} evidencia
+o ganho da amostragem direta.}
 \end{figure}
-\figcmd{python -m path_tracing.scripts.proj2_req6_mesh_lights --spp 16 --depth 8 --mode mis}
+\figcmd{python -m path_tracing.scripts.proj2_req6_mesh_lights --spp 16 --depth 8 --mode mis --width 512 --height 512}
 
-\noindent\textbf{Variações de parâmetros} (malha poliédrica com MIS e com Roleta Russa):
+\noindent\textbf{Variações de parâmetros}:
 \begin{itemize}\small\setlength{\itemsep}{1pt}
-\item \texttt{-{}-mode bsdf\_only -{}-spp 16} vs.\ \texttt{-{}-mode mis -{}-spp 16} --- a luz menor (octaedro) realça o ganho do NEE/MIS.
-\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 32} --- combina amostragem uniforme por área e RR.
+\item \texttt{-{}-mode bsdf\_only -{}-spp 16} vs.\ \texttt{-{}-mode mis -{}-spp 16} --- a fonte menor (octaedro) amplifica o ganho relativo do NEE\@.
+\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 32} --- combina amostragem de malha triangular e Roleta Russa.
 \end{itemize}
 
 \subsection{Dielétrico (Etapa 07)}
+
+Parâmetros do script (\path{src/path_tracing/scripts/proj2_req7_dielectric.py}):
+\texttt{-{}-material \{glass|water\}} (IOR=1{,}5 ou 1{,}33),
+\texttt{-{}-absorption R G B} (coeficiente $\sigma$ Beer-Lambert por canal~RGB; \texttt{0 0 0} = incolor; ex.: \texttt{0.2 0.6 1.2} para vidro âmbar absorvendo azul, \texttt{0.30 0.05 0.10} para água azul-esverdeada absorvendo vermelho),
+\texttt{-{}-mode \{bsdf\_only|nee\_only|mis\}},
+\texttt{-{}-use-rr}, \texttt{-{}-spp}, \texttt{-{}-depth}, \texttt{-{}-width/-{}-height}, \texttt{-{}-seed}.
 
 \paragraph{Vidro incolor (IOR=1{,}5).}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_172940/render.png}
-\caption{Vidro incolor (IOR=1{,}5), MIS sem RR (800$\times$600, SPP=64, seed=42, $\approx$58 min): máxima qualidade, evidencia refração, Fresnel e TIR.}
+\caption{Esfera de vidro incolor (IOR=1{,}5), MIS sem RR (800$\times$600, SPP=64, seed=42, $\approx$58 min). A alta reflectância Fresnel em ângulos rasantes --- comportamento correto de \texttt{DielectricBSDF} $\delta$ amostrado estocasticamente --- confere aparência especular às bordas; refração e TIR são observáveis na região central da esfera.}
 \end{figure}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_200923/render.png}
-\caption{Vidro incolor (IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): resolução intermediária.}
+\caption{Esfera de vidro incolor (IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): resolução intermediária.}
 \end{figure}
-\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42}
+\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42 --width 800 --height 600}
 
 \paragraph{Água com absorção de Beer-Lambert (IOR=1{,}33).}
 \begin{figure}[!ht]
@@ -460,39 +482,14 @@ poliedro nítido, e não um quad plano --- com amostragem uniforme por área. O 
 \subsection{Cena integrada (\emph{showcase})}
 \label{sec:showcase}
 
-Para comparar os estimadores a partir de \textbf{uma única cena}, a \emph{showcase}
-(\path{src/path_tracing/scenes/cornell_showcase.py}) reúne, numa Cornell Box: duas caixas
-difusas rotacionadas, uma esfera de vidro incolor, uma esfera de vidro \textbf{âmbar}
-(absorção de Beer-Lambert), uma esfera difusa azul (\emph{color bleeding}) e uma
-\textbf{luz poliédrica} --- um octaedro emissivo (8 faces) que serve de geometria visível e
-de luz para NEE. Assim, GI difusa, dielétrico (incolor e absorvente) e luz de malha são
-exercitados juntos. O script renderiza os quatro modos e grava cópias estáveis em
-\path{out/proj2/showcase/} (incluídas automaticamente abaixo quando existirem).
-
-\figcmd{python -m path_tracing.scripts.proj2_showcase --all --spp 64 --depth 8 --seed 42}
-
-\noindent Equivalente, modo a modo:
-\begin{itemize}\small\setlength{\itemsep}{1pt}
-\item \texttt{-{}-mode bsdf\_only -{}-spp 64} \quad \texttt{-{}-mode nee\_only -{}-spp 64} \quad \texttt{-{}-mode mis -{}-spp 64}
-\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 64} (Roleta Russa)
-\end{itemize}
-
-\figmaybe{../out/proj2/showcase/proj2_showcase_bsdf_only_no_rr.png}{Showcase --- \texttt{bsdf\_only} (alta variância; luz pequena raramente amostrada pela BSDF).}
-\figmaybe{../out/proj2/showcase/proj2_showcase_nee_only_no_rr.png}{Showcase --- \texttt{nee\_only} (amostragem direta da luz poliédrica).}
-\figmaybe{../out/proj2/showcase/proj2_showcase_mis_no_rr.png}{Showcase --- \texttt{mis} (combina BSDF e NEE; menor ruído).}
-\figmaybe{../out/proj2/showcase/proj2_showcase_mis_rr.png}{Showcase --- \texttt{mis} + Roleta Russa (mesma média, menor custo).}
-
-% =====================================================================
-\subsection{Cena \emph{showcase} com luzes de parede hexagonais}
-\label{sec:showcase-wall}
-
-A cena \emph{wall lights} (\path{src/path_tracing/scenes/cornell_wall_lights.py}) estende a
-Cornell Box com \textbf{três} fontes de área distintas: um painel retangular emissivo no teto
-(branco) e dois hexágonos emissivos nas paredes laterais (verde à esquerda, vermelho à
-direita). O ambiente inclui ainda duas esferas dielétricas --- vidro incolor (IOR 1.5) e
-âmbar com absorção de Beer-Lambert --- uma esfera difusa azul e duas caixas rotacionadas.
-Essa composição exercita simultaneamente GI difusa, refração, absorção cromática e amostragem
-de múltiplas fontes de área com geometria não-planar.
+A cena \emph{wall lights} (\path{src/path_tracing/scenes/cornell_wall_lights.py}) reúne numa
+Cornell Box todos os recursos implementados no projeto: \textbf{três} fontes de área
+(\texttt{RectAreaLight} branca no teto~+ dois painéis hexagonais emissivos nas paredes
+laterais, verde à esquerda e vermelho à direita), exercitando NEE com múltiplas fontes de
+geometria distinta; duas esferas dielétricas --- vidro incolor (IOR=1{,}5) e âmbar com
+absorção de Beer-Lambert; uma esfera difusa azul (\emph{color bleeding}); e duas caixas
+Lambertianas rotacionadas. A amostragem de pixel é estratificada (\texttt{stratified}) e a
+profundidade máxima é 12.
 
 O script (\path{src/path_tracing/scripts/proj2_showcase_wall_lights.py}) renderiza os quatro
 modos do \texttt{PathIntegrator} e grava cópias estáveis em
@@ -508,10 +505,10 @@ modos do \texttt{PathIntegrator} e grava cópias estáveis em
 \item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 64 -{}-depth 12} (Roleta Russa)
 \end{itemize}
 
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_bsdf_only_no_rr.png}{Wall lights --- \texttt{bsdf\_only} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$42 min): alta variância pois as fontes hexagonais laterais são raramente amostradas por BSDF.}
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_nee_only_no_rr.png}{Wall lights --- \texttt{nee\_only} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$100 min): amostragem direta das três fontes (teto + paredes); iluminação direta nítida.}
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png}{Wall lights --- \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$102 min): combina BSDF e NEE com heurística de potência; menor variância em superfícies difusas e especulares.}
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png}{Wall lights --- \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12, $\approx$70 min): mesma média com terminação probabilística de caminhos profundos.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_bsdf_only_no_rr.png}{Showcase --- \texttt{bsdf\_only} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$42 min): alta variância; as fontes hexagonais laterais são raramente amostradas por BSDF puro.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_nee_only_no_rr.png}{Showcase --- \texttt{nee\_only} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$100 min): amostragem direta das três fontes (teto + paredes laterais); iluminação direta nítida.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png}{Showcase --- \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$102 min): combina BSDF e NEE com heurística de potência ($\beta=2$); menor variância em superfícies difusas e especulares.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png}{Showcase --- \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12, $\approx$70 min): mesma média, terminação probabilística de caminhos profundos.}
 
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
