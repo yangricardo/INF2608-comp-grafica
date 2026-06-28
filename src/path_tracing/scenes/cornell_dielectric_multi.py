@@ -1,10 +1,12 @@
 """Cena Cornell Box com quatro esferas dielétricas em variações de IOR e absorção.
 
-Demonstra o espectro completo de DielectricBSDF:
-  - Vidro incolor (IOR=1.5): alta reflectância Fresnel em ângulos rasantes
-  - Vidro âmbar (IOR=1.5, absorção azul): coloração por Beer-Lambert
-  - Água incolor (IOR=1.33): refração mais suave, menos Fresnel
-  - Água azul-esverdeada (IOR=1.33, absorção vermelha): coloração por Beer-Lambert
+Composição: duas esferas no piso (primeiro plano, z≈3.5) e duas suspensas em
+alturas distintas (fundo, z≈1.8), criando escalonamento em profundidade.
+
+  - Esq-piso    (1.40, 0.76, 3.50): vidro incolor IOR=1.5
+  - Dir-piso    (4.15, 0.76, 3.50): água azul-esverdeada IOR=1.33
+  - Esq-suspensa (1.40, 2.50, 1.80): vidro âmbar IOR=1.5
+  - Dir-suspensa (4.15, 3.50, 1.80): água incolor IOR=1.33
 """
 
 from __future__ import annotations
@@ -20,13 +22,13 @@ from ..lights.area_rect import RectAreaLight
 
 
 def build_proj2_cornell_dielectric_multi_scene() -> tuple[Scene, Camera]:
-  """Cornell Box com quatro esferas dielétricas (2×2) ilustrando variações de IOR e absorção.
+  """Cornell Box com quatro esferas dielétricas ilustrando variações de IOR e absorção.
 
-  Layout das esferas (raio=0.75, pousadas no piso):
-    Frente-esq  (1.40, 0.75, 1.50): vidro incolor    IOR=1.5
-    Frente-dir  (4.15, 0.75, 1.50): vidro âmbar      IOR=1.5, absorção azul
-    Fundo-esq   (1.40, 0.75, 3.90): água incolor     IOR=1.33
-    Fundo-dir   (4.15, 0.75, 3.90): água azul-esverdeada IOR=1.33, absorção vermelha
+  Composição (raio=0.75):
+    Esq-piso     (1.40, 0.76, 3.50): vidro incolor IOR=1.5 — primeiro plano
+    Dir-piso     (4.15, 0.76, 3.50): água azul-esverdeada IOR=1.33 — primeiro plano
+    Esq-suspensa (1.40, 2.50, 1.80): vidro âmbar IOR=1.5 — suspensa, altura média
+    Dir-suspensa (4.15, 3.50, 1.80): água incolor IOR=1.33 — suspensa, altura alta
   """
   scene = Scene(
     ambient_light=glm.vec3(0.0),
@@ -66,34 +68,29 @@ def build_proj2_cornell_dielectric_multi_scene() -> tuple[Scene, Camera]:
 
   # === QUATRO ESFERAS DIELÉTRICAS ===
   r = 0.75  # raio comum
-  y = r + 0.01  # centro ligeiramente acima do piso para evitar auto-interseção
 
-  # Frente-esquerda: vidro incolor IOR=1.5
+  # Piso — primeiro plano (z=3.50, próximas à câmera)
   scene.objects.append(Sphere(
-    center=glm.vec3(1.40, y, 1.50),
+    center=glm.vec3(1.40, r + 0.01, 3.50),
     radius=r,
     material=DielectricBSDF(ior=1.5, absorption=None),
   ))
-
-  # Frente-direita: vidro âmbar IOR=1.5 (absorve azul → tom amarelo-âmbar)
   scene.objects.append(Sphere(
-    center=glm.vec3(4.15, y, 1.50),
+    center=glm.vec3(4.15, r + 0.01, 3.50),
+    radius=r,
+    material=DielectricBSDF(ior=1.33, absorption=glm.vec3(0.30, 0.05, 0.10)),
+  ))
+
+  # Suspensas — fundo (z=1.80, recuadas), alturas distintas
+  scene.objects.append(Sphere(
+    center=glm.vec3(1.40, 2.50, 1.80),
     radius=r,
     material=DielectricBSDF(ior=1.5, absorption=glm.vec3(0.2, 0.6, 1.2)),
   ))
-
-  # Fundo-esquerda: água incolor IOR=1.33
   scene.objects.append(Sphere(
-    center=glm.vec3(1.40, y, 3.90),
+    center=glm.vec3(4.15, 3.50, 1.80),
     radius=r,
     material=DielectricBSDF(ior=1.33, absorption=None),
-  ))
-
-  # Fundo-direita: água azul-esverdeada IOR=1.33 (absorve vermelho → tom azul-esverdeado)
-  scene.objects.append(Sphere(
-    center=glm.vec3(4.15, y, 3.90),
-    radius=r,
-    material=DielectricBSDF(ior=1.33, absorption=glm.vec3(0.30, 0.05, 0.10)),
   ))
 
   # === CÂMERA ===
