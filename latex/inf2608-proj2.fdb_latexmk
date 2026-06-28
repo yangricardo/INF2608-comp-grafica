@@ -1,25 +1,29 @@
 # Fdb version 4
-["bibtex inf2608-proj2"] 1782665997.46701 "inf2608-proj2.aux" "inf2608-proj2.bbl" "inf2608-proj2" 1782666001.49747 0
+["bibtex inf2608-proj2"] 1782666254.5568 "inf2608-proj2.aux" "inf2608-proj2.bbl" "inf2608-proj2" 1782666258.74637 0
   "./apalike-sol.bst" 1777689754.7587 24928 269dedab788b7f84af88c155ecb45872 ""
   "./refs.bib" 1780789153.23222 14377 f5f74553d9991cc592748bf474ca1d81 ""
-  "inf2608-proj2.aux" 1782665999.61576 11793 88322e256e8892e7138179e7650e6ffb "xelatex"
+  "inf2608-proj2.aux" 1782666256.77392 13415 fe349b3a9bb11da1c033c9677748226a "xelatex"
   (generated)
   "inf2608-proj2.bbl"
   "inf2608-proj2.blg"
   (rewritten before read)
-["xdvipdfmx"] 1782666000.03997 "inf2608-proj2.xdv" "inf2608-proj2.pdf" "inf2608-proj2" 1782666001.50013 0
-  "inf2608-proj2.xdv" 1782665999.61789 316560 a971836067b82844674d69b9bf3d2402 "xelatex"
+["xdvipdfmx"] 1782666257.26743 "inf2608-proj2.xdv" "inf2608-proj2.pdf" "inf2608-proj2" 1782666258.74972 0
+  "inf2608-proj2.xdv" 1782666256.77701 328800 3b661d92861c1bbb258478f6436fb676 "xelatex"
   (generated)
   "inf2608-proj2.pdf"
   (rewritten before read)
-["xelatex"] 1782665997.6364 "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" "inf2608-proj2.xdv" "inf2608-proj2" 1782666001.49757 0
+["xelatex"] 1782666254.72278 "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" "inf2608-proj2.xdv" "inf2608-proj2" 1782666258.7465 0
   "../out/proj2/req1/proj2_req1_lambert_basic_20260606_151600/render.png" 1780771131.23065 872376 07ac560173c9cf74a6867dce2ac96a7c ""
+  "../out/proj2/req2/proj2_req2_nee_only_20260606_155653/render.png" 1780772327.24184 97923 a930d12e57ec2fc8b77cfdf90a877862 ""
   "../out/proj2/req2/proj2_req2_nee_only_20260606_162251/render.png" 1780773890.92832 98023 0a810881e5220be99f50d7ba630ed3f6 ""
   "../out/proj2/req3/proj2_req3_mis_20260606_161743/render.png" 1780773583.1626 106731 2fdc4c8c8f42b4b89325119cc0c88bfe ""
   "../out/proj2/req5/proj2_req5_mis_no_rr_20260606_163937/render.png" 1780774903.75641 106731 2fdc4c8c8f42b4b89325119cc0c88bfe ""
+  "../out/proj2/req5/proj2_req5_mis_no_rr_20260607_153507/render.png" 1780857759.73355 429364 3f7f03a6f9c5fdf9c12f177829a9468b ""
   "../out/proj2/req5/proj2_req5_mis_rr_20260606_164126/render.png" 1780774997.11299 107273 d9fa73e1a1924cbb2437b2b945cbb3fc ""
   "../out/proj2/req6/proj2_req6_mis_no_rr_20260606_205410/render.png" 1780790624.23009 423511 8f29281979c977a423ebd729c6a29ebc ""
   "../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_172940/render.png" 1780781264.03562 666394 222fece72bc41e07906905b2373d4d03 ""
+  "../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_200923/render.png" 1780788345.9929 407447 d4ca24c37d1db36ef6c9cfc65bc88d9a ""
+  "../out/proj2/req7/proj2_req7_water_mis_no_rr_20260606_204425/render.png" 1780791439.82926 382650 42bb5c985b862c07c9b4e3cfc20f0d93 ""
   "../out/proj2/req7/proj2_req7_water_mis_no_rr_20260606_212027/render.png" 1780800133.44216 326185 1f2b3c2bd5601f33f413171871a32fd5 ""
   "../out/proj2/showcase/proj2_showcase_mis_no_rr.png" 1780858925.46271 432495 0ca67688a5529dd9a0b8b0d29139ef45 ""
   "../out/proj2/showcase/proj2_showcase_nee_only_no_rr.png" 1780798065.25803 421422 b2d0ebfa0449cf16eed9ea8b9577258e ""
@@ -27,7 +31,7 @@
   "../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png" 1781024064.15912 364949 912fbf368178e14e4980df5bec42c870 ""
   "../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png" 1781028250.49101 376983 57d7a79448725262e397f86554f18f90 ""
   "../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_nee_only_no_rr.png" 1781017951.72483 339617 9860108855a0ed189ce359bd88d8f2d5 ""
-  "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" 1782665878.27273 36040 6b56be74cbee78ae3134f1d832737f2e ""
+  "/Users/yang/projects/INF2608-comp-grafica/latex/inf2608-proj2.tex" 1782666251.8312 37837 e8a384ad995f1f7556ca1bfef1be29d8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -224,10 +228,10 @@
   "/usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt" 1777678477 5948570 505f2e03eedaee2f38c2252a747843a3 ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "aas_macros.sty" 1777689754.75839 4967 cf45ff75f433e372cec5993ac08f4363 ""
-  "inf2608-proj2.aux" 1782665999.61576 11793 88322e256e8892e7138179e7650e6ffb "xelatex"
-  "inf2608-proj2.bbl" 1782665997.63176 4245 d8d03ebf195ad0ebc7959d6640234df2 "bibtex inf2608-proj2"
-  "inf2608-proj2.out" 1782665999.61743 4131 d6116485a41449234245cb1d7333c395 "xelatex"
-  "inf2608-proj2.tex" 1782665878.27273 36040 6b56be74cbee78ae3134f1d832737f2e ""
+  "inf2608-proj2.aux" 1782666256.77392 13415 fe349b3a9bb11da1c033c9677748226a "xelatex"
+  "inf2608-proj2.bbl" 1782666254.7177 4245 d8d03ebf195ad0ebc7959d6640234df2 "bibtex inf2608-proj2"
+  "inf2608-proj2.out" 1782666256.77629 4131 d6116485a41449234245cb1d7333c395 "xelatex"
+  "inf2608-proj2.tex" 1782666251.8312 37837 e8a384ad995f1f7556ca1bfef1be29d8 ""
   "sbcreviews-2025.cls" 1777768907.51392 15053 3dba078b96610c60e27548cae34bb323 ""
   (generated)
   "inf2608-proj2.aux"

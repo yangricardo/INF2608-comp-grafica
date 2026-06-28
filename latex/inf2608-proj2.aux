@@ -52,45 +52,52 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Núcleo Lambertiano (Etapa 02)}{3}{subsection.8.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Cornell Box difusa, amostragem por BSDF (800$\times $600, SPP=32, seed=42).}}{3}{figure.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.2}NEE (Etapa 03)}{3}{subsection.8.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Amostragem direta da luz (NEE): menor variância que BSDF-only no mesmo SPP.}}{3}{figure.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces NEE --- execução~1 (256$\times $256, SPP=16, seed=42, $\approx $1{,}89 min): amostragem direta da luz, menor variância que BSDF-only.}}{3}{figure.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces NEE --- execução~2 (256$\times $256, SPP=16, seed=42, $\approx $1{,}99 min): consistência entre runs demonstra reprodutibilidade do estimador.}}{3}{figure.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.3}MIS (Etapa 04)}{3}{subsection.8.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces MIS (heurística de potência $\beta =2$) combinando BSDF e NEE.}}{3}{figure.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Roleta Russa (Etapa 05)}{3}{subsection.8.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces MIS \textbf  {sem} Roleta Russa (256$\times $256, SPP=16, seed=42): referência de variância para comparação.}}{4}{figure.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces MIS \textbf  {com} Roleta Russa (256$\times $256, SPP=16, seed=42): mesma média, menor custo em caminhos profundos.}}{4}{figure.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces MIS (heurística de potência $\beta =2$) combinando BSDF e NEE.}}{3}{figure.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Roleta Russa (Etapa 05)}{4}{subsection.8.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces MIS \textbf  {sem} Roleta Russa (256$\times $256, SPP=16, seed=42): referência de variância para comparação.}}{4}{figure.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces MIS \textbf  {com} Roleta Russa (256$\times $256, SPP=16, seed=42): mesma média, menor custo em caminhos profundos.}}{4}{figure.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces MIS + RR com profundidade mínima~4 (512$\times $512, SPP=12, $\approx $7{,}5 min), gerado com \texttt  {-{}-use-rr 4}: maior resolução evidencia a uniformidade da convergência.}}{4}{figure.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.5}Luz como malha de triângulos (Etapa 06)}{4}{subsection.8.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Luz poliédrica --- octaedro emissivo (8 faces) com amostragem uniforme por área, MIS (512$\times $512, SPP=16).}}{4}{figure.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.6}Dielétrico (Etapa 07)}{4}{subsection.8.6}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Esfera de vidro incolor (IOR=1.5), MIS sem Roleta Russa (800$\times $600, SPP=64, seed=42). Evidencia refração, Fresnel e reflexão interna total.}}{4}{figure.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.7}Cena integrada (\emph  {showcase})}{4}{subsection.8.7}\protected@file@percent }
-\newlabel{sec:showcase}{{8.7}{4}{Cena integrada (\emph {showcase})}{subsection.8.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Esfera de água (IOR=1.33) com absorção de Beer-Lambert, MIS sem Roleta Russa (512$\times $512, SPP=256). Coloração azul-esverdeada por atenuação seletiva do vermelho.}}{5}{figure.8}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Showcase --- \texttt  {bsdf\_only} (alta variância; luz pequena raramente amostrada pela BSDF).}}{5}{figure.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.8}Cena \emph  {showcase} com luzes de parede hexagonais}{5}{subsection.8.8}\protected@file@percent }
-\newlabel{sec:showcase-wall}{{8.8}{5}{Cena \emph {showcase} com luzes de parede hexagonais}{subsection.8.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Showcase --- \texttt  {nee\_only} (amostragem direta da luz poliédrica).}}{5}{figure.10}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Showcase --- \texttt  {mis} (combina BSDF e NEE; menor ruído).}}{5}{figure.11}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Showcase --- \texttt  {mis} + Roleta Russa (mesma média, menor custo).}}{5}{figure.12}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Luz poliédrica --- octaedro emissivo (8 faces) com amostragem uniforme por área, MIS (512$\times $512, SPP=16).}}{4}{figure.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.6}Dielétrico (Etapa 07)}{5}{subsection.8.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Vidro incolor (IOR=1{,}5).}{5}{subsection.8.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Vidro incolor (IOR=1{,}5), MIS sem RR (800$\times $600, SPP=64, seed=42, $\approx $58 min): máxima qualidade, evidencia refração, Fresnel e TIR.}}{5}{figure.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Vidro incolor (IOR=1{,}5), MIS sem RR (512$\times $512, SPP=32, $\approx $16 min): resolução intermediária.}}{5}{figure.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Água com absorção de Beer-Lambert (IOR=1{,}33).}{5}{figure.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times $512, SPP=64, $\approx $33 min): coloração azul-esverdeada por atenuação seletiva do vermelho.}}{5}{figure.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times $512, SPP=256, $\approx $142 min): convergência quase total, ruído praticamente eliminado.}}{5}{figure.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.7}Cena integrada (\emph  {showcase})}{5}{subsection.8.7}\protected@file@percent }
+\newlabel{sec:showcase}{{8.7}{5}{Cena integrada (\emph {showcase})}{subsection.8.7}{}}
 \citation{kajiya1986rendering}
 \citation{pharr2023pbrt}
-\citation{kajiya1986rendering}
-\citation{pharr2023pbrt}
-\citation{kajiya1986rendering}
-\citation{pharr2023pbrt}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Wall lights --- \texttt  {bsdf\_only}: alta variância pois as fontes hexagonais laterais são raramente amostradas por BSDF.}}{6}{figure.13}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Wall lights --- \texttt  {nee\_only}: amostragem direta das três fontes (teto + paredes); iluminação direta nítida.}}{6}{figure.14}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Wall lights --- \texttt  {mis}: combina BSDF e NEE com heurística de potência; menor variância em superfícies difusas e especulares.}}{6}{figure.15}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Wall lights --- \texttt  {mis} + Roleta Russa: mesma média com terminação probabilística de caminhos profundos.}}{6}{figure.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Showcase --- \texttt  {bsdf\_only} (alta variância; luz pequena raramente amostrada pela BSDF).}}{6}{figure.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Showcase --- \texttt  {nee\_only} (amostragem direta da luz poliédrica).}}{6}{figure.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.8}Cena \emph  {showcase} com luzes de parede hexagonais}{6}{subsection.8.8}\protected@file@percent }
+\newlabel{sec:showcase-wall}{{8.8}{6}{Cena \emph {showcase} com luzes de parede hexagonais}{subsection.8.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Showcase --- \texttt  {mis} (combina BSDF e NEE; menor ruído).}}{6}{figure.15}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Showcase --- \texttt  {mis} + Roleta Russa (mesma média, menor custo).}}{6}{figure.16}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {9}Comparação: Ray Tracing (Projeto 1) $\times $ Path Tracing (Projeto 2)}{6}{section.9}\protected@file@percent }
 \newlabel{sec:comparacao}{{9}{6}{Comparação: Ray Tracing (Projeto 1) \texorpdfstring {$\times $}{x} Path Tracing (Projeto 2)}{section.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Evolução do material dielétrico}{6}{subsection.9.1}\protected@file@percent }
-\newlabel{sec:dielectric-evol}{{9.1}{6}{Evolução do material dielétrico}{subsection.9.1}{}}
+\citation{kajiya1986rendering}
+\citation{pharr2023pbrt}
+\citation{kajiya1986rendering}
+\citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{walter2007microfacet}
 \citation{frisvad2012orthonormal}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Wall lights --- \texttt  {bsdf\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $42 min): alta variância pois as fontes hexagonais laterais são raramente amostradas por BSDF.}}{7}{figure.17}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Wall lights --- \texttt  {nee\_only} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $100 min): amostragem direta das três fontes (teto + paredes); iluminação direta nítida.}}{7}{figure.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Evolução do material dielétrico}{7}{subsection.9.1}\protected@file@percent }
+\newlabel{sec:dielectric-evol}{{9.1}{7}{Evolução do material dielétrico}{subsection.9.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Wall lights --- \texttt  {mis} (512$\times $512, SPP=64, estratificado, depth=12, $\approx $102 min): combina BSDF e NEE com heurística de potência; menor variância em superfícies difusas e especulares.}}{7}{figure.19}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Wall lights --- \texttt  {mis} + Roleta Russa (512$\times $512, SPP=64, estratificado, depth=12, $\approx $70 min): mesma média com terminação probabilística de caminhos profundos.}}{7}{figure.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Limites declarados.}{7}{table.caption.2}\protected@file@percent }
 \bibstyle{apalike-sol}
 \bibdata{refs}
 \bibcite{inf2608slides07}{{1}{2026a}{{Celes}}{{}}}
@@ -99,18 +106,17 @@
 \bibcite{frisvad2012orthonormal}{{4}{2012}{{Frisvad}}{{}}}
 \bibcite{kajiya1986rendering}{{5}{1986}{{Kajiya}}{{}}}
 \bibcite{inf2608projectrepo}{{6}{2026}{{Miranda}}{{}}}
-\bibcite{misso2022unbiased}{{7}{2022}{{Misso {\em  et~al}.}}{{}}}
-\bibcite{pharr2023pbrt}{{8}{2023}{{Pharr {\em  et~al}.}}{{}}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}}{7}{table.caption.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}}{8}{table.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:rt-vs-pt}{{1}{7}{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2)}{table.caption.1}{}}
-\@writefile{toc}{\contentsline {paragraph}{Limites declarados.}{7}{table.caption.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusão e Trabalhos Futuros}{7}{section.10}\protected@file@percent }
-\newlabel{sec:conclusao}{{10}{7}{Conclusão e Trabalhos Futuros}{section.10}{}}
-\bibcite{veach1995optimallycombin}{{9}{1995}{{Veach and Guibas}}{{}}}
-\bibcite{walter2007microfacet}{{10}{2007}{{Walter {\em  et~al}.}}{{}}}
+\newlabel{tab:rt-vs-pt}{{1}{8}{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2)}{table.caption.1}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2).}}{8}{table.caption.2}\protected@file@percent }
 \newlabel{tab:dielectric-evol}{{2}{8}{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times $ path tracer (Projeto~2)}{table.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusão e Trabalhos Futuros}{8}{section.10}\protected@file@percent }
+\newlabel{sec:conclusao}{{10}{8}{Conclusão e Trabalhos Futuros}{section.10}{}}
+\bibcite{misso2022unbiased}{{7}{2022}{{Misso {\em  et~al}.}}{{}}}
+\bibcite{pharr2023pbrt}{{8}{2023}{{Pharr {\em  et~al}.}}{{}}}
+\bibcite{veach1995optimallycombin}{{9}{1995}{{Veach and Guibas}}{{}}}
+\bibcite{walter2007microfacet}{{10}{2007}{{Walter {\em  et~al}.}}{{}}}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{frisvad2012orthonormal}
@@ -133,6 +139,6 @@
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
 \citation{pharr2023pbrt}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura).}}{10}{table.caption.3}\protected@file@percent }
-\newlabel{tab:referencias}{{3}{10}{Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura)}{table.caption.3}{}}
-\gdef \@abspage@last{10}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura).}}{11}{table.caption.3}\protected@file@percent }
+\newlabel{tab:referencias}{{3}{11}{Mapeamento conceito $\to $ evidência $\to $ referências (etapas 02--07 e infraestrutura)}{table.caption.3}{}}
+\gdef \@abspage@last{11}

@@ -346,8 +346,13 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \subsection{NEE (Etapa 03)}
 \begin{figure}[!ht]
 \centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req2/proj2_req2_nee_only_20260606_155653/render.png}
+\caption{NEE --- execução~1 (256$\times$256, SPP=16, seed=42, $\approx$1{,}89 min): amostragem direta da luz, menor variância que BSDF-only.}
+\end{figure}
+\begin{figure}[!ht]
+\centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req2/proj2_req2_nee_only_20260606_162251/render.png}
-\caption{Amostragem direta da luz (NEE): menor variância que BSDF-only no mesmo SPP.}
+\caption{NEE --- execução~2 (256$\times$256, SPP=16, seed=42, $\approx$1{,}99 min): consistência entre runs demonstra reprodutibilidade do estimador.}
 \end{figure}
 \figcmd{python -m path_tracing.scripts.proj2_req2_nee --spp 16 --depth 8 --seed 42}
 
@@ -383,7 +388,12 @@ Cada figura aponta para um diretório de \emph{snapshot} em \path{out/proj2/} co
 \includegraphics[width=0.92\linewidth]{../out/proj2/req5/proj2_req5_mis_rr_20260606_164126/render.png}
 \caption{MIS \textbf{com} Roleta Russa (256$\times$256, SPP=16, seed=42): mesma média, menor custo em caminhos profundos.}
 \end{figure}
-\figcmd{python -m path_tracing.scripts.proj2_req5_rr --mode mis --use-rr true --spp 16 --depth 8 --seed 42}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req5/proj2_req5_mis_no_rr_20260607_153507/render.png}
+\caption{MIS + RR com profundidade mínima~4 (512$\times$512, SPP=12, $\approx$7{,}5 min), gerado com \texttt{-{}-use-rr 4}: maior resolução evidencia a uniformidade da convergência.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req5_rr --spp 12 --depth 8 --mode mis --use-rr 4}
 
 \noindent\textbf{Variações de parâmetros} (controle off$\times$on e ganho em caminhos profundos):
 \begin{itemize}\small\setlength{\itemsep}{1pt}
@@ -412,17 +422,32 @@ poliedro nítido, e não um quad plano --- com amostragem uniforme por área. O 
 \end{itemize}
 
 \subsection{Dielétrico (Etapa 07)}
+
+\paragraph{Vidro incolor (IOR=1{,}5).}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_172940/render.png}
-\caption{Esfera de vidro incolor (IOR=1.5), MIS sem Roleta Russa (800$\times$600, SPP=64, seed=42). Evidencia refração, Fresnel e reflexão interna total.}
+\caption{Vidro incolor (IOR=1{,}5), MIS sem RR (800$\times$600, SPP=64, seed=42, $\approx$58 min): máxima qualidade, evidencia refração, Fresnel e TIR.}
+\end{figure}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_glass_mis_no_rr_20260606_200923/render.png}
+\caption{Vidro incolor (IOR=1{,}5), MIS sem RR (512$\times$512, SPP=32, $\approx$16 min): resolução intermediária.}
+\end{figure}
+\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42}
+
+\paragraph{Água com absorção de Beer-Lambert (IOR=1{,}33).}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_water_mis_no_rr_20260606_204425/render.png}
+\caption{Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times$512, SPP=64, $\approx$33 min): coloração azul-esverdeada por atenuação seletiva do vermelho.}
 \end{figure}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.92\linewidth]{../out/proj2/req7/proj2_req7_water_mis_no_rr_20260606_212027/render.png}
-\caption{Esfera de água (IOR=1.33) com absorção de Beer-Lambert, MIS sem Roleta Russa (512$\times$512, SPP=256). Coloração azul-esverdeada por atenuação seletiva do vermelho.}
+\caption{Água (IOR=1{,}33), absorção cromática, MIS sem RR (512$\times$512, SPP=256, $\approx$142 min): convergência quase total, ruído praticamente eliminado.}
 \end{figure}
-\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material glass --spp 64 --depth 8 --mode mis --seed 42}
+\figcmd{python -m path_tracing.scripts.proj2_req7_dielectric --material water --spp 64 --depth 8 --mode mis}
 
 \noindent\textbf{Variações de parâmetros} (material $\times$ absorção $\times$ estimador):
 \begin{itemize}\small\setlength{\itemsep}{1pt}
@@ -473,20 +498,20 @@ O script (\path{src/path_tracing/scripts/proj2_showcase_wall_lights.py}) renderi
 modos do \texttt{PathIntegrator} e grava cópias estáveis em
 \path{out/proj2/showcase\_wall\_lights/}.
 
-\figcmd{python -m path_tracing.scripts.proj2_showcase_wall_lights --all --spp 64 --depth 8 --seed 42}
+\figcmd{python -m path_tracing.scripts.proj2_showcase_wall_lights --spp 64 --depth 12 --all}
 
 \noindent Equivalente, modo a modo:
 \begin{itemize}\small\setlength{\itemsep}{1pt}
-\item \texttt{-{}-mode bsdf\_only -{}-spp 64}
-\item \texttt{-{}-mode nee\_only -{}-spp 64}
-\item \texttt{-{}-mode mis -{}-spp 64}
-\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 64} (Roleta Russa)
+\item \texttt{-{}-mode bsdf\_only -{}-spp 64 -{}-depth 12}
+\item \texttt{-{}-mode nee\_only -{}-spp 64 -{}-depth 12}
+\item \texttt{-{}-mode mis -{}-spp 64 -{}-depth 12}
+\item \texttt{-{}-mode mis -{}-use-rr true -{}-spp 64 -{}-depth 12} (Roleta Russa)
 \end{itemize}
 
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_bsdf_only_no_rr.png}{Wall lights --- \texttt{bsdf\_only}: alta variância pois as fontes hexagonais laterais são raramente amostradas por BSDF.}
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_nee_only_no_rr.png}{Wall lights --- \texttt{nee\_only}: amostragem direta das três fontes (teto + paredes); iluminação direta nítida.}
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png}{Wall lights --- \texttt{mis}: combina BSDF e NEE com heurística de potência; menor variância em superfícies difusas e especulares.}
-\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png}{Wall lights --- \texttt{mis} + Roleta Russa: mesma média com terminação probabilística de caminhos profundos.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_bsdf_only_no_rr.png}{Wall lights --- \texttt{bsdf\_only} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$42 min): alta variância pois as fontes hexagonais laterais são raramente amostradas por BSDF.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_nee_only_no_rr.png}{Wall lights --- \texttt{nee\_only} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$100 min): amostragem direta das três fontes (teto + paredes); iluminação direta nítida.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_no_rr.png}{Wall lights --- \texttt{mis} (512$\times$512, SPP=64, estratificado, depth=12, $\approx$102 min): combina BSDF e NEE com heurística de potência; menor variância em superfícies difusas e especulares.}
+\figmaybe{../out/proj2/showcase_wall_lights/proj2_showcase_wall_lights_mis_rr.png}{Wall lights --- \texttt{mis} + Roleta Russa (512$\times$512, SPP=64, estratificado, depth=12, $\approx$70 min): mesma média com terminação probabilística de caminhos profundos.}
 
 % =====================================================================
 \section{Comparação: Ray Tracing (Projeto 1) \texorpdfstring{$\times$}{x} Path Tracing (Projeto 2)}
