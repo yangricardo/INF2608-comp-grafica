@@ -5,13 +5,12 @@
 ' estruturais da cena. Forçado a uma única página.
 ' ============================================================
 
-title Diagrama de Classes — src/path_tracing (ESTÁTICO)\nGeometria, materiais, luzes
+title Diagrama de Classes — src/path_tracing (ESTÁTICO)\nGeometria, materiais, luzes (atributos + métodos)
 
 page 1 1
 top to bottom direction
 skinparam classAttributeIconSize 0
 hide empty members
-hide methods
 skinparam linetype ortho
 skinparam package {
   BackgroundColor #FAFAFA
@@ -25,7 +24,7 @@ skinparam class {
 }
 skinparam dpi 150
 skinparam pageMargin 10
-scale 0.55
+scale 0.50
 
 ' ============================================================
 ' 1. Entidades estruturais da cena
@@ -40,16 +39,20 @@ package "path_tracing (raiz — entidades estruturais)" as root {
     +pos: glm.vec3
     +normal: glm.vec3
     +geo_normal: glm.vec3
-    +material: Material | None
+    +material: BSDF | None
     +light: Light | None
     +front_face: bool
     +backfacing: bool
+    --
+    +set_face_normal(ray, outward_normal)
   }
   class Camera {
     +eye, center, up: glm.vec3
     +fov: float
     +width, height: int
     +focal_distance: float
+    --
+    +generate_ray(xn, yn): Ray
   }
   enum SamplingMode {
     REGULAR
@@ -62,9 +65,17 @@ package "path_tracing (raiz — entidades estruturais)" as root {
     +samples_per_pixel: int
     +sampling_mode: SamplingMode
     +seed: int | None
+    --
+    +get_samples_for_pixel(i, j): list
+    +render(scene, camera, filename, gamma_fix, integrator)
+    +set_pixel(i, j, color)
   }
   class ONB {
     +u, v, w: glm.vec3
+    --
+    +local_to_global(dir): glm.vec3
+    +global_to_local(dir): glm.vec3
+    {static} +frisvad_branchless(n): tuple
   }
   class Scene {
     +objects: list[Shape]
@@ -73,6 +84,12 @@ package "path_tracing (raiz — entidades estruturais)" as root {
     +background_color: glm.vec3
     +max_depth: int
     +ray_epsilon: float
+    --
+    +compute_intersection(ray): Hit | None
+    +offset_point(pos, normal, dir): glm.vec3
+    +can_spawn_ray(depth, max_depth): bool
+    +transmittance(...)
+    +trace_ray(ray, depth, max_depth)
   }
   class AmbientLight {
     +color: glm.vec3
@@ -90,23 +107,33 @@ package "shape" {
 
   abstract class Shape {
     +material: Any
+    --
+    +intersect(ray, hit)
   }
 
   class Sphere {
     +center: glm.vec3
     +radius: float
+    --
+    +intersect(ray, hit)
   }
   class Plane {
     +pos: glm.vec3
     +normal: glm.vec3
+    --
+    +intersect(ray, hit)
   }
   class Box {
     +p_min, p_max: glm.vec3
+    --
+    +intersect(ray, hit)
   }
   class Triangle {
     +v0, v1, v2: glm.vec3
     +e1, e2: glm.vec3
     +geo_normal: glm.vec3
+    --
+    +intersect(ray, hit)
   }
   class TriangleMesh {
     +triangles: list[Triangle]
@@ -116,12 +143,17 @@ package "shape" {
     +name: str
     +accelerator: str
     +bvh: TriangleBVH | None
+    --
+    {static} +from_vertices_faces(verts, faces, material, name): TriangleMesh
+    +intersect(ray, hit)
   }
   abstract class Instance {
     +shape: Shape
     +m: glm.mat4
     +m_inv: glm.mat4
     +m_inv_t: glm.mat4
+    --
+    +intersect(ray, hit)
   }
   class Translate
   class Rotate
@@ -147,18 +179,26 @@ package "triangle_bvh" {
 
   class AABB {
     +p_min, p_max: glm.vec3
+    --
+    {static} +from_triangles(triangles): AABB
+    +intersects(ray, t_min, t_max): tuple
   }
   class TriangleBVHNode {
     +bounds: AABB
     +triangles: list | None
     +left, right: TriangleBVHNode | None
     +depth: int
+    --
+    +is_leaf(): bool
+    +intersect(ray, hit)
   }
   class TriangleBVH {
     +root: TriangleBVHNode
     +node_count: int
     +leaf_count: int
     +max_depth: int
+    --
+    +intersect(ray, hit)
   }
 }
 
@@ -172,7 +212,8 @@ package "bsdf" {
   note as BsdfNote
     bsdf/base.py + bsdf/*.py
     Ref: PBRT 4e §9 "Reflection Models"
-    is_specular()=True em DielectricBSDF → NEE pula.
+    is_specular()=True em DielectricBSDF e MirrorBSDF
+    → ambos delta: NEE pula, peso MIS=1.
   end note
 
   abstract class BSDF {
@@ -184,59 +225,42 @@ package "bsdf" {
 
   class LambertianBSDF {
     +rho: glm.vec3
+    --
+    +eval(wo, wi): glm.vec3
+    +sample(wo, u): dict
+    +pdf(wo, wi): float
   }
   class EmissiveBSDF {
     +Le: glm.vec3
+    --
+    +eval(wo, wi): glm.vec3
+    +sample(wo, u): dict | None
+    +pdf(wo, wi): float
   }
   class DielectricBSDF {
     +ior: float
     +absorption: glm.vec3
+    --
+    +eval(wo, wi): glm.vec3
+    +pdf(wo, wi): float
+    +is_specular(): bool
+    +sample(wo, u): dict | None
+  }
+  class MirrorBSDF {
+    +eval(wo, wi): glm.vec3
+    +pdf(wo, wi): float
+    +is_specular(): bool
+    +sample(wo, u): dict | None
   }
 }
 
 BSDF <|-- LambertianBSDF
 BSDF <|-- EmissiveBSDF
 BSDF <|-- DielectricBSDF
+BSDF <|-- MirrorBSDF
 
 ' ============================================================
-' 5. materials (legado)
-' ============================================================
-package "materials (legado ray-tracing)" {
-  note as MatNote
-    Interface legada usada pelo traçador recursivo do Proj1.
-    Path tracer usa BSDF diretamente.
-  end note
-
-  abstract class Material << (A,#FFE0E0) >> {
-    +eval(scene, hit, ray, depth, max_depth)
-    +shadow_transmittance(...)
-  }
-
-  class PhongMaterial {
-    +diffuse: glm.vec3
-    +specular: glm.vec3
-    +shininess: float
-  }
-  class ReflectiveMaterial {
-    +reflective_color: glm.vec3
-  }
-  class TransparentMaterial {
-    +transparency: float
-    +ior: float
-  }
-  class EmissiveMaterial {
-    +emission: glm.vec3
-    +shadow_passthrough: bool
-  }
-}
-
-Material <|-- PhongMaterial
-PhongMaterial <|-- ReflectiveMaterial
-PhongMaterial <|-- TransparentMaterial
-Material <|-- EmissiveMaterial
-
-' ============================================================
-' 6. lights
+' 5. lights
 ' ============================================================
 package "lights" {
   note as LightsNote
@@ -247,13 +271,22 @@ package "lights" {
 
   abstract class Light {
     +is_delta: bool
-    +sample_Li(ref, u)
-    +pdf_Li(ref, wi)
+    --
+    +contains(hit): bool
+    +sample_Li(ref, u): dict | None
+    +pdf_Li(ref, wi): float
+    +radiance(scene, hit): tuple
+    +sample_radiance(scene, hit): list
   }
 
   class PointLight {
     +pos: glm.vec3
     +power: glm.vec3
+    --
+    +sample_Li(ref, u): dict | None
+    +pdf_Li(ref, wi): float
+    +radiance(scene, hit): tuple
+    +sample_radiance(scene, hit): list
   }
 
   enum AreaLightSamplingMode {
@@ -265,6 +298,11 @@ package "lights" {
   class AreaLight {
     +p, e_u, e_v: glm.vec3
     +power, Le: glm.vec3
+    --
+    +sample_Li(ref, u): dict | None
+    +pdf_Li(ref, wi): float
+    +radiance(scene, hit): tuple
+    +sample_radiance(scene, hit): list
   }
   class RectAreaLight {
     +corner, edge_u, edge_v: glm.vec3
@@ -272,6 +310,9 @@ package "lights" {
     +normal: glm.vec3
     +area: float
     +center: glm.vec3
+    --
+    +sample_Li(ref, u): dict | None
+    +pdf_Li(ref, wi): float
   }
 
   class _BvhTriangle << (P,#E0FFE0) >> {
@@ -279,6 +320,8 @@ package "lights" {
     +e1, e2: glm.vec3
     +normal: glm.vec3
     +area: float
+    --
+    +intersect(ray, hit): bool
   }
 
   class TriangleMeshLight {
@@ -289,6 +332,9 @@ package "lights" {
     +total_area: float
     +cdf: list[float]
     +_bvh: TriangleBVH
+    --
+    +sample_Li(ref, u): dict | None
+    +pdf_Li(ref, wi): float
   }
 }
 

@@ -832,4 +832,23 @@ Câmera, filme e amostragem de pixel & \texttt{Camera.generate\_ray()}, \texttt{
 \end{tblr}
 \end{table*}
 
+\clearpage
+
+% =====================================================================
+\section*{Anexo B: Diagrama de Classes (Estrutura Estática)}
+
+A Figura~\ref{fig:class-static} apresenta a estrutura estática de \path{src/path_tracing/}:
+as entidades geométricas (\texttt{Shape} e subclasses, BVH local de malhas), as BSDFs
+(incluindo \texttt{MirrorBSDF} e \texttt{DielectricBSDF}), as fontes de luz e as entidades
+estruturais da cena. O diagrama é gerado de
+\path{path_tracing_class_diagram_static.puml} (PlantUML).
+
+\begin{figure*}[p]
+\centering
+\includegraphics[width=\textwidth]{../path_tracing_class_diagram_static.png}
+\caption{Diagrama de classes (estático) de \texttt{src/path\_tracing/}: \emph{shapes} e BVH,
+BSDFs, fontes de luz (retangular e malha de triângulos) e entidades estruturais da cena.}
+\label{fig:class-static}
+\end{figure*}
+
 \end{document}
