@@ -179,8 +179,8 @@ O texto cobre apenas as etapas \emph{efetivamente implementadas}: o núcleo unid
 BSDF Lambertiana (Seção~\ref{sec:core}), a amostragem direta de luz — NEE (Seção~\ref{sec:nee}),
 o \emph{multiple importance sampling} (Seção~\ref{sec:mis}), a Roleta Russa
 (Seção~\ref{sec:rr}), as luzes de área retangular e poliédrica (Seção~\ref{sec:lights}) e a
-BSDF dielétrica refrativa (Seção~\ref{sec:dielectric}); como extra, a reflexão especular pura
-(espelho) é tratada junto às evidências (Seção~\ref{sec:mirror}). As evidências visuais estão
+BSDF dielétrica refrativa (Seção~\ref{sec:dielectric}); adicionalmente, a reflexão especular
+pura (espelho) é tratada junto às evidências (Seção~\ref{sec:mirror}). As evidências visuais estão
 reunidas na Seção~\ref{sec:evidencias}, e a comparação com o ray tracer do Projeto~1 (incluindo
 a evolução do material dielétrico) na Seção~\ref{sec:comparacao}.
 
@@ -213,7 +213,7 @@ de modo que o cosseno e o $\pi$ \emph{cancelam} na Eq.~\eqref{eq:throughput}:
 Esse cancelamento é uma fonte clássica de erro (multiplicar o cosseno \emph{de novo} no laço
 produziria $\cos^2\theta$); a implementação respeita exatamente a Eq.~\eqref{eq:lambert}.
 
-\paragraph{Profundidade mínima 4.} O enunciado exige caminhos com no mínimo quatro vértices
+\paragraph{Profundidade mínima 4.} Adota-se profundidade mínima de quatro vértices
 (câmera\,$\to x_1\to x_2\to x_3\to$\,luz). A implementação usa \texttt{max\_depth}$=8$ e não
 aplica terminação probabilística antes de \texttt{rr\_min\_depth}$=4$.
 
@@ -254,8 +254,8 @@ Um cuidado essencial de implementação (\path{src/path_tracing/integrators/path
 o peso da estratégia ``BSDF amostra a luz'' incide \emph{apenas} sobre a emissão vista
 diretamente no vértice seguinte; ele \textbf{não} é multiplicado no $\beta$ persistente, pois
 isso contaminaria todas as contribuições posteriores do caminho. Materiais especulares (delta)
-\emph{não} participam de MIS: \texttt{pending\_mis\_weight} é resetado a $1{,}0$ e NEE é
-suprimido no vértice especular. \textbf{Esta é implementação correta}, não um defeito.
+\emph{não} participam de MIS: \texttt{pending\_mis\_weight} é reposto a $1{,}0$ e o NEE é
+suprimido no vértice especular --- comportamento correto e intencional para distribuições delta.
 
 Com $N$ luzes independentes, a heurística de potência é calculada diretamente como
 \begin{equation}
@@ -527,7 +527,7 @@ Fundo-dir.  & 1{,}33 & $(0{,}3,\,0{,}05,\,0{,}1)$ & azul-esverdeado \\
 \item \texttt{-{}-material glass -{}-use-rr true -{}-depth 12} --- caminhos internos profundos (múltiplas reflexões/TIR) com RR.
 \end{itemize}
 
-\subsection{Espelho: reflexão especular pura (extra)}
+\subsection{Espelho: reflexão especular pura}
 \label{sec:mirror}
 
 Como contraponto ao dielétrico, implementou-se o \texttt{MirrorBSDF}
@@ -780,9 +780,9 @@ Integração com a luz & Embutida no sombreamento recursivo de Phong & Especular
 priorizando clareza e corretude; resoluções $\le 512^2$ e SPP moderado são o regime prático.
 O dielétrico assume meio \emph{não aninhado} (um nível dentro/fora), suficiente para
 esfera/cubo convexos isolados, e omite o fator de radiância $1/\eta^2$ por cancelar em objeto
-fechado. \emph{Não} foram implementadas (ficam como evolução): microfacetas GGX, luz infinita/
-\emph{environment}, traçado bidirecional (BDPT) e Metropolis (MLT); como os extras já
-realizados excedem a cota de pontos de extensão, essas ausências não comprometem o enunciado.
+fechado. \emph{Não} foram implementadas: microfacetas GGX, luz infinita por \emph{environment
+map}, traçado bidirecional (BDPT) e Metropolis (MLT), que ficam como evolução natural do
+trabalho.
 
 % =====================================================================
 \section{Conclusão e Trabalhos Futuros}

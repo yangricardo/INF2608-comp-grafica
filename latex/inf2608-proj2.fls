@@ -444,6 +444,9 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmbx7.tfm
 INPUT ./inf2608-proj2.bbl
 INPUT ./inf2608-proj2.bbl
 INPUT inf2608-proj2.bbl
+INPUT ../path_tracing_class_diagram_static.png
+INPUT ../path_tracing_class_diagram_static.png
+INPUT ../path_tracing_class_diagram_static.png
 INPUT inf2608-proj2.aux
 INPUT ./inf2608-proj2.out
 INPUT ./inf2608-proj2.out
