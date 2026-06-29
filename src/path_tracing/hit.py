@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from pyglm import glm
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-  from .material import Material
   from .light import Light
   from .ray import Ray
 
@@ -17,7 +16,7 @@ class Hit:
     self.pos = glm.vec3(0)
     self.normal = glm.vec3(0)
     self.geo_normal = glm.vec3(0)
-    self.material: Optional['Material'] = None
+    self.material: Optional[Any] = None  # BSDF no path tracer
     self.light: Optional['Light'] = None
     self.front_face: bool = True
     self.backfacing: bool = False

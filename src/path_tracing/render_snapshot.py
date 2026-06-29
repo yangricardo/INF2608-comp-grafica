@@ -15,7 +15,6 @@ from .bsdf.emissive import EmissiveBSDF
 from .bsdf.dielectric import DielectricBSDF
 from .lights.area_rect import RectAreaLight
 from .lights.area_mesh import TriangleMeshLight
-from .material import EmissiveMaterial, PhongMaterial, ReflectiveMaterial, TransparentMaterial
 from .scene import Scene
 from .shape import Box, Instance, Plane, Rotate, Sphere, Translate, Triangle, TriangleMesh
 
@@ -197,50 +196,6 @@ class MaterialSnapshot:
       return DielectricBSDF(
         ior=1.5 if self.ior is None else float(self.ior),
         absorption=absorption,
-      )
-
-    ambient = _list_to_vec3(self.ambient or [0.0, 0.0, 0.0], field_name='material.ambient')
-    diffuse = _list_to_vec3(self.diffuse or [0.0, 0.0, 0.0], field_name='material.diffuse')
-    specular = _list_to_vec3(self.specular or [0.0, 0.0, 0.0], field_name='material.specular')
-    shininess = 1.0 if self.shininess is None else float(self.shininess)
-
-    if self.type == 'EmissiveMaterial':
-      emission = _list_to_vec3(self.emission or [0.0, 0.0, 0.0], field_name='material.emission')
-      return EmissiveMaterial(
-        emission=emission,
-        shadow_passthrough=True if self.shadow_passthrough is None else bool(self.shadow_passthrough),
-      )
-
-    if self.type == 'ReflectiveMaterial':
-      reflectivity = _list_to_vec3(self.reflectivity or [0.5, 0.5, 0.5], field_name='material.reflectivity')
-      return ReflectiveMaterial(
-        ambient=ambient,
-        diffuse=diffuse,
-        specular=specular,
-        shininess=shininess,
-        reflectivity=reflectivity,
-      )
-
-    if self.type == 'TransparentMaterial':
-      attenuation = _list_to_vec3(self.attenuation or [1.0, 1.0, 1.0], field_name='material.attenuation')
-      return TransparentMaterial(
-        ambient=ambient,
-        diffuse=diffuse,
-        specular=specular,
-        shininess=shininess,
-        ior=1.5 if self.ior is None else float(self.ior),
-        attenuation=attenuation,
-        transmission=_optional_list_to_vec3(self.transmission, field_name='material.transmission'),
-        reflection_tint=_optional_list_to_vec3(self.reflection_tint, field_name='material.reflection_tint'),
-        opacity=0.0 if self.opacity is None else float(self.opacity),
-      )
-
-    if self.type == 'PhongMaterial':
-      return PhongMaterial(
-        ambient=ambient,
-        diffuse=diffuse,
-        specular=specular,
-        shininess=shininess,
       )
 
     raise ValueError(f'Unsupported material snapshot type: {self.type}')
