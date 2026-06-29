@@ -255,7 +255,7 @@ o peso da estratégia ``BSDF amostra a luz'' incide \emph{apenas} sobre a emiss�
 diretamente no vértice seguinte; ele \textbf{não} é multiplicado no $\beta$ persistente, pois
 isso contaminaria todas as contribuições posteriores do caminho. Materiais especulares (delta)
 \emph{não} participam de MIS: \texttt{pending\_mis\_weight} é reposto a $1{,}0$ e o NEE é
-suprimido no vértice especular --- comportamento correto e intencional para distribuições delta.
+suprimido no vértice especular --- comportamento intencional para distribuições delta.
 
 Com $N$ luzes independentes, a heurística de potência é calculada diretamente como
 \begin{equation}
@@ -721,28 +721,6 @@ e dispara raios secundários apenas para reflexão/refração especular; o path 
 por Monte Carlo, construindo caminhos completos com \emph{throughput} $\beta$
 \pbrtsecs{13.1, 13.3, 13.4}. A Tabela~\ref{tab:rt-vs-pt} contrasta os dois paradigmas.
 
-\begin{table*}[t]
-\caption{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}
-\label{tab:rt-vs-pt}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t},
-cells={font=\small}
-}
-Aspecto & Projeto 1 --- Ray Tracing (Whitted) & Projeto 2 --- Path Tracing \\
-Equação resolvida & Phong analítico + reflexão/refração recursiva & Estimador de Monte Carlo da LTE / integral de caminhos~\citep{kajiya1986rendering} \\
-Iluminação direta & \texttt{direct\_lighting()} analítico por luz pontual/área & NEE (amostragem da luz) + MIS no último segmento \\
-Iluminação indireta & Apenas especular (reflexão/refração) & Difusa e especular (GI completa) via $\beta$ acumulado \\
-Sombreamento & Função fechada do material (Phong) & Probabilístico: $\beta \mathrel{\ast}= f\,\lvert\cos\theta\rvert/p$ \\
-Terminação & \texttt{can\_spawn\_ray()} / \texttt{max\_depth} fixo & \texttt{min\_depth}=4 + Roleta Russa \pbrtsec{2.2.4} \\
-Convergência & Determinística (nítida em baixo SPP) & Estocástica, ruído $\propto 1/\sqrt{N}$ \\
-Especular + luz & Reflexão/refração somadas na recursão & Delta: pula NEE/MIS, peso 1 (\texttt{is\_specular}) \\
-\end{tblr}
-\end{table*}
-
 \subsection{Evolução do material dielétrico}
 \label{sec:dielectric-evol}
 
@@ -753,28 +731,6 @@ Beer-Lambert aplicada nos \emph{raios de sombra}. No Projeto~2, \texttt{Dielectr
 (\path{src/path_tracing/bsdf/dielectric.py}) é uma BSDF \emph{delta} amostrada
 estocasticamente, com Fresnel exato e absorção rastreada no integrador. A
 Tabela~\ref{tab:dielectric-evol} resume as diferenças.
-
-\begin{table*}[t]
-\caption{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times$ path tracer (Projeto~2).}
-\label{tab:dielectric-evol}
-\centering
-\begin{tblr}{
-width=\textwidth,
-colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
-row{1}={font=\bfseries},
-rows={valign=t},
-cells={font=\small}
-}
-Aspecto & \texttt{TransparentMaterial} (P1) & \texttt{DielectricBSDF} (P2) \\
-Fresnel & Aproximação de Schlick $R_0+(1-R_0)(1-\cos\theta)^5$ & Exato não polarizado $F=\tfrac12(r_\parallel^2+r_\perp^2)$ \pbrtsec{9.5} \\
-Reflexão vs.\ refração & Ponderação determinística ($R$ e $1-R$) na recursão & Escolha estocástica (uma direção delta por vértice) \\
-Direção refratada & \texttt{glm.refract()} & Forma vetorial no frame da normal geométrica \\
-Reflexão interna total & Teste heurístico sobre a direção refratada & Analítico: $\sin^2\theta_t = \eta^2(1-\cos^2\theta_i)\ge 1$ \\
-Entrada/saída do meio & \texttt{front\_face}/\texttt{backfacing} (normal virada) & Sinal de $\omega_o\!\cdot\! n$ (normal geométrica) \\
-Absorção (Beer-Lambert) & Nos raios de sombra ao sair do meio \pbrtsec{11.2} & Rastreio de meio: $\beta\mathrel{\ast}=e^{-\sigma d}$ em qualquer segmento interno \\
-Integração com a luz & Embutida no sombreamento recursivo de Phong & Especular pula NEE/MIS (peso 1); GI por amostragem da BSDF \\
-\end{tblr}
-\end{table*}
 
 \paragraph{Limites declarados.} A implementação é em Python puro (\texttt{pyglm}/PIL),
 priorizando clareza e corretude; resoluções $\le 512^2$ e SPP moderado são o regime prático.
@@ -800,12 +756,58 @@ bidirecionais/MCMC para reduzir o ruído de cáusticas. A base ortonormal local 
 \bibliographystyle{apalike-sol}
 \bibliography{refs}
 
+\clearpage
+
 % =====================================================================
 \section*{Anexo A: Quadro de Referências Conceituais}
 
 O quadro a seguir mapeia cada conceito implementado à evidência mais direta no código
 (\path{src/path_tracing/}) e a uma nota compacta com as páginas dos slides, a seção mais
 próxima em \pbrtbook{} e as linhas de código relevantes.
+
+\begin{table*}[!ht]
+\caption{Comparação conceitual entre o ray tracer recursivo (Projeto~1) e o path tracer (Projeto~2).}
+\label{tab:rt-vs-pt}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Aspecto & Projeto 1 --- Ray Tracing (Whitted) & Projeto 2 --- Path Tracing \\
+Equação resolvida & Phong analítico + reflexão/refração recursiva & Estimador de Monte Carlo da LTE / integral de caminhos~\citep{kajiya1986rendering} \\
+Iluminação direta & \texttt{direct\_lighting()} analítico por luz pontual/área & NEE (amostragem da luz) + MIS no último segmento \\
+Iluminação indireta & Apenas especular (reflexão/refração) & Difusa e especular (GI completa) via $\beta$ acumulado \\
+Sombreamento & Função fechada do material (Phong) & Probabilístico: $\beta \mathrel{\ast}= f\,\lvert\cos\theta\rvert/p$ \\
+Terminação & \texttt{can\_spawn\_ray()} / \texttt{max\_depth} fixo & \texttt{min\_depth}=4 + Roleta Russa \pbrtsec{2.2.4} \\
+Convergência & Determinística (nítida em baixo SPP) & Estocástica, ruído $\propto 1/\sqrt{N}$ \\
+Especular + luz & Reflexão/refração somadas na recursão & Delta: pula NEE/MIS, peso 1 (\texttt{is\_specular}) \\
+\end{tblr}
+\end{table*}
+
+\begin{table*}[!ht]
+\caption{Evolução da implementação dielétrica: ray tracer (Projeto~1) $\times$ path tracer (Projeto~2).}
+\label{tab:dielectric-evol}
+\centering
+\begin{tblr}{
+width=\textwidth,
+colspec={Q[l,wd=0.20\textwidth] Q[l,wd=0.38\textwidth] Q[l,wd=0.38\textwidth]},
+row{1}={font=\bfseries},
+rows={valign=t},
+cells={font=\small}
+}
+Aspecto & \texttt{TransparentMaterial} (P1) & \texttt{DielectricBSDF} (P2) \\
+Fresnel & Aproximação de Schlick $R_0+(1-R_0)(1-\cos\theta)^5$ & Exato não polarizado $F=\tfrac12(r_\parallel^2+r_\perp^2)$ \pbrtsec{9.5} \\
+Reflexão vs.\ refração & Ponderação determinística ($R$ e $1-R$) na recursão & Escolha estocástica (uma direção delta por vértice) \\
+Direção refratada & \texttt{glm.refract()} & Forma vetorial no frame da normal geométrica \\
+Reflexão interna total & Teste heurístico sobre a direção refratada & Analítico: $\sin^2\theta_t = \eta^2(1-\cos^2\theta_i)\ge 1$ \\
+Entrada/saída do meio & \texttt{front\_face}/\texttt{backfacing} (normal virada) & Sinal de $\omega_o\!\cdot\! n$ (normal geométrica) \\
+Absorção (Beer-Lambert) & Nos raios de sombra ao sair do meio \pbrtsec{11.2} & Rastreio de meio: $\beta\mathrel{\ast}=e^{-\sigma d}$ em qualquer segmento interno \\
+Integração com a luz & Embutida no sombreamento recursivo de Phong & Especular pula NEE/MIS (peso 1); GI por amostragem da BSDF \\
+\end{tblr}
+\end{table*}
 
 \begin{table*}[!ht]
 \caption{Mapeamento conceito $\to$ evidência $\to$ referências (etapas 02--07 e infraestrutura).}
